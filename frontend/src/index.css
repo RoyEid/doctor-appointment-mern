@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Liter&family=Outfit:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Sansita:ital,wght@0,400;0,700;0,800;0,900;1,400;1,700;1,800;1,900&display=swap');
+
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+
+*,body{
+  font-family: roboto;
+}
+
+
+button{
+  background: #46daea !important;
+  padding: 15px;
+  color:black;
+  font-weight: bold;
+  transition: ease-in-out 0.3s !important;
+
+
+}
+
+button:hover{
+  background: #43b0ba !important;
+}
