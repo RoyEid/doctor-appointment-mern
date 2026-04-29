@@ -1,11 +1,24 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Menu, X } from "lucide-react";
 
 function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+
+  const getLinkClass = (path) => {
+    return location.pathname === path
+      ? "text-[#008e9b] font-bold border-b-2 border-[#008e9b] pb-1"
+      : "text-gray-600 hover:text-[#008e9b] transition-colors";
+  };
+  
+  const getMobileLinkClass = (path) => {
+    return location.pathname === path
+      ? "block w-full text-[#008e9b] font-bold bg-gray-50 p-2 rounded"
+      : "block w-full text-gray-600 hover:text-[#008e9b] p-2 hover:bg-gray-50 transition-colors";
+  };
   
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -27,23 +40,22 @@ function Navbar() {
         {/* Desktop Menu */}
         <ul className="hidden md:flex space-x-8 items-center font-medium">
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/" className={getLinkClass("/")}>Home</Link>
         </li>
         <li>
-          <a href="#services">Services</a>
+          <a href="#services" className="text-gray-600 hover:text-[#008e9b] transition-colors">Services</a>
         </li>
-
         <li>
-          <a href="#about">About</a>
+          <a href="#about" className="text-gray-600 hover:text-[#008e9b] transition-colors">About</a>
         </li>
 
         {user?.role === "admin" && (
           <>
             <li>
-              <Link to="/add-doctor">Add Doctor</Link>
+              <Link to="/add-doctor" className={getLinkClass("/add-doctor")}>Add Doctor</Link>
             </li>
             <li>
-              <Link to="/add-department">Add Department</Link>
+              <Link to="/add-department" className={getLinkClass("/add-department")}>Add Department</Link>
             </li>
           </>
         )}
@@ -51,10 +63,10 @@ function Navbar() {
         {user?.role === "user" && (
           <>
             <li>
-              <Link to="/add-appointment">Add Appointment</Link>
+              <Link to="/add-appointment" className={getLinkClass("/add-appointment")}>Add Appointment</Link>
             </li>
             <li>
-              <Link to="/my-appointments">My Appointments</Link>
+              <Link to="/my-appointments" className={getLinkClass("/my-appointments")}>My Appointments</Link>
             </li>
           </>
         )}
@@ -62,10 +74,10 @@ function Navbar() {
         {!user && (
           <>
             <li>
-              <Link to="/login">Login</Link>
+              <Link to="/login" className={getLinkClass("/login")}>Login</Link>
             </li>
             <li>
-              <Link to="/register">Register</Link>
+              <Link to="/register" className={getLinkClass("/register")}>Register</Link>
             </li>
           </>
         )}
@@ -87,21 +99,21 @@ function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-white border-t py-4 px-4 shadow-inner absolute w-full">
           <ul className="flex flex-col space-y-4 text-lg font-medium">
-            <li><Link to="/" onClick={closeMenu} className="block w-full hover:text-[#43b0ba]">Home</Link></li>
-            <li><a href="#services" onClick={closeMenu} className="block w-full hover:text-[#43b0ba]">Services</a></li>
-            <li><a href="#about" onClick={closeMenu} className="block w-full hover:text-[#43b0ba]">About</a></li>
+            <li><Link to="/" onClick={closeMenu} className={getMobileLinkClass("/")}>Home</Link></li>
+            <li><a href="#services" onClick={closeMenu} className="block w-full text-gray-600 hover:text-[#008e9b] p-2 hover:bg-gray-50 transition-colors">Services</a></li>
+            <li><a href="#about" onClick={closeMenu} className="block w-full text-gray-600 hover:text-[#008e9b] p-2 hover:bg-gray-50 transition-colors">About</a></li>
             
             {user?.role === "admin" && (
               <>
-                <li><Link to="/add-doctor" onClick={closeMenu} className="block w-full hover:text-[#43b0ba]">Add Doctor</Link></li>
-                <li><Link to="/add-department" onClick={closeMenu} className="block w-full hover:text-[#43b0ba]">Add Department</Link></li>
+                <li><Link to="/add-doctor" onClick={closeMenu} className={getMobileLinkClass("/add-doctor")}>Add Doctor</Link></li>
+                <li><Link to="/add-department" onClick={closeMenu} className={getMobileLinkClass("/add-department")}>Add Department</Link></li>
               </>
             )}
             
             {user?.role === "user" && (
               <>
-                <li><Link to="/add-appointment" onClick={closeMenu} className="block w-full hover:text-[#43b0ba]">Add Appointment</Link></li>
-                <li><Link to="/my-appointments" onClick={closeMenu} className="block w-full hover:text-[#43b0ba]">My Appointments</Link></li>
+                <li><Link to="/add-appointment" onClick={closeMenu} className={getMobileLinkClass("/add-appointment")}>Add Appointment</Link></li>
+                <li><Link to="/my-appointments" onClick={closeMenu} className={getMobileLinkClass("/my-appointments")}>My Appointments</Link></li>
               </>
             )}
             
