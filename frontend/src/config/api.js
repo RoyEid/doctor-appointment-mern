@@ -1,5 +1,5 @@
 // API Configuration - Uses environment variables for production
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://doctor-backend-46g2.onrender.com";
 
 export const apiConfig = {
     baseURL: API_BASE_URL,
