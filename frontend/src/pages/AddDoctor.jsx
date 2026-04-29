@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { apiConfig } from "../config/api";
 
 function AddDoctor() {
   const { user } = useContext(AuthContext);
@@ -40,7 +41,7 @@ function AddDoctor() {
       formData.append("description", form.description);
       if (form.image) formData.append("image", form.image);
 
-      const res = await fetch("http://localhost:5000/doctors/addDoctors", {
+      const res = await fetch(apiConfig.addDoctor, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

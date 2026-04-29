@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { apiConfig } from "../config/api";
 
 function DoctorDetails() {
   const { id } = useParams();
@@ -10,7 +11,7 @@ function DoctorDetails() {
   useEffect(() => {
     const fetchedDoctors = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/doctors/${id}`);
+        const res = await fetch(apiConfig.getDoctorById(id));
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch doctors");
         setDoctor(data);
@@ -22,9 +23,7 @@ function DoctorDetails() {
 
     const fetchRelatedDoctors = async (specialty, currentId) => {
       try {
-        const res = await fetch(
-          `http://localhost:5000/doctors/doctors/bySpecialty/${specialty}`,
-        );
+        const res = await fetch(apiConfig.getDoctorsBySpecialty(specialty));
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch doctors");
@@ -45,7 +44,7 @@ function DoctorDetails() {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl p-8 m-auto min-h-screen">
       <div className="md:col-span-2 flex flex-col md:flex-row items-center">
         <img
-          src={`http://localhost:5000/uploads/${doctor?.image}`}
+          src={apiConfig.getImageUrl(doctor?.image)}
           alt={doctor?.name || "doctor"}
           className="w-64 h-64 object-cover rounded-lg shadow-md mb-6 md:mb-0 md:mr-10"
         />
@@ -74,7 +73,7 @@ function DoctorDetails() {
                 to={`/doctor/${doc?._id}`}
               >
                 <img
-                  src={`http://localhost:5000/uploads/${doc?.image}`}
+                  src={apiConfig.getImageUrl(doc?.image)}
                   alt={doc?.name || "doctor"}
                   className="w-16 h-16 rounded-full object-cover border mr-4"
                 />

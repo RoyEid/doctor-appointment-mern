@@ -1,11 +1,12 @@
 import React, { act, useEffect, useState } from "react";
+import { apiConfig } from "../config/api";
 
 function Departments() {
   const [departments, setDepartments] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/departments/allDepartments")
+    fetch(apiConfig.getAllDepartments)
       .then((res) => res.json())
       .then((data) => {
         setDepartments(data);
@@ -64,7 +65,7 @@ function Departments() {
 
                 <div></div>
               </div>
-            ) : null
+            ) : null,
           )}
         </div>
       </div>

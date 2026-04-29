@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
+import { apiConfig } from "../config/api";
 
 function MyAppointments() {
   const { user } = useContext(AuthContext);
@@ -31,7 +32,7 @@ function MyAppointments() {
         console.log("User from context:", user);
 
         // Make fetch request
-        const url = "http://localhost:5000/appointments/myAppointments";
+        const url = apiConfig.getMyAppointments;
         console.log("Fetching from:", url);
 
         const res = await fetch(url, {
@@ -76,16 +77,13 @@ function MyAppointments() {
       const token = localStorage.getItem("token");
       console.log("Deleting appointment:", id);
 
-      const res = await fetch(
-        `http://localhost:5000/appointments/deleteAppointment/${id}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+      const res = await fetch(apiConfig.deleteAppointment(id), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       const data = await res.json();
       console.log("Delete response:", data);
@@ -155,7 +153,7 @@ function MyAppointments() {
                   className="w-20 h-20 rounded-full object-cover border-2 border-[#008e9b]"
                   src={
                     app?.doctor?.image
-                      ? `http://localhost:5000/uploads/${app.doctor.image}`
+                      ? apiConfig.getImageUrl(app.doctor.image)
                       : "./img/doctors/avatar.png"
                   }
                   onError={(e) => {

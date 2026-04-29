@@ -15,7 +15,7 @@ function AddDepartment() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/departments/addDepartment", {
+      const res = await fetch(apiConfig.addDepartment, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,7 +33,6 @@ function AddDepartment() {
       } else {
         alert(data.message || "Error adding department");
       }
-
     } catch (err) {
       console.error(err);
       alert("Network error");
@@ -46,9 +45,7 @@ function AddDepartment() {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded shadow-md w-96"
       >
-        <h2 className="text-xl font-bold mb-4 text-center">
-          Add Department
-        </h2>
+        <h2 className="text-xl font-bold mb-4 text-center">Add Department</h2>
 
         <input
           type="text"

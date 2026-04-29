@@ -1,13 +1,14 @@
 import { ArrowRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { apiConfig } from "../config/api";
 
 function Doctors() {
   const [doctors, setDoctors] = useState([]);
   useEffect(() => {
     const fetchedDoctors = async () => {
       try {
-        const res = await fetch("http://localhost:5000/doctors/allDoctors");
+        const res = await fetch(apiConfig.getAllDoctors);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch doctors");
         setDoctors(data.slice(0, 3));
@@ -31,7 +32,7 @@ function Doctors() {
           >
             <Link to={`/doctor/${doc?._id}`}>
               <img
-                src={`http://localhost:5000/uploads/${doc?.image}`}
+                src={apiConfig.getImageUrl(doc?.image)}
                 alt={doc?.name || "doctor"}
                 className="w-32 h-32 mx-auto rounded-full object-cover border mb-4"
               />
