@@ -14,6 +14,7 @@ export const apiConfig = {
     getDoctorsBySpecialty: (specialty) => `${API_BASE_URL}/doctors/doctors/bySpecialty/${specialty}`,
     addDoctor: `${API_BASE_URL}/doctors/addDoctors`,
     getDoctorsCount: `${API_BASE_URL}/doctors/count`,
+    deleteDoctor: (id) => `${API_BASE_URL}/doctors/${id}`,
 
     // Appointment endpoints
     createAppointment: `${API_BASE_URL}/appointments/createAppointment`,
@@ -24,6 +25,7 @@ export const apiConfig = {
     getAllDepartments: `${API_BASE_URL}/departments/allDepartments`,
     addDepartment: `${API_BASE_URL}/departments/addDepartment`,
     getDepartmentsCount: `${API_BASE_URL}/departments/count`,
+    deleteDepartment: (id) => `${API_BASE_URL}/departments/${id}`,
 
     // Image upload helper
     getImageUrl: (filename) => `${API_BASE_URL}/uploads/${filename}`,

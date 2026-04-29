@@ -71,7 +71,12 @@ function Navbar() {
         )}
 
         {user && (
-          <li>
+          <li className="flex items-center gap-3">
+            {user.role === "admin" && (
+              <span className="text-xs bg-green-500 text-white px-2 py-1 rounded font-bold shadow-sm">
+                Admin
+              </span>
+            )}
             <button onClick={logout} className="bg-red-50 text-red-600 hover:bg-red-100 hover:scale-105 transition-all text-sm font-bold py-2 px-4 rounded-lg shadow-sm">Logout</button>
           </li>
         )}
@@ -106,7 +111,12 @@ function Navbar() {
                 <Link to="/register" onClick={closeMenu} className="text-center w-full bg-[#008e9b] text-white py-2 rounded-lg hover:bg-[#007a85] transition">Register</Link>
               </li>
             ) : (
-              <li className="pt-2 border-t">
+              <li className="pt-4 border-t flex flex-col space-y-3 items-center">
+                {user.role === "admin" && (
+                  <span className="text-xs bg-green-500 text-white px-3 py-1.5 rounded font-bold shadow-sm">
+                    Admin
+                  </span>
+                )}
                 <button onClick={() => { logout(); closeMenu(); }} className="w-full text-center bg-red-50 text-red-600 py-3 rounded-lg hover:bg-red-100 font-bold transition">Logout</button>
               </li>
             )}

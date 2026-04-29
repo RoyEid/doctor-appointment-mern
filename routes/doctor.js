@@ -2,6 +2,7 @@ import express from "express";
 import Doctor from "../models/DoctorSchema.js";
 import multer from "multer";
 import path from "path";
+import auth from "../auth/Middleware.js";
 
 const router = express.Router();
 
@@ -88,6 +89,20 @@ router.get("/:id", async (req, res) => {
         return res.status(404).json({ message: "Doctor not found" });
     }
     res.json(doctor);
+});
+
+// ✅ Delete Doctor (ADMIN ONLY)
+router.delete("/:id", auth("admin"), async (req, res) => {
+    try {
+        const deletedDoctor = await Doctor.findByIdAndDelete(req.params.id);
+        if (!deletedDoctor) {
+            return res.status(404).json({ message: "Doctor not found" });
+        }
+        res.json({ message: "Doctor deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting doctor:", error);
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
 export default router;

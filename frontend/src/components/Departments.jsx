@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { apiConfig } from "../config/api";
+import { AuthContext } from "../context/AuthContext";
 
 function Departments() {
+  const { user } = useContext(AuthContext);
   const [departments, setDepartments] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
 
@@ -18,6 +20,28 @@ function Departments() {
   const handleTabClick = (id) => {
     setActiveTab(id);
   };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this department?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(apiConfig.deleteDepartment(id), {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setDepartments(departments.filter((d) => d._id !== id));
+        if (activeTab === id) setActiveTab(departments.find((d) => d._id !== id)?._id || null);
+      } else {
+        const data = await res.json();
+        alert(data.message || "Failed to delete department");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Network error deleting department");
+    }
+  };
+
   return (
     <section id="services" className="py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,11 +82,19 @@ function Departments() {
                 key={dep._id}
                 className="flex flex-col md:flex-row items-center gap-6"
               >
-                <div className="">
-                  <h3 className="font-bold text-[#008e9b] mb-2 text-2xl ">
+                <div className="w-full relative">
+                  {user?.role === "admin" && (
+                    <button
+                      onClick={() => handleDelete(dep._id)}
+                      className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-red-600 transition shadow-sm z-10"
+                    >
+                      Delete
+                    </button>
+                  )}
+                  <h3 className="font-bold text-[#008e9b] mb-4 text-2xl pr-20">
                     {dep?.name}
                   </h3>
-                  <p>{dep?.description}</p>
+                  <p className="text-gray-700 leading-relaxed">{dep?.description}</p>
                 </div>
 
                 </div>
