@@ -1,4 +1,3 @@
-import React from "react";
 import Slider from "react-slick";
 import carousel_1 from "../img/hero-carousel/hero-carousel-1.jpg";
 

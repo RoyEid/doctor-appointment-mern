@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
@@ -7,7 +7,7 @@ function Navbar() {
   return (
     <nav className="bg-white shadow-md text-[#008e9b] flex justify-between">
       <div>
-        <img alt="" className="w-32" src="./logo.png" />
+        <img alt="MediCare Logo" className="w-32" src="./logo.png" />
       </div>
 
       <ul className="flex space-x-6 items-center px-4">

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { apiConfig } from "../config/api";
 
 function AddDepartment() {
   const [name, setName] = useState("");

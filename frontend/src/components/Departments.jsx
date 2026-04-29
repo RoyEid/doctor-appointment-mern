@@ -1,4 +1,4 @@
-import React, { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { apiConfig } from "../config/api";
 
 function Departments() {
