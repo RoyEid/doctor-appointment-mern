@@ -19,34 +19,36 @@ function Departments() {
     setActiveTab(id);
   };
   return (
-    <section id="services" className=" py-12 bg-white max-w-6xl mx-auto px-4">
-      <div className="mb-8 text-center">
-        <h2 className="text-3xl font-bold mb-2">Departments</h2>
-        <p className="text-gray-600 max-w-xl mx-auto">
-          Explore our specialized medical departments staffed with expert
-          doctors.
-        </p>
-      </div>
+    <section id="services" className="py-16 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-gray-800 tracking-tight">Our <span className="text-[#008e9b]">Departments</span></h2>
+          <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+            Explore our specialized medical departments staffed with expert
+            doctors dedicated to your health and well-being.
+          </p>
+        </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Tabs List */}
-
-        <ul className="flex md:flex-col space-x-4 md:space-x-0 border-b md:border-b-0 md:border-r  border-gray-300">
-          {departments.map((dep) => (
-            <li key={dep._id}>
-              <button
-                onClick={() => handleTabClick(dep._id)}
-                className={`w-40 mr-4 block mt-3 px-4 py-2 rounded-t md:rounded-tr-none  md:rounded-1 ${
-                  activeTab === dep._id
-                    ? "bg-white text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
+        <div className="flex flex-col md:flex-row gap-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Tabs List */}
+          <div className="md:w-64 border-b md:border-b-0 md:border-r border-gray-100 bg-gray-50 flex-shrink-0">
+            <ul className="flex flex-row overflow-x-auto md:flex-col hide-scrollbar p-2 md:p-4 gap-2">
+              {departments.map((dep) => (
+                <li key={dep._id} className="flex-shrink-0">
+                  <button
+                    onClick={() => handleTabClick(dep._id)}
+                    className={`w-full text-left font-medium px-5 py-3 rounded-xl whitespace-nowrap transition-all duration-200 ${
+                      activeTab === dep._id
+                        ? "bg-[#008e9b] text-white shadow-md"
+                        : "text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+                    }`}
+                  >
                 {dep?.name}
               </button>
             </li>
           ))}
         </ul>
+        </div>
         {/* Tab Content */}
 
         <div className="flex-1 bg-gray-50 p-6 rounded shadow">
@@ -63,10 +65,10 @@ function Departments() {
                   <p>{dep?.description}</p>
                 </div>
 
-                <div></div>
-              </div>
-            ) : null,
-          )}
+                </div>
+              ) : null,
+            )}
+          </div>
         </div>
       </div>
     </section>

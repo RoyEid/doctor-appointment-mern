@@ -71,56 +71,63 @@ function AddAppointment() {
   }
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded-lg p-8 w-full max-w-md"
+        className="bg-white shadow-xl rounded-2xl p-6 sm:p-8 w-full max-w-md border border-gray-100"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">Add Appointment</h2>
+        <h2 className="text-2xl sm:text-3xl font-extrabold mb-8 text-center text-gray-800">Add Appointment</h2>
 
-        <label className="block mb-2 text-sm font-semibold">Doctor</label>
-        <select
-          name="doctor"
-          value={form.doctor}
-          onChange={handleChange}
-          required
-          className="w-full mb-4 p-2 border rounded"
-        >
-          <option value="">Select doctor</option>
-          {doctors?.map((doc) => (
-            <option key={doc._id} value={doc._id}>
-              {doc?.name} - {doc?.specialty}
-            </option>
-          ))}
-        </select>
+        <div className="space-y-4 sm:space-y-6">
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">Doctor</label>
+            <select
+              name="doctor"
+              value={form.doctor}
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
+            >
+              <option value="">Select doctor</option>
+              {doctors?.map((doc) => (
+                <option key={doc._id} value={doc._id}>
+                  {doc?.name} - {doc?.specialty}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <label className="block mb-2 text-sm font-semibold">Date</label>
-        <input
-          type="date"
-          name="date"
-          value={form.date}
-          onChange={handleChange}
-          required
-          className="w-full mb-4 p-2 border rounded"
-        />
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">Date</label>
+            <input
+              type="date"
+              name="date"
+              value={form.date}
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
+            />
+          </div>
 
-        <label className="block mb-2 text-sm font-semibold">Reason</label>
-        <textarea
-          name="reason"
-          value={form.reason}
-          onChange={handleChange}
-          required
-          className="w-full mb-4 p-2 border rounded h-24 resize-none"
-          placeholder="Describe your reason for the appointment..."
-        />
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">Reason</label>
+            <textarea
+              name="reason"
+              value={form.reason}
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
+              placeholder="Describe your reason for the appointment..."
+            />
+          </div>
 
-        {/* FIXED: Added proper button styling */}
-        <button
-          type="submit"
-          className="w-full py-2 rounded  text-white font-semibold transition duration-200"
-        >
-          Submit
-        </button>
+          <button
+            type="submit"
+            className="w-full py-3.5 rounded-lg bg-[#008e9b] text-white font-bold tracking-wide hover:bg-[#007a85] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008e9b] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+          >
+            Submit Request
+          </button>
+        </div>
       </form>
     </div>
   );

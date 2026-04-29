@@ -23,10 +23,10 @@ function AllDoctors() {
         Our Doctors
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
         {doctors?.map((doc) => (
           <div
-            className="bg-white rounded-lg shadow p-4 text-center"
+            className="bg-white rounded-lg shadow p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             key={doc?._id}
           >
             <Link to={`/doctor/${doc._id}`}>

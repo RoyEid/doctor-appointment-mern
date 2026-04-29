@@ -79,13 +79,13 @@ function AddDoctor() {
   }
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl flex gap-8"
+        className="bg-white shadow-xl border border-gray-100 rounded-2xl p-6 md:p-8 w-full max-w-4xl flex flex-col md:flex-row gap-8 items-center md:items-start"
         encType="multipart/form-data"
       >
-        <div className="flex flex-col items-center w-1/3">
+        <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
           <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-300">
             {preview ? (
               <img
@@ -104,7 +104,7 @@ function AddDoctor() {
           <button
             type="button"
             onClick={() => document.getElementById("fileInput").click()}
-            className="mt-4 bg-[#008e9b] text-white px-4 py-1 rounded hover:bg-[#007a85]"
+            className="mt-2 bg-[#008e9b] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#007a85] focus:outline-none focus:ring-2 focus:ring-[#007a85] transition-colors shadow-sm"
           >
             Choose Image
           </button>
@@ -117,56 +117,64 @@ function AddDoctor() {
           />
         </div>
 
-        <div className="w-2/3">
-          <h2 className="text-2xl font-bold mb-6 text-[#008e9b] text-center">
+        <div className="w-full md:w-2/3 space-y-4">
+          <h2 className="text-3xl font-extrabold mb-6 text-gray-800 text-center md:text-left">
             Add New Doctor
           </h2>
 
           {error && <p className="text-red-500">{error}</p>}
 
-          <label className="block mb-2 font-semibold">Name</label>
-          <input
-            value={form.name}
-            onChange={handleChange}
-            type="text"
-            name="name"
-            required
-            className="w-full mb-4 p-2 border rounded"
-          />
+          <div>
+            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Name</label>
+            <input
+              value={form.name}
+              onChange={handleChange}
+              type="text"
+              name="name"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
+            />
+          </div>
 
-          <label className="block mb-2 font-semibold">Specialty</label>
-          <input
-            value={form.specialty}
-            onChange={handleChange}
-            type="text"
-            name="specialty"
-            required
-            className="w-full mb-4 p-2 border rounded"
-          />
+          <div>
+            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Specialty</label>
+            <input
+              value={form.specialty}
+              onChange={handleChange}
+              type="text"
+              name="specialty"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
+            />
+          </div>
 
-          <label className="block mb-2 font-semibold">Experience Years</label>
-          <input
-            value={form.experienceYears}
-            onChange={handleChange}
-            type="number"
-            name="experienceYears"
-            required
-            className="w-full mb-4 p-2 border rounded"
-          />
+          <div>
+            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Experience Years</label>
+            <input
+              value={form.experienceYears}
+              onChange={handleChange}
+              type="number"
+              name="experienceYears"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
+            />
+          </div>
 
-          <label className="block mb-2 font-semibold">Description</label>
-          <input
-            onChange={handleChange}
-            value={form.description}
-            type="text"
-            name="description"
-            required
-            className="w-full mb-4 p-2 border rounded"
-          />
+          <div>
+            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Description</label>
+            <textarea
+              onChange={handleChange}
+              value={form.description}
+              name="description"
+              required
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 resize-none"
+            />
+          </div>
 
           <button
             type="submit"
-            className="w-full py-2 rounded bg-[#008e9b] text-white hover:bg-[#007a85]"
+            className="w-full py-3.5 mt-2 rounded-lg bg-[#008e9b] text-white font-bold tracking-wide hover:bg-[#007a85] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008e9b] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
           >
             Add Doctor
           </button>

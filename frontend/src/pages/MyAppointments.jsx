@@ -136,18 +136,19 @@ function MyAppointments() {
         </div>
       )}
 
-      <div className="space-y-6 max-w-3xl mx-auto">
+      <div className="space-y-6 max-w-4xl mx-auto px-4">
         {appointments.length === 0 ? (
-          <p className="text-center text-gray-500 text-lg">
-            No appointments found
-          </p>
+          <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
+            <p className="text-gray-500 text-lg mb-4">No appointments found</p>
+            <Link to="/add-appointment" className="text-[#008e9b] hover:underline font-medium">Book your first appointment</Link>
+          </div>
         ) : (
           appointments.map((app) => (
             <div
               key={app._id}
-              className="flex items-center justify-between bg-white shadow p-4 rounded-lg hover:shadow-md transition"
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white shadow-sm border border-gray-100 p-5 sm:p-6 rounded-2xl hover:shadow-md transition-all duration-300 gap-4 sm:gap-0 relative"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 sm:gap-6 w-full">
                 <img
                   alt={app?.doctor?.name || "Doctor"}
                   className="w-20 h-20 rounded-full object-cover border-2 border-[#008e9b]"
@@ -179,7 +180,7 @@ function MyAppointments() {
               </div>
 
               <button
-                className="text-red-500 hover:text-red-700 transition p-2"
+                className="absolute sm:relative top-4 right-4 sm:top-auto sm:right-auto text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-full p-2.5 transition-colors focus:outline-none focus:ring-2 focus:ring-red-200"
                 onClick={() => {
                   if (
                     window.confirm(
@@ -191,7 +192,8 @@ function MyAppointments() {
                 }}
                 title="Cancel appointment"
               >
-                <X fontSize={24} />
+                <X size={20} className="sm:hidden" />
+                <X size={24} className="hidden sm:block" />
               </button>
             </div>
           ))

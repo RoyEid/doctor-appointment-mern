@@ -43,16 +43,18 @@ function HeroSlider() {
               alt={slide.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col justify-center items-center text-center text-white px-4">
-              <h2 className="text-4xl text-[#46daea] font-bold mb-4">
+            <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col justify-center items-center text-center text-white px-6">
+              <h2 className="text-3xl md:text-5xl text-[#46daea] font-extrabold mb-4 md:mb-6 animate-fade-in-up">
                 {slide.title}
               </h2>
 
-              <p className="max-w-xl text-xl ">{slide.text}</p>
+              <p className="max-w-2xl text-lg md:text-2xl font-light mb-8 opacity-90 animate-fade-in-up animation-delay-300">
+                {slide.text}
+              </p>
 
               <a
                 href="#about"
-                className="mt-6 inline-block bg-[#46daea] text-black py-3 px-6 rounded hover:bg-[#43b0ba] transition "
+                className="inline-block bg-[#46daea] bg-opacity-90 text-black font-bold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-lg hover:bg-[#43b0ba] hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
                 Read More
               </a>

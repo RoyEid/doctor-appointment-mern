@@ -55,20 +55,22 @@ function Stats() {
     },
   ];
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 ">
-        <div className="grid lg:grid-cols-4  md:grid-cols-2 sm:grid-cols-1 gap-4">
+    <section className="py-16 bg-white border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((item, index) => (
             <div
-              className=" group  cursor-pointer flex items-center justify-start space-x-4 bg-white shadow-md rounded-lg p-6 hover:shadow-lg  hover:bg-[#008e9b] transition-colors duration-300"
+              className="group cursor-pointer flex flex-col items-center justify-center space-y-4 bg-gray-50 shadow-sm border border-gray-100 rounded-2xl p-8 hover:shadow-xl hover:bg-[#008e9b] hover:-translate-y-1 transition-all duration-300 text-center"
               key={index}
             >
-              <i className={`${item.icon} text-[#46daea] text-4xl`}></i>
+              <div className="bg-white p-4 rounded-full group-hover:bg-[#007a85] transition-colors duration-300 inline-block shadow-sm">
+                <i className={`${item.icon} text-[#46daea] text-4xl group-hover:text-white transition-colors duration-300`}></i>
+              </div>
 
               <div>
-                <span className="text-3xl font-bold block">{item.count}</span>
+                <span className="text-4xl font-extrabold text-gray-800 group-hover:text-white transition-colors duration-300 block">{item.count}</span>
 
-                <p className="text-gray-600 group-hover:text-white">
+                <p className="text-gray-500 font-medium mt-1 group-hover:text-blue-100 transition-colors duration-300 uppercase tracking-wider text-sm">
                   {item.label}
                 </p>
               </div>
