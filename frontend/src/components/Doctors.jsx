@@ -54,16 +54,25 @@ function Doctors() {
             key={doc?._id}
           >
             {user?.role === "admin" && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDelete(doc._id);
-                }}
-                className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded hover:bg-red-600 transition shadow-sm z-10"
-              >
-                Delete
-              </button>
+              <div className="absolute top-3 right-3 flex gap-2 z-10">
+                <Link
+                  to={`/edit-doctor/${doc._id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-blue-600 transition shadow-sm"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDelete(doc._id);
+                  }}
+                  className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-red-600 transition shadow-sm"
+                >
+                  Delete
+                </button>
+              </div>
             )}
             <Link to={`/doctor/${doc?._id}`} className="block">
               <img

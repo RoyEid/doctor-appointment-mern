@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/addDoctors", upload.single("image"), async (req, res) => {
+router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, res) => {
     try {
         console.log("=== ADD DOCTOR DEBUG ===");
         console.log("req.body:", req.body);
@@ -101,6 +101,29 @@ router.delete("/:id", auth("admin"), async (req, res) => {
         res.json({ message: "Doctor deleted successfully" });
     } catch (error) {
         console.error("Error deleting doctor:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// ✅ Update Doctor (ADMIN ONLY)
+router.put("/:id", auth("admin"), upload.single("image"), async (req, res) => {
+    try {
+        const { name, specialty, experienceYears, description } = req.body;
+        const updateData = { name, specialty, experienceYears, description };
+        
+        if (req.file) {
+            updateData.image = req.file.filename;
+        }
+
+        const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        
+        if (!updatedDoctor) {
+            return res.status(404).json({ message: "Doctor not found" });
+        }
+        
+        res.json(updatedDoctor);
+    } catch (error) {
+        console.error("Error updating doctor:", error);
         res.status(500).json({ message: "Server error" });
     }
 });
