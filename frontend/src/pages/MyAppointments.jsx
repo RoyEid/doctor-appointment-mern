@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
+import { Link } from "react-router-dom";
 
 function MyAppointments() {
   const { user } = useContext(AuthContext);
