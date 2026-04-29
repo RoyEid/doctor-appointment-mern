@@ -93,7 +93,11 @@ function AddDoctor() {
                 className="object-cover w-full h-full"
               />
             ) : (
-              <img src="./img/doctors/avatar.png" alt="Default avatar" />
+              <img
+                src="./img/doctors/avatar.png"
+                alt="Default avatar"
+                className="object-cover w-full h-full"
+              />
             )}
           </div>
           <button
