@@ -49,7 +49,7 @@ function DoctorDetails() {
         <div className='md:col-span-2 flex flex-col md:flex-row items-center'>
 
        
-        <img src={`http://localhost:5000/uploads/${doctor?.image}`} className='w-64 h-64 object-cover rounded-lg shadow-md mb-6 md:mb-0 md:mr-10'/>
+        <img alt='' src={`http://localhost:5000/uploads/${doctor?.image}`} className='w-64 h-64 object-cover rounded-lg shadow-md mb-6 md:mb-0 md:mr-10'/>
 
          <div className='space-y-4'>
             <h2 className='text-4xl font-bold text-[#008e9b]'>{doctor?.name}</h2>
@@ -68,7 +68,7 @@ function DoctorDetails() {
                 relatedDoctors?.map((doc)=> (
                     <Link className = "flex items-center bg-white rounded-lg shadow p-3 "  key={doc?._id} to={`/doctor/${doc?._id}`}>
                     
-                    <img  className="w-16 h-16 rounded-full object-cover border mr-4" src={`http://localhost:5000/uploads/${doc?.image}`}/>
+                    <img alt='' className="w-16 h-16 rounded-full object-cover border mr-4" src={`http://localhost:5000/uploads/${doc?.image}`}/>
                     <div >
                     <h4>{doc?.name}</h4>
                        <p>Experience: {doc?.experienceYears} years</p> 

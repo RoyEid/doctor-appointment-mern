@@ -54,7 +54,13 @@ function AddDoctor() {
       }
 
       toast.success("Doctor added successfully!");
-      setForm({ name: "", specialty: "", experienceYears: "", description: "", image: null });
+      setForm({
+        name: "",
+        specialty: "",
+        experienceYears: "",
+        description: "",
+        image: null,
+      });
       setPreview(null);
     } catch (error) {
       console.error("Error submitting form", error);
@@ -64,7 +70,11 @@ function AddDoctor() {
   };
 
   if (!user || user.role !== "admin") {
-    return <div className="flex items-center h-screen">Only admin can add doctors</div>;
+    return (
+      <div className="flex items-center h-screen">
+        Only admin can add doctors
+      </div>
+    );
   }
 
   return (
@@ -77,7 +87,11 @@ function AddDoctor() {
         <div className="flex flex-col items-center w-1/3">
           <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-300">
             {preview ? (
-              <img src={preview} className="object-cover w-full h-full" />
+              <img
+                src={preview}
+                alt="preview"
+                className="object-cover w-full h-full"
+              />
             ) : (
               <img src="./img/doctors/avatar.png" alt="Default avatar" />
             )}
@@ -89,11 +103,19 @@ function AddDoctor() {
           >
             Choose Image
           </button>
-          <input id="fileInput" onChange={handleChange} type="file" accept="image/*" className="hidden" />
+          <input
+            id="fileInput"
+            onChange={handleChange}
+            type="file"
+            accept="image/*"
+            className="hidden"
+          />
         </div>
 
         <div className="w-2/3">
-          <h2 className="text-2xl font-bold mb-6 text-[#008e9b] text-center">Add New Doctor</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#008e9b] text-center">
+            Add New Doctor
+          </h2>
 
           {error && <p className="text-red-500">{error}</p>}
 
@@ -137,7 +159,10 @@ function AddDoctor() {
             className="w-full mb-4 p-2 border rounded"
           />
 
-          <button type="submit" className="w-full py-2 rounded bg-[#008e9b] text-white hover:bg-[#007a85]">
+          <button
+            type="submit"
+            className="w-full py-2 rounded bg-[#008e9b] text-white hover:bg-[#007a85]"
+          >
             Add Doctor
           </button>
         </div>
