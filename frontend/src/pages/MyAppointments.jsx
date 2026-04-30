@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
 import { Link } from "react-router-dom";
+import AuthRequired from "../components/AuthRequired";
 
 function MyAppointments() {
   const { user } = useContext(AuthContext);
@@ -106,15 +107,7 @@ function MyAppointments() {
   };
 
   // If not logged in
-  if (!user) {
-    return (
-      <div className="p-8 bg-gray-100 min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">
-          Please login to view your appointments
-        </p>
-      </div>
-    );
-  }
+  if (!user) return <AuthRequired />;
 
   // Loading state
   if (loading) {
