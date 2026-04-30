@@ -198,7 +198,7 @@ function MyAppointments() {
                 {/* RIGHT */}
                 <div className="shrink-0 flex items-start">
                   <button
-                    className="text-gray-400 bg-gray-50 hover:bg-red-100 hover:text-red-500 rounded-full w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-colors focus:outline-none"
+                    className="text-white bg-red-500 hover:bg-red-600 rounded-full w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-colors focus:outline-none shadow-sm"
                     onClick={() => {
                       if (
                         window.confirm(
@@ -210,7 +210,7 @@ function MyAppointments() {
                     }}
                     title="Cancel appointment"
                   >
-                    <X size={16} />
+                    <X size={16} strokeWidth={2.5} />
                   </button>
                 </div>
 

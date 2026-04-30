@@ -27,7 +27,7 @@ function Navbar() {
     <nav className="bg-white shadow-md text-[#008e9b] sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-20">
         <Link to="/" onClick={closeMenu}>
-          <img alt="MediCare Logo" className="w-32 hover:opacity-80 transition-opacity" src="./logo.png" />
+          <img alt="MediCare Logo" className="w-32 hover:opacity-80 transition-opacity" src="/logo.png" />
         </Link>
 
         {/* Mobile menu button */}
