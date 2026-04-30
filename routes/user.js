@@ -18,13 +18,14 @@ router.post("/register", async (req,res)=>{
 
         const newUser = await User.create({name,email, password: hashedPassword,role  })
 
-        let token = jwt.sign({email,id:newUser._id, role: newUser.role},process.env.SECRET_KEY,{expiresIn:"1w"})
+        const userRole = newUser.role || "user";
+        let token = jwt.sign({email,id:newUser._id, role: userRole},process.env.SECRET_KEY,{expiresIn:"1w"})
 
         return res.status(201).json({message:"user registerd successfully", token, user: {
             id: newUser._id,
             name: newUser.name,
             email: newUser.email,
-            role: newUser.role
+            role: userRole
         }})
 
 
@@ -42,13 +43,14 @@ router.post("/register", async (req,res)=>{
      const match = await bcrypt.compare(password,user.password)
      if(!match) return res.status(400).json({message:"Password is Not Correct"})
 
-        const token = jwt.sign({id:user._id,role: user.role},process.env.SECRET_KEY,{expiresIn:"1w"})
+        const authRole = user.role || "user";
+        const token = jwt.sign({id:user._id,role: authRole},process.env.SECRET_KEY,{expiresIn:"1w"})
 
          return res.status(201).json({message:"user Logged In successfully", token,user: {
             id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role
+            role: authRole
         }})
 
 

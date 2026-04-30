@@ -166,7 +166,9 @@ function MyAppointments() {
             <Link to="/add-appointment" className="text-[#008e9b] hover:underline font-medium">Book your first appointment</Link>
           </div>
         ) : (
-          appointments.map((app) => (
+          appointments.map((app) => {
+            const currentStatus = app.status || "pending";
+            return (
             <div
               key={app._id}
               className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white shadow-sm border border-gray-100 p-5 sm:p-6 rounded-2xl hover:shadow-md transition-all duration-300 gap-4 sm:gap-0 relative"
@@ -197,12 +199,12 @@ function MyAppointments() {
                     )}
                     <span 
                       className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        app.status === 'approved' ? 'bg-green-100 text-green-700' : 
-                        app.status === 'rejected' ? 'bg-red-100 text-red-700' : 
+                        currentStatus === 'approved' ? 'bg-green-100 text-green-700' : 
+                        currentStatus === 'rejected' ? 'bg-red-100 text-red-700' : 
                         'bg-yellow-100 text-yellow-700'
                       }`}
                     >
-                      {app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : "Pending"}
+                      {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
                     </span>
                   </div>
                   <p className="text-gray-600 mb-1">{app.reason}</p>
@@ -222,7 +224,7 @@ function MyAppointments() {
               </div>
 
               <div className="absolute sm:relative top-4 right-4 sm:top-auto sm:right-auto flex flex-col sm:flex-row items-end sm:items-center gap-2">
-                {user?.role === "admin" && app.status === "pending" && (
+                {user?.role === "admin" && currentStatus === "pending" && (
                   <div className="flex gap-2 mr-0 sm:mr-2">
                     <button
                       onClick={() => updateStatus(app._id, "approved")}
@@ -257,7 +259,8 @@ function MyAppointments() {
                 </button>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
