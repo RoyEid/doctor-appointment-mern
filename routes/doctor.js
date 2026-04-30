@@ -23,15 +23,10 @@ const upload = multer({ storage });
 
 router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, res) => {
     try {
-        console.log("=== ADD DOCTOR DEBUG ===");
-        console.log("req.body:", req.body);
-        console.log("req.file:", req.file);
-        console.log("======================");
-
         const { name, specialty, description, experienceYears, email, password } = req.body;
 
-        if (!name || !specialty || !description || !experienceYears || !email || !password) {
-            return res.status(400).json({ error: "All fields are required, including email and password" });
+        if (!name || !specialty || !email || !password) {
+            return res.status(400).json({ message: "name, email, password and specialty are required" });
         }
 
         // 1. Check if user already exists
@@ -63,12 +58,19 @@ router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, re
 
         const savedDoctor = await newDoctor.save();
         res.status(201).json({
-            message: "Doctor and User account created successfully",
-            doctor: savedDoctor,
-            user: {
-                id: newUser._id,
-                email: newUser.email,
-                role: newUser.role
+            message: "Doctor account created successfully",
+            data: {
+                doctor: {
+                    id: savedDoctor._id,
+                    name: savedDoctor.name,
+                    specialty: savedDoctor.specialty,
+                    image: savedDoctor.image
+                },
+                user: {
+                    id: newUser._id,
+                    email: newUser.email,
+                    role: newUser.role
+                }
             }
         });
     } catch (error) {

@@ -23,6 +23,25 @@ function Navbar() {
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
 
+  const roleLinks = {
+    user: [
+      { to: "/", label: "Home" },
+      { to: "/add-appointment", label: "Add Appointment" },
+      { to: "/my-appointments", label: "My Appointments" },
+    ],
+    doctor: [
+      { to: "/doctor/dashboard", label: "Dashboard" },
+      { to: "/doctor/appointments", label: "My Patients" },
+    ],
+    admin: [
+      { to: "/admin/appointments", label: "Dashboard" },
+      { to: "/add-doctor", label: "Add Doctor" },
+      { to: "/admin/appointments", label: "Manage Appointments" },
+    ],
+  };
+
+  const currentLinks = user?.role ? roleLinks[user.role] || [] : [];
+
   return (
     <nav className="bg-white shadow-md text-[#008e9b] sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-20">
@@ -39,46 +58,11 @@ function Navbar() {
 
         {/* Desktop Menu */}
         <ul className="hidden md:flex space-x-8 items-center font-medium">
-        <li>
-          <Link to="/" className={getLinkClass("/")}>Home</Link>
-        </li>
-        <li>
-          <a href="#services" className="text-gray-600 hover:text-[#008e9b] transition-colors">Services</a>
-        </li>
-        <li>
-          <a href="#about" className="text-gray-600 hover:text-[#008e9b] transition-colors">About</a>
-        </li>
-
-        {user?.role === "admin" && (
-          <>
-            <li>
-              <Link to="/admin/appointments" className={getLinkClass("/admin/appointments")}>Admin</Link>
-            </li>
-            <li>
-              <Link to="/add-doctor" className={getLinkClass("/add-doctor")}>Add Doctor</Link>
-            </li>
-            <li>
-              <Link to="/add-department" className={getLinkClass("/add-department")}>Add Department</Link>
-            </li>
-          </>
-        )}
-
-        {user?.role === "user" && (
-          <>
-            <li>
-              <Link to="/add-appointment" className={getLinkClass("/add-appointment")}>Add Appointment</Link>
-            </li>
-            <li>
-              <Link to="/my-appointments" className={getLinkClass("/my-appointments")}>My Appointments</Link>
-            </li>
-          </>
-        )}
-
-        {user?.role === "doctor" && (
-          <li>
-            <Link to="/doctor/appointments" className={getLinkClass("/doctor/appointments")}>Doctor Dashboard</Link>
+        {currentLinks.map((item, idx) => (
+          <li key={`${item.to}-${idx}`}>
+            <Link to={item.to} className={getLinkClass(item.to)}>{item.label}</Link>
           </li>
-        )}
+        ))}
 
         {!user && (
           <>
@@ -111,30 +95,13 @@ function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t py-4 px-4 shadow-inner absolute w-full">
+        <div className="md:hidden bg-white border-t py-4 px-4 shadow-inner">
           <ul className="flex flex-col space-y-4 text-lg font-medium">
-            <li><Link to="/" onClick={closeMenu} className={getMobileLinkClass("/")}>Home</Link></li>
-            <li><a href="#services" onClick={closeMenu} className="block w-full text-gray-600 hover:text-[#008e9b] p-2 hover:bg-gray-50 transition-colors">Services</a></li>
-            <li><a href="#about" onClick={closeMenu} className="block w-full text-gray-600 hover:text-[#008e9b] p-2 hover:bg-gray-50 transition-colors">About</a></li>
-            
-            {user?.role === "admin" && (
-              <>
-                <li><Link to="/admin/appointments" onClick={closeMenu} className={getMobileLinkClass("/admin/appointments")}>Admin</Link></li>
-                <li><Link to="/add-doctor" onClick={closeMenu} className={getMobileLinkClass("/add-doctor")}>Add Doctor</Link></li>
-                <li><Link to="/add-department" onClick={closeMenu} className={getMobileLinkClass("/add-department")}>Add Department</Link></li>
-              </>
-            )}
-            
-            {user?.role === "user" && (
-              <>
-                <li><Link to="/add-appointment" onClick={closeMenu} className={getMobileLinkClass("/add-appointment")}>Add Appointment</Link></li>
-                <li><Link to="/my-appointments" onClick={closeMenu} className={getMobileLinkClass("/my-appointments")}>My Appointments</Link></li>
-              </>
-            )}
-
-            {user?.role === "doctor" && (
-              <li><Link to="/doctor/appointments" onClick={closeMenu} className={getMobileLinkClass("/doctor/appointments")}>Doctor Dashboard</Link></li>
-            )}
+            {currentLinks.map((item, idx) => (
+              <li key={`${item.to}-${idx}`}>
+                <Link to={item.to} onClick={closeMenu} className={getMobileLinkClass(item.to)}>{item.label}</Link>
+              </li>
+            ))}
             
             {!user ? (
               <li className="pt-2 border-t flex flex-col space-y-3">

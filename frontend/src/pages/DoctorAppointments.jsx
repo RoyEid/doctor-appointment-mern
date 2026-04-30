@@ -160,7 +160,7 @@ function DoctorAppointments() {
   }
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
+    <div className="px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
       <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
         Doctor Dashboard
       </h2>
@@ -206,7 +206,7 @@ function DoctorAppointments() {
         My Patients & Appointments
       </h3>
 
-      <div className="space-y-4 px-4 max-w-3xl mx-auto">
+      <div className="space-y-4 max-w-3xl mx-auto">
         {appointments.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
             <p className="text-gray-500 text-lg mb-4">No appointments assigned to you.</p>
@@ -217,16 +217,16 @@ function DoctorAppointments() {
             return (
               <div
                 key={app._id}
-                className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col md:flex-row justify-between gap-4"
+                className="w-full mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col gap-4"
               >
-                <div className="flex gap-4 w-full">
+                <div className="flex gap-4 w-full min-w-0">
                    <div className="flex-shrink-0 w-12 h-12 bg-[#008e9b] text-white rounded-full flex items-center justify-center font-bold text-xl uppercase">
                       {app.user?.name ? app.user.name.charAt(0) : 'P'}
                    </div>
 
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div className="flex flex-col mb-1 gap-0.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                      <div className="flex flex-col mb-1 gap-0.5 min-w-0">
                         <h3 className="font-semibold text-gray-800 text-base sm:text-lg leading-tight">
                           {app.user?.name || "Unknown Patient"}
                         </h3>
@@ -237,16 +237,16 @@ function DoctorAppointments() {
 
                       {/* Action Buttons */}
                       {currentStatus === "pending" && (
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                           <button
                             onClick={() => updateStatus(app._id, "approved")}
-                            className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm"
+                            className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm"
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => updateStatus(app._id, "rejected")}
-                            className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm"
+                            className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm"
                           >
                             Reject
                           </button>

@@ -28,6 +28,7 @@ function App() {
         <Route path="/my-appointments" element={<MyAppointments />} />
         <Route path="/add-doctor" element={<RoleBasedRoute element={<AddDoctor />} requiredRole="admin" />} />
         <Route path="/admin/appointments" element={<RoleBasedRoute element={<AdminAppointments />} requiredRole="admin" />} />
+        <Route path="/doctor/dashboard" element={<RoleBasedRoute element={<DoctorAppointments />} requiredRole="doctor" />} />
         <Route path="/doctor/appointments" element={<RoleBasedRoute element={<DoctorAppointments />} requiredRole="doctor" />} />
         <Route path="/edit-doctor/:id" element={<RoleBasedRoute element={<EditDoctor />} requiredRole="admin" />} />
         <Route path="/allDoctors" element={<AllDoctors />} />

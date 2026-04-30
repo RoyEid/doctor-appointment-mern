@@ -97,7 +97,7 @@ function AdminAppointments() {
   }
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
+    <div className="px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
       <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
         Admin Dashboard - Appointments
       </h2>
@@ -113,10 +113,10 @@ function AdminAppointments() {
             return (
               <div
                 key={app._id}
-                className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col md:flex-row justify-between gap-4"
+                className="w-full mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col gap-4"
               >
                 {/* LEFT SIDE */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 min-w-0">
                   <img
                     alt={app?.doctor?.name || "Doctor"}
                     className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b]"
@@ -130,7 +130,7 @@ function AdminAppointments() {
                     }}
                   />
 
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-col mb-1 gap-0.5">
                       <h3 className="font-semibold text-gray-800 text-base sm:text-lg leading-tight">
                         {app.doctor?.name || "Unknown Doctor"}
@@ -168,18 +168,18 @@ function AdminAppointments() {
                 </div>
 
                 {/* RIGHT SIDE */}
-                <div className="flex gap-2 mt-2 md:mt-0 md:justify-end items-start shrink-0">
+                <div className="flex flex-wrap gap-2 mt-1 sm:mt-2 sm:justify-end items-start">
                   {currentStatus === "pending" ? (
-                    <div className="flex gap-2 w-full md:w-auto">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                       <button
                         onClick={() => updateStatus(app._id, "approved")}
-                        className="flex-1 md:flex-none text-white bg-green-500 hover:bg-green-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
+                        className="w-full sm:w-auto text-white bg-green-500 hover:bg-green-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => updateStatus(app._id, "rejected")}
-                        className="flex-1 md:flex-none text-white bg-red-500 hover:bg-red-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
+                        className="w-full sm:w-auto text-white bg-red-500 hover:bg-red-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
                       >
                         Reject
                       </button>

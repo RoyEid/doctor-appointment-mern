@@ -12,10 +12,17 @@ router.post("/createAppointment", auth(), async (req, res) => {
     }
 
     const appDate = new Date(date);
+    if (Number.isNaN(appDate.getTime())) {
+        return res.status(400).json({ message: "Invalid appointment date" });
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const bookingDate = new Date(appDate);
+    bookingDate.setHours(0, 0, 0, 0);
+    const bookingDayEnd = new Date(bookingDate);
+    bookingDayEnd.setHours(23, 59, 59, 999);
 
-    if (appDate < today) {
+    if (bookingDate < today) {
         return res.status(400).json({ message: "Cannot book appointments in the past" });
     }
 
@@ -29,21 +36,21 @@ router.post("/createAppointment", auth(), async (req, res) => {
 
     const existing = await Appoitment.findOne({
         doctor,
-        date,
+        date: { $gte: bookingDate, $lte: bookingDayEnd },
         time,
         status: { $in: ["pending", "approved"] }
     });
 
     if (existing) {
         return res.status(400).json({
-            message: "Time slot already booked"
+            message: "This doctor already has an appointment at the selected date and time."
         });
     }
 
     const appointment = await Appoitment.create({
         user: req.user.id,
         doctor,
-        date,
+        date: bookingDate,
         time,
         reason,
         status: 'pending'
@@ -103,6 +110,12 @@ router.put("/:id/status", auth(), async (req, res) => {
     try {
         const { id } = req.params;
         const { status, time } = req.body;
+        const isAdmin = req.user.role === "admin";
+        const isDoctor = req.user.role === "doctor";
+        
+        if (!isAdmin && !isDoctor) {
+            return res.status(403).json({ message: "Access denied." });
+        }
         
         if (status && !['pending', 'approved', 'rejected'].includes(status)) {
             return res.status(400).json({ message: "Invalid status" });
@@ -114,10 +127,9 @@ router.put("/:id/status", auth(), async (req, res) => {
         }
 
         // Security Check
-        const isAdmin = req.user.role === "admin";
         let isAssignedDoctor = false;
 
-        if (req.user.role === "doctor") {
+        if (isDoctor) {
             const doctorProfile = await Doctor.findOne({ userId: req.user.id });
             if (doctorProfile && appointment.doctor.toString() === doctorProfile._id.toString()) {
                 isAssignedDoctor = true;
@@ -126,6 +138,16 @@ router.put("/:id/status", auth(), async (req, res) => {
 
         if (!isAdmin && !isAssignedDoctor) {
             return res.status(403).json({ message: "Access denied. You can only update your own appointments." });
+        }
+
+        // Doctors can only approve/reject their own appointments.
+        if (isDoctor) {
+            if (time !== undefined) {
+                return res.status(403).json({ message: "Doctors cannot change appointment time." });
+            }
+            if (!status || !['approved', 'rejected'].includes(status)) {
+                return res.status(400).json({ message: "Doctors can only approve or reject appointments." });
+            }
         }
 
         // Update fields if provided

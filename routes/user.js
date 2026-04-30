@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 
 
 router.post("/register", async (req,res)=>{
-    const {name, email, password,role = "user"} = req.body
+    const {name, email, password} = req.body
     if(!name || !email || !password)
          return res.status(400).json({ message: "All fields are required" });
 
@@ -16,7 +16,7 @@ router.post("/register", async (req,res)=>{
         const hashedPassword = await bcrypt.hash(password, 10)
 
 
-        const newUser = await User.create({name,email, password: hashedPassword,role  })
+        const newUser = await User.create({name,email, password: hashedPassword, role: "user" })
 
         const userRole = newUser.role || "user";
         let token = jwt.sign({email,id:newUser._id, role: userRole},process.env.SECRET_KEY,{expiresIn:"1w"})

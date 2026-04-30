@@ -14,10 +14,11 @@ const auth = (requiredRole = null) => {
          return res.status(400).json({message:'Invalid token.'});
 
         }else{
-            console.log(decoded)
-            req.user = decoded
+            const normalizedRole = decoded.role || "user";
+            req.user = { ...decoded, role: normalizedRole }
+            const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
-            if(requiredRole && decoded.role !== requiredRole){
+            if(requiredRole && !allowedRoles.includes(normalizedRole)){
                  return res.status(403).json({ 
                  message: 'Access denied. Insufficient permissions.' 
                     });

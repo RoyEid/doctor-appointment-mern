@@ -104,7 +104,7 @@ function MyAppointments() {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="px-4 sm:px-6 py-6 bg-gray-100 min-h-screen">
       <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
         My Appointments
       </h2>
@@ -137,9 +137,9 @@ function MyAppointments() {
                 key={app._id}
                 className="w-full bg-white rounded-2xl shadow-md p-4 border border-gray-50 hover:shadow-lg transition"
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   {/* LEFT */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 min-w-0">
                     <img
                       alt={app?.doctor?.name || "Doctor"}
                       className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b]"
@@ -153,7 +153,7 @@ function MyAppointments() {
                       }}
                     />
 
-                    <div>
+                    <div className="min-w-0">
                       <h3 className="font-semibold text-gray-800 text-base sm:text-lg">
                         {app.doctor?.name || "Unknown Doctor"}
                       </h3>
@@ -188,9 +188,9 @@ function MyAppointments() {
                   </div>
 
                   {/* RIGHT */}
-                  <div className="shrink-0">
+                  <div className="shrink-0 self-end sm:self-start">
                     <button
-                      className="bg-red-500 hover:bg-red-600 text-white w-9 h-9 rounded-full flex items-center justify-center shadow-md transition"
+                      className="bg-red-500 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition"
                       onClick={() => {
                         if (
                           window.confirm(
@@ -200,7 +200,7 @@ function MyAppointments() {
                           cancelAppointment(app._id);
                         }
                       }}
-                    >❌
+                    >
                       <X size={18} strokeWidth={2.5} />
                     </button>
                   </div>
