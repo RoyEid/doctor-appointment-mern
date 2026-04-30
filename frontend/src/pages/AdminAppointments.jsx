@@ -102,7 +102,7 @@ function AdminAppointments() {
         Admin Dashboard - Appointments
       </h2>
 
-      <div className="space-y-6 max-w-5xl mx-auto px-4">
+      <div className="space-y-4 px-4 max-w-3xl mx-auto">
         {appointments.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
             <p className="text-gray-500 text-lg mb-4">No appointments found across the platform.</p>
@@ -113,13 +113,13 @@ function AdminAppointments() {
             return (
               <div
                 key={app._id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 flex flex-col md:flex-row justify-between gap-4 transition-all duration-300 hover:shadow-md"
+                className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col md:flex-row justify-between gap-4"
               >
                 {/* LEFT SIDE */}
-                <div className="flex gap-4 sm:gap-6">
+                <div className="flex gap-3">
                   <img
                     alt={app?.doctor?.name || "Doctor"}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[#008e9b]"
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b]"
                     src={
                       app?.doctor?.image
                         ? apiConfig.getImageUrl(app.doctor.image)
@@ -130,59 +130,62 @@ function AdminAppointments() {
                     }}
                   />
 
-                  <div className="flex flex-col justify-center">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-                      <h3 className="text-lg sm:text-xl font-semibold text-gray-800">
+                  <div>
+                    <div className="flex flex-col mb-1 gap-0.5">
+                      <h3 className="font-semibold text-gray-800 text-base sm:text-lg leading-tight">
                         {app.doctor?.name || "Unknown Doctor"}
                       </h3>
                       {app.user && (
-                        <span className="text-xs sm:text-sm bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">
-                          User: {app.user.name}
-                        </span>
+                        <p className="text-sm font-medium text-[#008e9b]">
+                          {app.user.name}
+                        </p>
                       )}
-                      <span 
-                        className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${
-                          currentStatus === 'approved' ? 'bg-green-100 text-green-700' : 
-                          currentStatus === 'rejected' ? 'bg-red-100 text-red-700' : 
-                          'bg-yellow-100 text-yellow-700'
-                        }`}
-                      >
-                        {currentStatus}
-                      </span>
                     </div>
-                    <p className="text-gray-600 mb-1 text-sm sm:text-base">{app.reason}</p>
-                    <p className="text-sm font-medium text-gray-700 flex flex-wrap items-center gap-2">
-                      <span className="text-gray-500">📅</span>
+                    
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{app.reason}</p>
+                    
+                    <div className="text-xs sm:text-sm text-gray-400 mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span>📅</span>
                       {new Date(app.date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        year: "numeric",
                         month: "short",
                         day: "numeric",
                       })}
-                      <span className="hidden sm:inline text-gray-400">|</span>
-                      <span className="text-gray-500">🕒</span>
-                      {app.time || "Time not specified"}
-                    </p>
+                      <span className="mx-0.5">|</span>
+                      <span>🕒</span>
+                      {app.time || "N/A"}
+                    </div>
+
+                    <span 
+                      className={`inline-block mt-2 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
+                        currentStatus === 'approved' ? 'bg-green-100 text-green-700' : 
+                        currentStatus === 'rejected' ? 'bg-red-100 text-red-700' : 
+                        'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                      {currentStatus}
+                    </span>
                   </div>
                 </div>
 
                 {/* RIGHT SIDE */}
-                <div className="flex gap-2 mt-3 md:mt-0 justify-end items-center">
-                  {currentStatus === "pending" && (
-                    <>
+                <div className="flex gap-2 mt-2 md:mt-0 md:justify-end items-start shrink-0">
+                  {currentStatus === "pending" ? (
+                    <div className="flex gap-2 w-full md:w-auto">
                       <button
                         onClick={() => updateStatus(app._id, "approved")}
-                        className="text-white bg-green-500 hover:bg-green-600 rounded px-4 py-2 text-sm font-semibold transition shadow-sm whitespace-nowrap"
+                        className="flex-1 md:flex-none text-white bg-green-500 hover:bg-green-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => updateStatus(app._id, "rejected")}
-                        className="text-white bg-orange-500 hover:bg-orange-600 rounded px-4 py-2 text-sm font-semibold transition shadow-sm whitespace-nowrap"
+                        className="flex-1 md:flex-none text-white bg-red-500 hover:bg-red-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
                       >
                         Reject
                       </button>
-                    </>
+                    </div>
+                  ) : (
+                    <div className="hidden md:block w-full"></div>
                   )}
                 </div>
               </div>

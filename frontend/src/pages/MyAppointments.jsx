@@ -133,11 +133,10 @@ function MyAppointments() {
           <p className="text-center">{error}</p>
         </div>
       )}
-
-      <div className="space-y-6 max-w-4xl mx-auto px-4">
+      <div className="space-y-4 px-4 max-w-3xl mx-auto">
         {appointments.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
-            <p className="text-gray-500 text-lg mb-4">No appointments found</p>
+            <p className="text-gray-500 text-lg mb-4">You have no appointments booked.</p>
             <Link to="/add-appointment" className="text-[#008e9b] hover:underline font-medium">Book your first appointment</Link>
           </div>
         ) : (
@@ -146,75 +145,75 @@ function MyAppointments() {
             return (
             <div
               key={app._id}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white shadow-sm border border-gray-100 p-5 sm:p-6 rounded-2xl hover:shadow-md transition-all duration-300 gap-4 sm:gap-0 relative"
+              className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg"
             >
-              <div className="flex items-center gap-4 sm:gap-6 w-full">
-                <img
-                  alt={app?.doctor?.name || "Doctor"}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-[#008e9b]"
-                  src={
-                    app?.doctor?.image
-                      ? apiConfig.getImageUrl(app.doctor.image)
-                      : "./img/doctors/avatar.png"
-                  }
-                  onError={(e) => {
-                    e.target.src = "./img/doctors/avatar.png";
-                  }}
-                />
+              <div className="flex items-start justify-between gap-3">
+                
+                {/* LEFT */}
+                <div className="flex gap-3">
+                  <img
+                    alt={app?.doctor?.name || "Doctor"}
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b]"
+                    src={
+                      app?.doctor?.image
+                        ? apiConfig.getImageUrl(app.doctor.image)
+                        : "./img/doctors/avatar.png"
+                    }
+                    onError={(e) => {
+                      e.target.src = "./img/doctors/avatar.png";
+                    }}
+                  />
 
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-xl font-semibold text-gray-800">
+                  <div>
+                    <h3 className="font-semibold text-gray-800 text-base sm:text-lg">
                       {app.doctor?.name || "Unknown Doctor"}
                     </h3>
-                    {user?.role === "admin" && app.user && (
-                      <span className="text-sm bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">
-                        Patient: {app.user.name}
-                      </span>
-                    )}
+                    
+                    <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
+                      {app.reason}
+                    </p>
+                    
+                    <div className="text-xs sm:text-sm text-gray-400 mt-1.5 flex items-center gap-1.5 flex-wrap">
+                      <span>📅</span> 
+                      {new Date(app.date).toLocaleDateString("en-US", {
+                        month: "short", day: "numeric"
+                      })}
+                      <span className="mx-0.5">|</span>
+                      <span>🕒</span> 
+                      {app.time || "N/A"}
+                    </div>
+
                     <span 
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      className={`inline-block mt-2 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
                         currentStatus === 'approved' ? 'bg-green-100 text-green-700' : 
                         currentStatus === 'rejected' ? 'bg-red-100 text-red-700' : 
                         'bg-yellow-100 text-yellow-700'
                       }`}
                     >
-                      {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
+                      {currentStatus}
                     </span>
                   </div>
-                  <p className="text-gray-600 mb-1">{app.reason}</p>
-                  <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <span className="text-gray-500">📅</span>
-                    {new Date(app.date).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                    <span className="text-gray-400">|</span>
-                    <span className="text-gray-500">🕒</span>
-                    {app.time || "Time not specified"}
-                  </p>
                 </div>
-              </div>
 
-              <div className="absolute sm:relative top-4 right-4 sm:top-auto sm:right-auto flex flex-col sm:flex-row items-end sm:items-center gap-2">
-                <button
-                  className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-full p-2.5 transition-colors focus:outline-none focus:ring-2 focus:ring-red-200 mt-2 sm:mt-0"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to cancel this appointment?",
-                      )
-                    ) {
-                      cancelAppointment(app._id);
-                    }
-                  }}
-                  title="Cancel appointment"
-                >
-                  <X size={20} className="sm:hidden" />
-                  <X size={24} className="hidden sm:block" />
-                </button>
+                {/* RIGHT */}
+                <div className="shrink-0 flex items-start">
+                  <button
+                    className="text-gray-400 bg-gray-50 hover:bg-red-100 hover:text-red-500 rounded-full w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-colors focus:outline-none"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to cancel this appointment?",
+                        )
+                      ) {
+                        cancelAppointment(app._id);
+                      }
+                    }}
+                    title="Cancel appointment"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
               </div>
             </div>
             );
