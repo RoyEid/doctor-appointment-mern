@@ -194,20 +194,7 @@ function MyAppointments() {
                         }
                       }}
                     >
-                      <button
-                        className="bg-red-500 hover:bg-red-600 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition"
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              "Are you sure you want to cancel this appointment?",
-                            )
-                          ) {
-                            cancelAppointment(app._id);
-                          }
-                        }}
-                      >
-                        <X size={18} strokeWidth={2.5} stroke="white" />
-                      </button>{" "}
+                      <X size={18} strokeWidth={2.5} />
                     </button>
                   </div>
                 </div>
