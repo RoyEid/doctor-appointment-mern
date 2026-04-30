@@ -9,6 +9,7 @@ function AddAppointment() {
   const [form, setForm] = useState({
     doctor: "",
     date: "",
+    time: "",
     reason: "",
   });
 
@@ -51,7 +52,7 @@ function AddAppointment() {
 
       if (res.ok) {
         alert("Appointment added successfully!");
-        setForm({ doctor: "", date: "", reason: "" });
+        setForm({ doctor: "", date: "", time: "", reason: "" });
       } else {
         console.error("Error response:", data);
         alert(data.message || "Failed to add appointment");
@@ -98,6 +99,19 @@ function AddAppointment() {
               type="date"
               name="date"
               value={form.date}
+              onChange={handleChange}
+              min={new Date().toISOString().split('T')[0]}
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">Time</label>
+            <input
+              type="time"
+              name="time"
+              value={form.time}
               onChange={handleChange}
               required
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"

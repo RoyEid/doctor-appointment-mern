@@ -157,18 +157,32 @@ function MyAppointments() {
                 />
 
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    {app.doctor?.name || "Unknown Doctor"}
-                  </h3>
-                  <p className="text-gray-600">{app.reason}</p>
-                  <p className="text-sm text-gray-500">
-                    📅{" "}
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="text-xl font-semibold text-gray-800">
+                      {app.doctor?.name || "Unknown Doctor"}
+                    </h3>
+                    <span 
+                      className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        app.status === 'approved' ? 'bg-green-100 text-green-700' : 
+                        app.status === 'rejected' ? 'bg-red-100 text-red-700' : 
+                        'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                      {app.status ? app.status.charAt(0).toUpperCase() + app.status.slice(1) : "Pending"}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 mb-1">{app.reason}</p>
+                  <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <span className="text-gray-500">📅</span>
                     {new Date(app.date).toLocaleDateString("en-US", {
                       weekday: "short",
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
+                    <span className="text-gray-400">|</span>
+                    <span className="text-gray-500">🕒</span>
+                    {app.time || "Time not specified"}
                   </p>
                 </div>
               </div>

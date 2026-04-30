@@ -5,16 +5,26 @@ import auth from "../auth/Middleware.js";
 const router = express.Router();
 
 router.post("/createAppointment", auth(), async (req, res) => {
-    const { doctor, date, reason } = req.body;
-    if (!doctor || !date || !reason) {
+    const { doctor, date, time, reason } = req.body;
+    if (!doctor || !date || !time || !reason) {
         return res.status(400).json({ message: "Missing fields" });
+    }
+
+    const appDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (appDate < today) {
+        return res.status(400).json({ message: "Cannot book appointments in the past" });
     }
 
     const appointment = await Appoitment.create({
         user: req.user.id,
         doctor,
         date,
+        time,
         reason,
+        status: 'pending'
     });
 
     res.status(201).json(appointment);
