@@ -14,6 +14,7 @@ import AddDepartment from "./pages/AddDepartment";
 import EditDoctor from "./pages/EditDoctor.jsx";
 import AdminAppointments from "./pages/AdminAppointments.jsx";
 import DoctorAppointments from "./pages/DoctorAppointments.jsx";
+import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 
 function App() {
   return (
@@ -25,13 +26,13 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/add-appointment" element={<AddAppointment />} />
         <Route path="/my-appointments" element={<MyAppointments />} />
-        <Route path="/add-doctor" element={<AddDoctor />} />
-        <Route path="/admin/appointments" element={<AdminAppointments />} />
-        <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-        <Route path="/edit-doctor/:id" element={<EditDoctor />} />
+        <Route path="/add-doctor" element={<RoleBasedRoute element={<AddDoctor />} requiredRole="admin" />} />
+        <Route path="/admin/appointments" element={<RoleBasedRoute element={<AdminAppointments />} requiredRole="admin" />} />
+        <Route path="/doctor/appointments" element={<RoleBasedRoute element={<DoctorAppointments />} requiredRole="doctor" />} />
+        <Route path="/edit-doctor/:id" element={<RoleBasedRoute element={<EditDoctor />} requiredRole="admin" />} />
         <Route path="/allDoctors" element={<AllDoctors />} />
         <Route path="/doctor/:id" element={<DoctorDetails />} />
-        <Route path="/add-department" element={<AddDepartment />} />
+        <Route path="/add-department" element={<RoleBasedRoute element={<AddDepartment />} requiredRole="admin" />} />
       </Routes>
       <ToastContainer position="top-right" autoClose={3000} />
     </>

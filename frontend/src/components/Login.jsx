@@ -26,7 +26,7 @@ function Login() {
       setError(data.message || "Something went wrong");
     }
     if (data.token) {
-      login(data.token);
+      login(data.token, data.user);
       if (data.user.role === "admin") {
         navigate("/admin/appointments");
       } else if (data.user.role === "doctor") {
@@ -43,10 +43,14 @@ function Login() {
         onSubmit={handleSubmit}
       >
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-800">Welcome Back</h2>
-          <p className="text-gray-500 mt-2">Log in to manage your appointments</p>
+          <h2 className="text-3xl font-extrabold text-gray-800">
+            Welcome Back
+          </h2>
+          <p className="text-gray-500 mt-2">
+            Log in to manage your appointments
+          </p>
         </div>
-        
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
             {error}
@@ -55,7 +59,9 @@ function Login() {
 
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
@@ -65,7 +71,9 @@ function Login() {
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Password
+            </label>
             <input
               type="password"
               name="password"

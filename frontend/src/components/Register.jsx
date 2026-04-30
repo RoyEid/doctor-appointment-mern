@@ -20,7 +20,7 @@ function Register() {
     });
     const data = await res.json();
     if (data.token) {
-      login(data.token);
+      login(data.token, data.user);
       navigate("/");
     }
   };
@@ -31,13 +31,19 @@ function Register() {
         onSubmit={handleSubmit}
       >
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-800">Create Account</h2>
-          <p className="text-gray-500 mt-2">Join us to book your appointments</p>
+          <h2 className="text-3xl font-extrabold text-gray-800">
+            Create Account
+          </h2>
+          <p className="text-gray-500 mt-2">
+            Join us to book your appointments
+          </p>
         </div>
 
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Full Name
+            </label>
             <input
               type="text"
               name="name"
@@ -48,7 +54,9 @@ function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
@@ -59,7 +67,9 @@ function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Password
+            </label>
             <input
               type="password"
               name="password"
