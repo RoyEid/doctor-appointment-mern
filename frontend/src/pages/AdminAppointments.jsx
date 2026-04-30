@@ -113,12 +113,13 @@ function AdminAppointments() {
             return (
               <div
                 key={app._id}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white shadow-sm border border-gray-100 p-5 sm:p-6 rounded-2xl hover:shadow-md transition-all duration-300 gap-4 sm:gap-0 relative"
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 flex flex-col md:flex-row justify-between gap-4 transition-all duration-300 hover:shadow-md"
               >
-                <div className="flex items-center gap-4 sm:gap-6 w-full">
+                {/* LEFT SIDE */}
+                <div className="flex gap-4 sm:gap-6">
                   <img
                     alt={app?.doctor?.name || "Doctor"}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-[#008e9b]"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[#008e9b]"
                     src={
                       app?.doctor?.image
                         ? apiConfig.getImageUrl(app.doctor.image)
@@ -129,13 +130,13 @@ function AdminAppointments() {
                     }}
                   />
 
-                  <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-xl font-semibold text-gray-800">
+                  <div className="flex flex-col justify-center">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-800">
                         {app.doctor?.name || "Unknown Doctor"}
                       </h3>
                       {app.user && (
-                        <span className="text-sm bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">
+                        <span className="text-xs sm:text-sm bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">
                           User: {app.user.name}
                         </span>
                       )}
@@ -149,8 +150,8 @@ function AdminAppointments() {
                         {currentStatus}
                       </span>
                     </div>
-                    <p className="text-gray-600 mb-1">{app.reason}</p>
-                    <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <p className="text-gray-600 mb-1 text-sm sm:text-base">{app.reason}</p>
+                    <p className="text-sm font-medium text-gray-700 flex flex-wrap items-center gap-2">
                       <span className="text-gray-500">📅</span>
                       {new Date(app.date).toLocaleDateString("en-US", {
                         weekday: "short",
@@ -158,29 +159,30 @@ function AdminAppointments() {
                         month: "short",
                         day: "numeric",
                       })}
-                      <span className="text-gray-400">|</span>
+                      <span className="hidden sm:inline text-gray-400">|</span>
                       <span className="text-gray-500">🕒</span>
                       {app.time || "Time not specified"}
                     </p>
                   </div>
                 </div>
 
-                <div className="absolute sm:relative top-4 right-4 sm:top-auto sm:right-auto flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                {/* RIGHT SIDE */}
+                <div className="flex gap-2 mt-3 md:mt-0 justify-end items-center">
                   {currentStatus === "pending" && (
-                    <div className="flex gap-2">
+                    <>
                       <button
                         onClick={() => updateStatus(app._id, "approved")}
-                        className="text-white bg-green-500 hover:bg-green-600 rounded px-3 py-1.5 text-sm font-semibold transition shadow-sm"
+                        className="text-white bg-green-500 hover:bg-green-600 rounded px-4 py-2 text-sm font-semibold transition shadow-sm whitespace-nowrap"
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => updateStatus(app._id, "rejected")}
-                        className="text-white bg-orange-500 hover:bg-orange-600 rounded px-3 py-1.5 text-sm font-semibold transition shadow-sm"
+                        className="text-white bg-orange-500 hover:bg-orange-600 rounded px-4 py-2 text-sm font-semibold transition shadow-sm whitespace-nowrap"
                       >
                         Reject
                       </button>
-                    </div>
+                    </>
                   )}
                 </div>
               </div>

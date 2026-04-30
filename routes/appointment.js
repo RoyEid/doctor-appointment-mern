@@ -18,6 +18,19 @@ router.post("/createAppointment", auth(), async (req, res) => {
         return res.status(400).json({ message: "Cannot book appointments in the past" });
     }
 
+    const existing = await Appoitment.findOne({
+        doctor,
+        date,
+        time,
+        status: { $in: ["pending", "approved"] }
+    });
+
+    if (existing) {
+        return res.status(400).json({
+            message: "This time slot is already booked for this doctor"
+        });
+    }
+
     const appointment = await Appoitment.create({
         user: req.user.id,
         doctor,
