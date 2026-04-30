@@ -19,14 +19,8 @@ const AppointmentSchema = new mongoose.Schema({
         type: String,
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
-
-
-})
+}, { timestamps: true });
 
 const Appointment = mongoose.model("Appointment", AppointmentSchema);
 export default Appointment;

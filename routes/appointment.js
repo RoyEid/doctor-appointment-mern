@@ -49,10 +49,12 @@ router.get("/myAppointments", auth(), async (req, res) => {
         if (req.user.role === "admin") {
             appointments = await Appoitment.find()
                 .populate("doctor")
-                .populate("user", "name email");
+                .populate("user", "name email")
+                .sort({ createdAt: -1 });
         } else {
             appointments = await Appoitment.find({ user: req.user.id })
-                .populate("doctor");
+                .populate("doctor")
+                .sort({ createdAt: -1 });
         }
         res.json(appointments);
     } catch (error) {

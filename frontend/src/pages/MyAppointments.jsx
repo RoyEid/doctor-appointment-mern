@@ -55,7 +55,11 @@ function MyAppointments() {
         }
 
         console.log("Appointments fetched successfully:", data);
-        setAppointments(Array.isArray(data) ? data : data.appointments || []);
+        
+        const apptArray = Array.isArray(data) ? data : data.appointments || [];
+        const sorted = apptArray.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        setAppointments(sorted);
       } catch (error) {
         console.error("Error fetching appointments:", error);
         setError(error.message || "Failed to load appointments");
