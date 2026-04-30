@@ -5,7 +5,15 @@ const DoctorSchema = new mongoose.Schema({
   specialty: String,
   image: String,
   description: String,
-  experienceYears: Number
+  experienceYears: Number,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  },
+  availableSlots: {
+    type: [String],
+    default: []
+  }
 })
 
 

@@ -2,16 +2,41 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { apiConfig } from "../config/api";
 import AuthRequired from "../components/AuthRequired";
+import { useNavigate } from "react-router-dom";
 
 function AddAppointment() {
-  const [doctors, setDoctors] = useState([]);
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.role !== "user") {
+       navigate("/");
+    }
+  }, [user, navigate]);
+
+  const [doctors, setDoctors] = useState([]);
   const [form, setForm] = useState({
     doctor: "",
     date: "",
     time: "",
     reason: "",
   });
+  const [selectedDoctorSlots, setSelectedDoctorSlots] = useState([]);
+
+  useEffect(() => {
+    if (form.doctor && doctors.length > 0) {
+      const doc = doctors.find(d => d._id === form.doctor);
+      if (doc && doc.availableSlots && doc.availableSlots.length > 0) {
+        setSelectedDoctorSlots(doc.availableSlots);
+        // Default to first slot if nothing chosen or current not in list
+        if (!form.time || !doc.availableSlots.includes(form.time)) {
+          setForm(prev => ({ ...prev, time: doc.availableSlots[0] }));
+        }
+      } else {
+        setSelectedDoctorSlots([]);
+      }
+    }
+  }, [form.doctor, doctors, form.time]);
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -108,14 +133,28 @@ function AddAppointment() {
 
           <div>
             <label className="block mb-2 text-sm font-semibold text-gray-700">Time</label>
-            <input
-              type="time"
-              name="time"
-              value={form.time}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
-            />
+            {selectedDoctorSlots.length > 0 ? (
+              <select
+                name="time"
+                value={form.time}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
+              >
+                {selectedDoctorSlots.map((slot, i) => (
+                  <option key={i} value={slot}>{slot}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="time"
+                name="time"
+                value={form.time}
+                onChange={handleChange}
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
+              />
+            )}
           </div>
 
           <div>

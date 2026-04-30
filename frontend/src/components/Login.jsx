@@ -27,7 +27,13 @@ function Login() {
     }
     if (data.token) {
       login(data.token);
-      navigate("/");
+      if (data.user.role === "admin") {
+        navigate("/admin/appointments");
+      } else if (data.user.role === "doctor") {
+        navigate("/doctor/appointments");
+      } else {
+        navigate("/");
+      }
     }
   };
   return (

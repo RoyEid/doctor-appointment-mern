@@ -1,10 +1,18 @@
-import { useContext, useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
+import { useNavigate } from "react-router-dom";
 
 function AddDoctor() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+       navigate("/");
+    }
+  }, [user, navigate]);
   const [preview, setPreview] = useState(null);
 
   const [error, setError] = useState(null);

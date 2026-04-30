@@ -16,10 +16,12 @@ export const apiConfig = {
     getDoctorsCount: `${API_BASE_URL}/doctors/count`,
     deleteDoctor: (id) => `${API_BASE_URL}/doctors/${id}`,
     updateDoctor: (id) => `${API_BASE_URL}/doctors/${id}`,
+    updateAvailability: `${API_BASE_URL}/doctors/availability`,
 
     // Appointment endpoints
     createAppointment: `${API_BASE_URL}/appointments/createAppointment`,
     getMyAppointments: `${API_BASE_URL}/appointments/myAppointments`,
+    getDoctorAppointments: `${API_BASE_URL}/appointments/doctor`,
     deleteAppointment: (id) => `${API_BASE_URL}/appointments/deleteAppointment/${id}`,
     updateAppointmentStatus: (id) => `${API_BASE_URL}/appointments/${id}/status`,
 

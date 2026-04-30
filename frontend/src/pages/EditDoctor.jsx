@@ -6,8 +6,15 @@ import { useParams, useNavigate } from "react-router-dom";
 
 function EditDoctor() {
   const { user } = useContext(AuthContext);
-  const { id } = useParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+       navigate("/");
+    }
+  }, [user, navigate]);
+
+  const { id } = useParams();
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState(null);
   

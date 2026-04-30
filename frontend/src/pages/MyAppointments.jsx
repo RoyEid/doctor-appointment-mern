@@ -1,13 +1,20 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { X } from "lucide-react";
 import { toast } from "react-toastify";
+import { X } from "lucide-react";
 import { apiConfig } from "../config/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthRequired from "../components/AuthRequired";
 
 function MyAppointments() {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && user.role === "admin") {
+       // Admins can see all, but they have their own page.
+    }
+  }, [user, navigate]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

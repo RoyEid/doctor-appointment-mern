@@ -74,6 +74,12 @@ function Navbar() {
           </>
         )}
 
+        {user?.role === "doctor" && (
+          <li>
+            <Link to="/doctor/appointments" className={getLinkClass("/doctor/appointments")}>Doctor Dashboard</Link>
+          </li>
+        )}
+
         {!user && (
           <>
             <li>
@@ -90,6 +96,11 @@ function Navbar() {
             {user.role === "admin" && (
               <span className="text-xs bg-green-500 text-white px-2 py-1 rounded font-bold shadow-sm">
                 Admin
+              </span>
+            )}
+            {user.role === "doctor" && (
+              <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded font-bold shadow-sm">
+                Doctor
               </span>
             )}
             <button onClick={logout} className="bg-red-50 text-red-600 hover:bg-red-100 hover:scale-105 transition-all text-sm font-bold py-2 px-4 rounded-lg shadow-sm">Logout</button>
@@ -120,6 +131,10 @@ function Navbar() {
                 <li><Link to="/my-appointments" onClick={closeMenu} className={getMobileLinkClass("/my-appointments")}>My Appointments</Link></li>
               </>
             )}
+
+            {user?.role === "doctor" && (
+              <li><Link to="/doctor/appointments" onClick={closeMenu} className={getMobileLinkClass("/doctor/appointments")}>Doctor Dashboard</Link></li>
+            )}
             
             {!user ? (
               <li className="pt-2 border-t flex flex-col space-y-3">
@@ -131,6 +146,11 @@ function Navbar() {
                 {user.role === "admin" && (
                   <span className="text-xs bg-green-500 text-white px-3 py-1.5 rounded font-bold shadow-sm">
                     Admin
+                  </span>
+                )}
+                {user.role === "doctor" && (
+                  <span className="text-xs bg-blue-500 text-white px-3 py-1.5 rounded font-bold shadow-sm">
+                    Doctor
                   </span>
                 )}
                 <button onClick={() => { logout(); closeMenu(); }} className="w-full text-center bg-red-50 text-red-600 py-3 rounded-lg hover:bg-red-100 font-bold transition">Logout</button>

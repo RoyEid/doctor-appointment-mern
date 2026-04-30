@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
      
        email: {
         type: String,
-        uniqe:true, 
+        unique: true, 
         required: true,
        } ,
 
@@ -19,9 +19,10 @@ const UserSchema = new mongoose.Schema({
       
        } ,
 
-       role : {
-        type:String,
-        default:"user"
+       role: {
+        type: String,
+        enum: ["user", "admin", "doctor"],
+        default: "user"
        }
 })
 

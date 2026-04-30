@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import AddDepartment from "./pages/AddDepartment";
 import EditDoctor from "./pages/EditDoctor.jsx";
 import AdminAppointments from "./pages/AdminAppointments.jsx";
+import DoctorAppointments from "./pages/DoctorAppointments.jsx";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/my-appointments" element={<MyAppointments />} />
         <Route path="/add-doctor" element={<AddDoctor />} />
         <Route path="/admin/appointments" element={<AdminAppointments />} />
+        <Route path="/doctor/appointments" element={<DoctorAppointments />} />
         <Route path="/edit-doctor/:id" element={<EditDoctor />} />
         <Route path="/allDoctors" element={<AllDoctors />} />
         <Route path="/doctor/:id" element={<DoctorDetails />} />

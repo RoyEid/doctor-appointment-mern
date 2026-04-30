@@ -3,6 +3,8 @@ import Doctor from "../models/DoctorSchema.js";
 import multer from "multer";
 import path from "path";
 import auth from "../auth/Middleware.js";
+import User from "../models/UserSchema.js";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
@@ -26,29 +28,51 @@ router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, re
         console.log("req.file:", req.file);
         console.log("======================");
 
-        const { name, specialty, description, experienceYears } = req.body;
+        const { name, specialty, description, experienceYears, email, password } = req.body;
 
-        if (!name || !specialty || !description || !experienceYears) {
-            console.log("Validation failed - Missing fields:", {
-                name: !!name,
-                specialty: !!specialty,
-                description: !!description,
-                experienceYears: !!experienceYears,
-            });
-            return res.status(400).json({ error: "All fields are required" });
+        if (!name || !specialty || !description || !experienceYears || !email || !password) {
+            return res.status(400).json({ error: "All fields are required, including email and password" });
         }
 
+        // 1. Check if user already exists
+        const userExist = await User.findOne({ email });
+        if (userExist) {
+            return res.status(400).json({ message: "A user with this email already exists" });
+        }
+
+        // 2. Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 3. Create User account
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            role: "doctor"
+        });
+
+        // 4. Create Doctor linked to User
         const newDoctor = new Doctor({
             name,
             specialty,
             description,
             experienceYears,
             image: req.file ? req.file.filename : null,
+            userId: newUser._id
         });
 
         const savedDoctor = await newDoctor.save();
-        res.status(201).json(savedDoctor);
+        res.status(201).json({
+            message: "Doctor and User account created successfully",
+            doctor: savedDoctor,
+            user: {
+                id: newUser._id,
+                email: newUser.email,
+                role: newUser.role
+            }
+        });
     } catch (error) {
+        console.error("Error adding doctor:", error);
         res.status(500).json({ message: error.message || "Server error" });
     }
 });
@@ -124,6 +148,30 @@ router.put("/:id", auth("admin"), upload.single("image"), async (req, res) => {
         res.json(updatedDoctor);
     } catch (error) {
         console.error("Error updating doctor:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// ✅ Update Availability (DOCTOR ONLY)
+router.put("/availability", auth("doctor"), async (req, res) => {
+    try {
+        const { availableSlots } = req.body;
+        
+        if (!Array.isArray(availableSlots)) {
+            return res.status(400).json({ message: "availableSlots must be an array" });
+        }
+
+        const doctor = await Doctor.findOne({ userId: req.user.id });
+        if (!doctor) {
+            return res.status(404).json({ message: "Doctor profile not found" });
+        }
+
+        doctor.availableSlots = availableSlots;
+        const updatedDoctor = await doctor.save();
+        
+        res.json(updatedDoctor);
+    } catch (error) {
+        console.error("Error updating availability:", error);
         res.status(500).json({ message: "Server error" });
     }
 });

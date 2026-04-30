@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 import Appoitment from "../models/AppointmentSchema.js";
+import Doctor from "../models/DoctorSchema.js";
 import auth from "../auth/Middleware.js";
 
 const router = express.Router();
@@ -18,6 +19,14 @@ router.post("/createAppointment", auth(), async (req, res) => {
         return res.status(400).json({ message: "Cannot book appointments in the past" });
     }
 
+    // New: Availability check
+    const docProfile = await Doctor.findById(doctor);
+    if (docProfile && docProfile.availableSlots && docProfile.availableSlots.length > 0) {
+        if (!docProfile.availableSlots.includes(time)) {
+            return res.status(400).json({ message: `Doctor is only available at: ${docProfile.availableSlots.join(", ")}` });
+        }
+    }
+
     const existing = await Appoitment.findOne({
         doctor,
         date,
@@ -27,7 +36,7 @@ router.post("/createAppointment", auth(), async (req, res) => {
 
     if (existing) {
         return res.status(400).json({
-            message: "This time slot is already booked for this doctor"
+            message: "Time slot already booked"
         });
     }
 
@@ -40,7 +49,8 @@ router.post("/createAppointment", auth(), async (req, res) => {
         status: 'pending'
     });
 
-    res.status(201).json(appointment);
+    const populatedAppointment = await Appoitment.findById(appointment._id).populate("doctor");
+    res.status(201).json(populatedAppointment);
 });
 
 router.get("/myAppointments", auth(), async (req, res) => {
@@ -50,6 +60,16 @@ router.get("/myAppointments", auth(), async (req, res) => {
             appointments = await Appoitment.find()
                 .populate("doctor")
                 .populate("user", "name email")
+                .sort({ createdAt: -1 });
+        } else if (req.user.role === "doctor") {
+            // Find the doctor doc for this user account
+            const doctorDoc = await Doctor.findOne({ userId: req.user.id });
+            if (!doctorDoc) {
+                return res.status(404).json({ message: "Doctor profile not found" });
+            }
+            appointments = await Appoitment.find({ doctor: doctorDoc._id })
+                .populate("user", "name email")
+                .populate("doctor")
                 .sort({ createdAt: -1 });
         } else {
             appointments = await Appoitment.find({ user: req.user.id })
@@ -78,27 +98,99 @@ router.post("/deleteAppointment/:id", auth(), async (req, res) => {
     }
 });
 
-// ✅ Update Appointment Status (ADMIN ONLY)
-router.put("/:id/status", auth("admin"), async (req, res) => {
+// ✅ Update Appointment Status & Time (ADMIN & ASSIGNED DOCTOR)
+router.put("/:id/status", auth(), async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, time } = req.body;
         
-        if (!['pending', 'approved', 'rejected'].includes(status)) {
+        if (status && !['pending', 'approved', 'rejected'].includes(status)) {
             return res.status(400).json({ message: "Invalid status" });
         }
 
-        const appointment = await Appoitment.findByIdAndUpdate(id, { status }, { new: true })
-            .populate("doctor")
-            .populate("user", "name email");
-        
+        const appointment = await Appoitment.findById(id);
         if (!appointment) {
             return res.status(404).json({ message: "Appointment not found" });
         }
+
+        // Security Check
+        const isAdmin = req.user.role === "admin";
+        let isAssignedDoctor = false;
+
+        if (req.user.role === "doctor") {
+            const doctorProfile = await Doctor.findOne({ userId: req.user.id });
+            if (doctorProfile && appointment.doctor.toString() === doctorProfile._id.toString()) {
+                isAssignedDoctor = true;
+            }
+        }
+
+        if (!isAdmin && !isAssignedDoctor) {
+            return res.status(403).json({ message: "Access denied. You can only update your own appointments." });
+        }
+
+        // Update fields if provided
+        if (status) appointment.status = status;
         
-        res.json(appointment);
+        if (time !== undefined && time !== appointment.time) {
+            // Check for double booking if time is changing
+            const checkStatus = status || appointment.status;
+            if (checkStatus !== "rejected") {
+                const conflict = await Appoitment.findOne({
+                    _id: { $ne: id },
+                    doctor: appointment.doctor,
+                    date: appointment.date,
+                    time: time,
+                    status: { $in: ["pending", "approved"] }
+                });
+
+                if (conflict) {
+                    return res.status(400).json({ message: "Time slot already booked" });
+                }
+            }
+            appointment.time = time;
+        } else if (status && status !== "rejected" && appointment.time) {
+             // If status is becoming active but time stayed same, check for conflicts 
+             // (e.g. if another appointment was made to this slot while this was rejected/pending)
+             const conflict = await Appoitment.findOne({
+                _id: { $ne: id },
+                doctor: appointment.doctor,
+                date: appointment.date,
+                time: appointment.time,
+                status: { $in: ["pending", "approved"] }
+            });
+
+            if (conflict) {
+                return res.status(400).json({ message: "Time slot already booked" });
+            }
+        }
+        
+        const updatedAppointment = await appointment.save();
+        
+        const populated = await Appoitment.findById(updatedAppointment._id)
+            .populate("doctor")
+            .populate("user", "name email");
+        
+        res.json(populated);
     } catch (error) {
-        console.error("Error updating appointment status:", error);
+        console.error("Error updating appointment:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// ✅ Get Doctor's Appointments (DOCTOR ONLY)
+router.get("/doctor", auth("doctor"), async (req, res) => {
+    try {
+        const doctorDoc = await Doctor.findOne({ userId: req.user.id });
+        if (!doctorDoc) {
+            return res.status(404).json({ message: "Doctor profile not found" });
+        }
+        const appointments = await Appoitment.find({ doctor: doctorDoc._id })
+            .populate("user", "name email")
+            .populate("doctor")
+            .sort({ createdAt: -1 });
+        res.json(appointments);
+    } catch (error) {
+        console.error("Error fetching doctor appointments:", error);
         res.status(500).json({ message: "Server error" });
     }
 });
