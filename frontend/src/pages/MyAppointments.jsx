@@ -106,35 +106,6 @@ function MyAppointments() {
     }
   };
 
-  const updateStatus = async (id, status) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(apiConfig.updateAppointmentStatus(id), {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to update appointment status");
-      }
-      
-      // Update state locally rather than refetching for rapid UI updates
-      setAppointments((prevAppointments) => 
-        prevAppointments.map((a) => a._id === id ? { ...a, status: data.status } : a)
-      );
-      toast.success(`Appointment ${status} successfully!`);
-    } catch (error) {
-      console.error("Error updating status:", error);
-      toast.error(error.message);
-    }
-  };
-
   // If not logged in
   if (!user) return <AuthRequired />;
 
@@ -224,23 +195,6 @@ function MyAppointments() {
               </div>
 
               <div className="absolute sm:relative top-4 right-4 sm:top-auto sm:right-auto flex flex-col sm:flex-row items-end sm:items-center gap-2">
-                {user?.role === "admin" && currentStatus === "pending" && (
-                  <div className="flex gap-2 mr-0 sm:mr-2">
-                    <button
-                      onClick={() => updateStatus(app._id, "approved")}
-                      className="text-white bg-green-500 hover:bg-green-600 rounded px-3 py-1.5 text-sm font-semibold transition shadow-sm"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => updateStatus(app._id, "rejected")}
-                      className="text-white bg-orange-500 hover:bg-orange-600 rounded px-3 py-1.5 text-sm font-semibold transition shadow-sm"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                )}
-                
                 <button
                   className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-full p-2.5 transition-colors focus:outline-none focus:ring-2 focus:ring-red-200 mt-2 sm:mt-0"
                   onClick={() => {

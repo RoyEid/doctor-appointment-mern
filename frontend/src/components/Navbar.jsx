@@ -52,6 +52,9 @@ function Navbar() {
         {user?.role === "admin" && (
           <>
             <li>
+              <Link to="/admin/appointments" className={getLinkClass("/admin/appointments")}>Admin</Link>
+            </li>
+            <li>
               <Link to="/add-doctor" className={getLinkClass("/add-doctor")}>Add Doctor</Link>
             </li>
             <li>
@@ -105,6 +108,7 @@ function Navbar() {
             
             {user?.role === "admin" && (
               <>
+                <li><Link to="/admin/appointments" onClick={closeMenu} className={getMobileLinkClass("/admin/appointments")}>Admin</Link></li>
                 <li><Link to="/add-doctor" onClick={closeMenu} className={getMobileLinkClass("/add-doctor")}>Add Doctor</Link></li>
                 <li><Link to="/add-department" onClick={closeMenu} className={getMobileLinkClass("/add-department")}>Add Department</Link></li>
               </>

@@ -19,6 +19,10 @@ const AppointmentSchema = new mongoose.Schema({
         type: String,
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 
 
