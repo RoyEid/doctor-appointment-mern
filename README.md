@@ -1,184 +1,158 @@
-# 🏥 Doctor Appointment MERN App
+# 🩺 Doctor Appointment MERN App
 
-A full-stack web application built with the **MERN stack** that allows users to book doctor appointments easily and enables admins to manage doctors and departments efficiently.
+A full-stack MERN application that allows users to book doctor appointments and enables administrators to manage doctors, departments, and efficiently handle appointment approvals and rejections.
 
----
-
-## 🚀 Features
-
-### 👤 User
-- Register & Login (JWT Authentication)
-- Book appointments
-- View personal appointments
-- Delete appointments
-
-### 👨‍⚕️ Admin
-- Add doctors (with image upload)
-- Add departments
-- Manage system data
+[![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://doctor-appointment-mern-nnsd5n9l4-royeids-projects.vercel.app)
+[![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=flat&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=flat&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
 ---
 
-## 🛠 Tech Stack
+## 🌐 Deployment
 
-| Layer       | Technology            |
-|------------|----------------------|
-| Frontend    | React, Tailwind CSS  |
-| Backend     | Node.js, Express     |
-| Database    | MongoDB Atlas        |
-| Auth        | JWT (JSON Web Token) |
+🔗 Frontend (Live Demo):  
+https://doctor-appointment-mern-nnsd5n9l4-royeids-projects.vercel.app  
+
+🔗 Backend API:  
+https://doctor-backend-46g2.onrender.com
+
+---
+
+## ✨ Features
+
+### 👤 User Features
+- **Authentication**: Secure Registration & Login using JSON Web Tokens (JWT).
+- **Appointment Booking**: Select preferred date and time for doctor visits.
+- **Validation Rules**: 
+  - Prevents booking appointments in the past.
+  - Prevents double booking for the same doctor at the same time.
+- **Management Center**: View, delete, and check status (Pending / Approved / Rejected) of personal appointments.
+
+### 🛡️ Admin Features
+- **Doctor Management**: Add, update, and remove doctor profiles.
+- **Department Management**: Add and delete hospital departments.
+- **Appointment Control**: View all user appointments sorted by newest first.
+- **Decisions**: Approve or reject pending appointments.
+
+---
+
+## 💻 Tech Stack
+
+- **Frontend**: React.js, Tailwind CSS
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB Atlas
+- **Authentication**: JWT (JSON Web Tokens) & bcryptjs
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 doctor-appointment-mern/
-│
-├── frontend/       # React frontend
-├── models/         # Mongoose schemas
-├── routes/         # API routes
-├── config/         # Database connection
-├── auth/           # Authentication middleware
-├── uploads/        # Uploaded images
-├── server.js       # Backend entry point
+├── frontend/          # React frontend application
+├── models/            # Mongoose database schemas
+├── routes/            # Express route handlers
+├── config/            # Database and environment configurations
+├── auth/              # JWT authorization middleware
+├── uploads/           # Static asset/image storage
+└── server.js          # Entry point for the Node.js backend server
 ```
 
 ---
 
-## ⚙️ Installation & Setup
+## 🔌 API Endpoints
 
-### 🔹 1. Clone the repository
+### Authentication
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/user/register` | Register a new user |
+| `POST` | `/user/signin` | Login user & return JWT |
 
-```bash
-git clone https://github.com/RoyEid/doctor-appointment-mern.git
-cd doctor-appointment-mern
-```
+### Doctors
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/doctors/allDoctors` | Retrieve list of all doctors |
+| `POST` | `/doctors/addDoctors` | Add a new doctor (Admin) |
+| `PUT` | `/doctors/:id` | Update doctor details (Admin) |
+| `DELETE` | `/doctors/:id` | Remove a doctor (Admin) |
 
----
+### Appointments
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/appointments/createAppointment` | Book a new appointment |
+| `GET` | `/appointments/myAppointments` | Get logged-in user's appointments |
+| `PUT` | `/appointments/:id/status` | Update status [Approve/Reject] (Admin) |
+| `DELETE` | `/appointments/:id` | Cancel/Delete an appointment |
 
-### 🔹 2. Install dependencies
-
-#### Backend
-```bash
-npm install
-```
-
-#### Frontend
-```bash
-cd frontend
-npm install
-cd ..
-```
-
----
-
-### 🔹 3. Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-MONGO_URI=your_mongodb_connection_string
-SECRET_KEY=your_secret_key
-PORT=5000
-```
+### Departments
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/departments/allDepartments` | Retrieve all departments |
+| `POST` | `/departments/addDepartment` | Create a new department (Admin) |
+| `DELETE` | `/departments/:id` | Delete a department (Admin) |
 
 ---
 
-### 🔹 4. Run the application
+## 🔐 Security
 
-#### Start backend
-```bash
-npm start
-```
-
-#### Start frontend
-```bash
-cd frontend
-npm start
-```
+- **Authentication**: Stateless JWT-based authentication.
+- **Password Hashing**: Passwords securely hashed in the database before storage.
+- **Protected Routes**: Middleware verifies tokens to protect administrative routes and personal user data.
+- **Input Validation**: Backend validation to prevent invalid booking times (e.g., past dates, time conflicts).
 
 ---
 
-## 🌐 API Endpoints
+## 🛠 Installation & Setup
 
-### 🔐 Authentication
-- POST `/user/register`
-- POST `/user/signin`
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/RoyEid/doctor-appointment-mern.git
+   cd doctor-appointment-mern
+   ```
 
----
+2. **Backend Setup:**
+   ```bash
+   # Install dependencies
+   npm install
+   
+   # Create a .env file based on the config requirements:
+   # MONGO_URI=your_mongodb_connection_string
+   # JWT_SECRET=your_secret_key
+   # PORT=5000
+   
+   # Start the server
+   npm run server
+   ```
 
-### 👨‍⚕️ Doctors
-- POST `/doctors/addDoctors`
-- GET `/doctors/allDoctors`
-- GET `/doctors/count`
-- GET `/doctors/byspecialty/:specialty`
-- GET `/doctors/:id`
-
----
-
-### 📅 Appointments
-- POST `/appointments/createAppointment`
-- GET `/appointments/myAppointments`
-- POST `/appointments/deleteAppointment/:id`
-
----
-
-### 🏥 Departments
-- POST `/departments/addDepartment`
-- GET `/departments/allDepartments`
-- GET `/departments/count`
-
----
-
-## 🔐 Authentication & Security
-
-- JWT-based authentication
-- Protected routes for users and admins
-- Role-based access control (Admin/User)
-
----
-
-## ⚠️ Limitations
-
-- No appointment conflict validation yet
-- No email notifications
-- Basic admin panel (can be improved)
+3. **Frontend Setup:**
+   ```bash
+   # Navigate to the frontend directory
+   cd frontend
+   
+   # Install dependencies
+   npm install
+   
+   # Start the React development server
+   npm start
+   ```
 
 ---
 
 ## 🔮 Future Improvements
 
-- Add doctor availability scheduling
-- Add email notifications for appointments
-- Implement payment system
-- Improve UI/UX design
-- Add admin dashboard analytics
-
----
-
-## 🧪 Testing
-
-You can test API endpoints using:
-- Postman
-- Thunder Client (VS Code)
-
----
-
-## 📜 License
-
-This project is open-source and available under the MIT License.
+- Add email notifications for appointment approvals/rejections.
+- Implement user profile image uploads and management.
+- Introduce a real-time chat feature between patients and doctors.
+- Add comprehensive unit and integration testing.
+- Integrate a payment gateway for premium consultation fees.
 
 ---
 
 ## 👨‍💻 Author
 
-**Roy Eid**
-
-- GitHub: https://github.com/RoyEid
-
----
-
-## ⭐ Support
-
-If you like this project, give it a ⭐ on GitHub!
+**Roy Eid**  
+- [GitHub](https://github.com/RoyEid)
+- Project Link: [https://github.com/RoyEid/doctor-appointment-mern](https://github.com/RoyEid/doctor-appointment-mern)
