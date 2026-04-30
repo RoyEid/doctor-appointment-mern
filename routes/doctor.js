@@ -5,6 +5,7 @@ import path from "path";
 import auth from "../auth/Middleware.js";
 import User from "../models/UserSchema.js";
 import bcrypt from "bcryptjs";
+import { getDoctorProfileForUser } from "../utils/doctorAccess.js";
 
 const router = express.Router();
 
@@ -24,13 +25,14 @@ const upload = multer({ storage });
 router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, res) => {
     try {
         const { name, specialty, description, experienceYears, email, password } = req.body;
+        const normalizedEmail = email?.trim().toLowerCase();
 
-        if (!name || !specialty || !email || !password) {
+        if (!name || !specialty || !normalizedEmail || !password) {
             return res.status(400).json({ message: "name, email, password and specialty are required" });
         }
 
         // 1. Check if user already exists
-        const userExist = await User.findOne({ email });
+        const userExist = await User.findOne({ email: normalizedEmail });
         if (userExist) {
             return res.status(400).json({ message: "A user with this email already exists" });
         }
@@ -41,7 +43,7 @@ router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, re
         // 3. Create User account
         const newUser = await User.create({
             name,
-            email,
+            email: normalizedEmail,
             password: hashedPassword,
             role: "doctor"
         });
@@ -70,6 +72,10 @@ router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, re
                     id: newUser._id,
                     email: newUser.email,
                     role: newUser.role
+                },
+                credentials: {
+                    email: newUser.email,
+                    password
                 }
             }
         });
@@ -163,7 +169,7 @@ router.put("/availability", auth("doctor"), async (req, res) => {
             return res.status(400).json({ message: "availableSlots must be an array" });
         }
 
-        const doctor = await Doctor.findOne({ userId: req.user.id });
+        const doctor = await getDoctorProfileForUser(req.user.id);
         if (!doctor) {
             return res.status(404).json({ message: "Doctor profile not found" });
         }

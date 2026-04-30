@@ -25,16 +25,14 @@ function Navbar() {
 
   const roleLinks = {
     user: [
-      { to: "/", label: "Home" },
       { to: "/add-appointment", label: "Add Appointment" },
       { to: "/my-appointments", label: "My Appointments" },
     ],
     doctor: [
-      { to: "/doctor/dashboard", label: "Dashboard" },
-      { to: "/doctor/appointments", label: "My Patients" },
+      { to: "/doctor/appointments", label: "My Appointments" },
     ],
     admin: [
-      { to: "/admin/appointments", label: "Dashboard" },
+      { to: "/admin/dashboard", label: "Dashboard" },
       { to: "/add-doctor", label: "Add Doctor" },
       { to: "/admin/appointments", label: "Manage Appointments" },
     ],

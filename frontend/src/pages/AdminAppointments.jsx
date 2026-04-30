@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
 import { useNavigate } from "react-router-dom";
 
@@ -56,34 +55,6 @@ function AdminAppointments() {
     }
   }, [user]);
 
-  const updateStatus = async (id, status) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(apiConfig.updateAppointmentStatus(id), {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to update appointment status");
-      }
-      
-      setAppointments((prev) => 
-        prev.map((a) => a._id === id ? { ...a, status: data.status } : a)
-      );
-      toast.success(`Appointment ${status} successfully!`);
-    } catch (error) {
-      console.error("Error updating status:", error);
-      toast.error(error.message);
-    }
-  };
-
   if (!user || user.role !== "admin") {
     return null; // Don't flash UI before navigate fires
   }
@@ -99,7 +70,7 @@ function AdminAppointments() {
   return (
     <div className="px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
       <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
-        Admin Dashboard - Appointments
+        Admin Supervisor - All Appointments
       </h2>
 
       <div className="space-y-4 px-4 max-w-3xl mx-auto">
@@ -167,26 +138,8 @@ function AdminAppointments() {
                   </div>
                 </div>
 
-                {/* RIGHT SIDE */}
-                <div className="flex flex-wrap gap-2 mt-1 sm:mt-2 sm:justify-end items-start">
-                  {currentStatus === "pending" ? (
-                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                      <button
-                        onClick={() => updateStatus(app._id, "approved")}
-                        className="w-full sm:w-auto text-white bg-green-500 hover:bg-green-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => updateStatus(app._id, "rejected")}
-                        className="w-full sm:w-auto text-white bg-red-500 hover:bg-red-600 rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition shadow-sm whitespace-nowrap"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="hidden md:block w-full"></div>
-                  )}
+                <div className="text-xs text-gray-500 mt-1">
+                  Review only. Approval actions are handled by assigned doctors.
                 </div>
               </div>
             );

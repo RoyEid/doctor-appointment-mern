@@ -6,6 +6,11 @@ const AppointmentSchema = new mongoose.Schema({
      type: mongoose.Schema.Types.ObjectId,ref:"User"
     },
 
+    doctorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+
     doctor :{
          type: mongoose.Schema.Types.ObjectId,ref:"Doctor"
     },

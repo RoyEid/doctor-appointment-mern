@@ -16,8 +16,11 @@ function AddDoctor() {
   const [preview, setPreview] = useState(null);
 
   const [error, setError] = useState(null);
+  const [createdCredentials, setCreatedCredentials] = useState(null);
   const [form, setForm] = useState({
     name: "",
+    email: "",
+    password: "",
     specialty: "",
     experienceYears: "",
     description: "",
@@ -39,11 +42,14 @@ function AddDoctor() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setCreatedCredentials(null);
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
 
       formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("password", form.password);
       formData.append("specialty", form.specialty);
       formData.append("experienceYears", form.experienceYears);
       formData.append("description", form.description);
@@ -62,9 +68,16 @@ function AddDoctor() {
         throw new Error(data.message || "Failed to add doctor");
       }
 
+      const credentials = data?.data?.credentials || {
+        email: form.email,
+        password: form.password,
+      };
+      setCreatedCredentials(credentials);
       toast.success("Doctor added successfully!");
       setForm({
         name: "",
+        email: "",
+        password: "",
         specialty: "",
         experienceYears: "",
         description: "",
@@ -139,6 +152,13 @@ function AddDoctor() {
           </h2>
 
           {error && <p className="text-red-500">{error}</p>}
+          {createdCredentials && (
+            <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-lg text-sm">
+              <p className="font-semibold">Doctor account created</p>
+              <p>Email: {createdCredentials.email}</p>
+              <p>Password: {createdCredentials.password}</p>
+            </div>
+          )}
 
           <div>
             <label className="block mb-1.5 text-sm font-semibold text-gray-700">Name</label>
@@ -147,6 +167,30 @@ function AddDoctor() {
               onChange={handleChange}
               type="text"
               name="name"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Email</label>
+            <input
+              value={form.email}
+              onChange={handleChange}
+              type="email"
+              name="email"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Password</label>
+            <input
+              value={form.password}
+              onChange={handleChange}
+              type="password"
+              name="password"
               required
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
             />

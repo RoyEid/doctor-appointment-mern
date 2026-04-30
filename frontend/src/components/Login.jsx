@@ -28,9 +28,9 @@ function Login() {
     if (data.token) {
       login(data.token, data.user);
       if (data.user.role === "admin") {
-        navigate("/admin/appointments");
+        navigate("/admin/dashboard");
       } else if (data.user.role === "doctor") {
-        navigate("/doctor/dashboard");
+        navigate("/doctor/appointments");
       } else {
         navigate("/");
       }

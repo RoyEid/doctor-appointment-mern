@@ -8,10 +8,8 @@ function DoctorAppointments() {
   const { user } = useContext(AuthContext);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editingTimeId, setEditingTimeId] = useState(null);
-  const [tempTime, setTempTime] = useState("");
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [newSlot, setNewSlot] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [rescheduleForm, setRescheduleForm] = useState({ date: "", time: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,46 +19,46 @@ function DoctorAppointments() {
     }
   }, [user, navigate]);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        if (!token) return;
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-        const res = await fetch(apiConfig.getDoctorAppointments, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+      const res = await fetch(apiConfig.getDoctorAppointments, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-        const data = await res.json();
-        
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to fetch appointments");
-        }
-        
-        // Ensure data is array and sort newest first
-        const apptArray = Array.isArray(data) ? data : data.appointments || [];
-        const sorted = apptArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
-        setAppointments(sorted);
-      } catch (error) {
-        console.error("Error fetching doctor appointments:", error);
-        toast.error(error.message || "Error loading appointments");
-      } finally {
-        setLoading(false);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch appointments");
       }
-    };
 
-    if (user?.role === "doctor") {
-      fetchAppointments();
+      const apptArray = Array.isArray(data) ? data : data.appointments || [];
+      const onlyMyAppointments = apptArray.filter(
+        (appt) => appt?.doctorId === user?.id || appt?.doctorId?._id === user?.id,
+      );
+      const sorted = onlyMyAppointments.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      );
+      setAppointments(sorted);
+    } catch (error) {
+      console.error("Error fetching doctor appointments:", error);
+      toast.error(error.message || "Error loading appointments");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (user?.role === "doctor") fetchAppointments();
   }, [user]);
 
-  const updateAppointment = async (id, { status, time }) => {
+  const updateStatus = async (id, status) => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(apiConfig.updateAppointmentStatus(id), {
@@ -69,81 +67,66 @@ function DoctorAppointments() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status, time })
+        body: JSON.stringify({ status }),
       });
-      
+
       const data = await res.json();
-      
       if (!res.ok) {
         throw new Error(data.message || "Failed to update appointment");
       }
-      
-      setAppointments((prev) => 
-        prev.map((a) => a._id === id ? data : a)
+
+      setAppointments((prev) =>
+        prev.map((appointment) =>
+          appointment._id === id
+            ? { ...appointment, status: data.status || status }
+            : appointment,
+        ),
       );
-      
-      if (status) toast.success(`Appointment ${status} successfully!`);
-      if (time) toast.success(`Time updated to ${time}`);
-      
-      setEditingTimeId(null);
+      toast.success(`Appointment ${status} successfully!`);
     } catch (error) {
       console.error("Error updating appointment:", error);
       toast.error(error.message);
     }
   };
 
-  const updateStatus = (id, status) => updateAppointment(id, { status });
-  
-  const saveTime = (id) => {
-    if (!tempTime) return setEditingTimeId(null);
-    updateAppointment(id, { time: tempTime });
+  const startReschedule = (appointment) => {
+    setEditingId(appointment._id);
+    const dateValue = appointment?.date
+      ? new Date(appointment.date).toISOString().split("T")[0]
+      : "";
+    setRescheduleForm({
+      date: dateValue,
+      time: appointment?.time || "",
+    });
   };
 
-  useEffect(() => {
-    const fetchAvailability = async () => {
-      try {
-        const res = await fetch(apiConfig.getAllDoctors);
-        const doctors = await res.json();
-        const currentDoc = doctors.find(d => d.userId === user.id);
-        if (currentDoc && currentDoc.availableSlots) {
-          setAvailableSlots(currentDoc.availableSlots);
-        }
-      } catch (err) {
-        console.error("Error fetching availability:", err);
-      }
-    };
-    if (user?.role === "doctor") fetchAvailability();
-  }, [user]);
-
-  const addSlot = async () => {
-    if (!newSlot) return;
-    const updated = [...availableSlots, newSlot].sort();
-    await saveAvailability(updated);
-    setNewSlot("");
-  };
-
-  const removeSlot = async (slot) => {
-    const updated = availableSlots.filter(s => s !== slot);
-    await saveAvailability(updated);
-  };
-
-  const saveAvailability = async (slots) => {
+  const submitReschedule = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(apiConfig.updateAvailability, {
+      const res = await fetch(apiConfig.updateAppointmentStatus(id), {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ availableSlots: slots })
+        body: JSON.stringify({
+          date: rescheduleForm.date,
+          time: rescheduleForm.time,
+        }),
       });
-      if (res.ok) {
-        setAvailableSlots(slots);
-        toast.success("Availability updated!");
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to reschedule appointment");
       }
-    } catch (err) {
-      toast.error("Failed to update availability");
+
+      setAppointments((prev) =>
+        prev.map((appointment) => (appointment._id === id ? data : appointment)),
+      );
+      setEditingId(null);
+      toast.success("Appointment rescheduled successfully!");
+    } catch (error) {
+      toast.error(error.message || "Failed to reschedule appointment");
     }
   };
 
@@ -162,49 +145,8 @@ function DoctorAppointments() {
   return (
     <div className="px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
       <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
-        Doctor Dashboard
+        Doctor Appointments
       </h2>
-
-      {/* Availability Management */}
-      <div className="max-w-3xl mx-auto mb-10 bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span>📅</span> Manage My Availability
-        </h3>
-        <p className="text-sm text-gray-500 mb-4">Define the time slots you are available for appointments.</p>
-        
-        <div className="flex flex-wrap gap-2 mb-6">
-          {availableSlots.length === 0 ? (
-            <p className="text-gray-400 italic text-sm">No slots defined yet.</p>
-          ) : (
-            availableSlots.map((slot, i) => (
-              <span key={i} className="bg-blue-50 text-[#008e9b] px-3 py-1.5 rounded-full flex items-center gap-2 text-sm font-medium border border-blue-100">
-                {slot}
-                <button onClick={() => removeSlot(slot)} className="text-red-400 hover:text-red-600 font-bold">×</button>
-              </span>
-            ))
-          )}
-        </div>
-
-        <div className="flex gap-2 max-w-sm">
-          <input 
-            type="text" 
-            placeholder="e.g. 09:00 AM" 
-            value={newSlot}
-            onChange={(e) => setNewSlot(e.target.value)}
-            className="flex-1 p-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#008e9b] transition-all bg-gray-50"
-          />
-          <button 
-            onClick={addSlot}
-            className="bg-[#008e9b] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#007a85] transition shadow-sm"
-          >
-            Add Slot
-          </button>
-        </div>
-      </div>
-
-      <h3 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        My Patients & Appointments
-      </h3>
 
       <div className="space-y-4 max-w-3xl mx-auto">
         {appointments.length === 0 ? (
@@ -230,9 +172,6 @@ function DoctorAppointments() {
                         <h3 className="font-semibold text-gray-800 text-base sm:text-lg leading-tight">
                           {app.user?.name || "Unknown Patient"}
                         </h3>
-                        <p className="text-sm font-medium text-[#008e9b]">
-                          {app.user?.email || "No Email Provided"}
-                        </p>
                       </div>
 
                       {/* Action Buttons */}
@@ -260,44 +199,57 @@ function DoctorAppointments() {
                     
                     <div className="text-xs sm:text-sm text-gray-400 mt-1.5 flex flex-wrap items-center gap-1.5">
                       <span>📅</span>
-                      {new Date(app.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {new Date(app.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       <span className="mx-0.5">|</span>
                       <span>🕒</span>
-                      
-                      {editingTimeId === app._id ? (
-                        <div className="flex items-center gap-2">
-                          <input 
-                            type="text" 
-                            value={tempTime}
-                            onChange={(e) => setTempTime(e.target.value)}
-                            className="border border-gray-300 rounded px-2 py-0.5 text-gray-700 w-24 outline-none focus:ring-1 focus:ring-[#008e9b]"
-                            placeholder="e.g. 10:00 AM"
-                            autoFocus
+                      {app.time || "N/A"}
+                    </div>
+
+                    {editingId === app._id ? (
+                      <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="date"
+                            value={rescheduleForm.date}
+                            min={new Date().toISOString().split("T")[0]}
+                            onChange={(e) =>
+                              setRescheduleForm((prev) => ({ ...prev, date: e.target.value }))
+                            }
+                            className="w-full sm:w-auto p-2 border border-gray-300 rounded-md text-sm"
                           />
-                          <button 
-                            onClick={() => saveTime(app._id)}
-                            className="text-[#008e9b] font-bold hover:underline"
+                          <input
+                            type="text"
+                            value={rescheduleForm.time}
+                            placeholder="e.g. 10:30 AM"
+                            onChange={(e) =>
+                              setRescheduleForm((prev) => ({ ...prev, time: e.target.value }))
+                            }
+                            className="w-full sm:w-auto p-2 border border-gray-300 rounded-md text-sm"
+                          />
+                        </div>
+                        <div className="mt-2 flex gap-2">
+                          <button
+                            onClick={() => submitReschedule(app._id)}
+                            className="bg-[#008e9b] text-white px-3 py-1.5 rounded-md text-xs font-semibold"
                           >
                             Save
                           </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md text-xs font-semibold"
+                          >
+                            Cancel
+                          </button>
                         </div>
-                      ) : (
-                        <span 
-                          onClick={() => {
-                            setEditingTimeId(app._id);
-                            setTempTime(app.time || "");
-                          }}
-                          className="hover:text-[#008e9b] cursor-pointer transition-colors flex items-center gap-1"
-                          title="Click to edit time"
-                        >
-                          {app.time || <span className="italic text-gray-400">Time not specified</span>}
-                          <span className="text-[10px] opacity-0 group-hover:opacity-100 italic transition-opacity"> (edit)</span>
-                        </span>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => startReschedule(app)}
+                        className="mt-3 bg-white border border-[#008e9b] text-[#008e9b] px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-[#008e9b] hover:text-white transition"
+                      >
+                        Reschedule
+                      </button>
+                    )}
 
                     <span 
                       className={`inline-block mt-2 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
