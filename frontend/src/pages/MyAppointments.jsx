@@ -193,7 +193,7 @@ function MyAppointments() {
                           cancelAppointment(app._id);
                         }
                       }}
-                    >
+                    >❌
                       <X size={18} strokeWidth={2.5} />
                     </button>
                   </div>
