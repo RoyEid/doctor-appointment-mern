@@ -16,6 +16,7 @@ import AdminAppointments from "./pages/AdminAppointments.jsx";
 import DoctorAppointments from "./pages/DoctorAppointments.jsx";
 import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import DoctorProfile from "./pages/DoctorProfile.jsx";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/admin/appointments" element={<RoleBasedRoute element={<AdminAppointments />} requiredRole="admin" />} />
         <Route path="/doctor/dashboard" element={<RoleBasedRoute element={<DoctorAppointments />} requiredRole="doctor" />} />
         <Route path="/doctor/appointments" element={<RoleBasedRoute element={<DoctorAppointments />} requiredRole="doctor" />} />
+        <Route path="/doctor/profile" element={<RoleBasedRoute element={<DoctorProfile />} requiredRole="doctor" />} />
         <Route path="/edit-doctor/:id" element={<RoleBasedRoute element={<EditDoctor />} requiredRole="admin" />} />
         <Route path="/allDoctors" element={<AllDoctors />} />
         <Route path="/doctor/:id" element={<DoctorDetails />} />

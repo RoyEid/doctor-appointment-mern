@@ -22,6 +22,63 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+router.put("/update-profile", auth("doctor"), upload.single("image"), async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        const doctor = await getDoctorProfileForUser(req.user.id);
+        if (!doctor) {
+            return res.status(404).json({ message: "Doctor profile not found" });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: "User account not found" });
+        }
+
+        if (name) {
+            user.name = name;
+            doctor.name = name;
+        }
+
+        if (email) {
+            const normalizedEmail = email.trim().toLowerCase();
+            const existingUser = await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } });
+            if (existingUser) {
+                return res.status(400).json({ message: "A user with this email already exists" });
+            }
+            user.email = normalizedEmail;
+        }
+
+        if (password) {
+            user.password = await bcrypt.hash(password, 10);
+        }
+
+        if (req.file) {
+            doctor.image = req.file.filename;
+        }
+
+        await user.save();
+        await doctor.save();
+
+        return res.json({
+            message: "Doctor profile updated successfully",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
+            doctor: {
+                id: doctor._id,
+                image: doctor.image
+            }
+        });
+    } catch (error) {
+        console.error("Error updating doctor profile:", error);
+        return res.status(500).json({ message: "Server error" });
+    }
+});
+
 router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, res) => {
     try {
         const { name, specialty, description, experienceYears, email, password } = req.body;

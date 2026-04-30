@@ -17,6 +17,7 @@ app.use(cors())
 app.use("/user", User);
 
 app.use("/doctors", Doctor);
+app.use("/api/doctors", Doctor);
 
 app.use("/appointments", Appointment);
 app.use("/departments", Departments);

@@ -30,6 +30,7 @@ function Navbar() {
     ],
     doctor: [
       { to: "/doctor/appointments", label: "My Appointments" },
+      { to: "/doctor/profile", label: "Profile" },
     ],
     admin: [
       { to: "/admin/dashboard", label: "Dashboard" },
