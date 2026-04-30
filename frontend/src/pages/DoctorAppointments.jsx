@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
@@ -19,7 +19,7 @@ function DoctorAppointments() {
     }
   }, [user, navigate]);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
@@ -52,11 +52,11 @@ function DoctorAppointments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     if (user?.role === "doctor") fetchAppointments();
-  }, [user]);
+  }, [fetchAppointments, user?.role]);
 
   const updateStatus = async (id, status) => {
     try {
