@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express from "express";
 import Appoitment from "../models/AppointmentSchema.js";
 import Doctor from "../models/DoctorSchema.js";
 import auth from "../auth/Middleware.js";
@@ -6,6 +6,7 @@ import { getDoctorProfileForUser } from "../utils/doctorAccess.js";
 
 const router = express.Router();
 const ACTIVE_STATUSES = ["pending", "approved"];
+const ALL_STATUSES = ["pending", "approved", "rejected", "cancelled", "completed"];
 
 const getDayRange = (dateValue) => {
     const parsed = new Date(dateValue);
@@ -21,7 +22,7 @@ const hasDoctorConflict = async ({ appointmentId, doctorId, doctor, date, time }
     const dayRange = getDayRange(date);
     if (!dayRange) return false;
     const conflict = await Appoitment.findOne({
-        _id: { $ne: appointmentId },
+        _id: appointmentId ? { $ne: appointmentId } : { $exists: true },
         $or: [
             { doctorId },
             { doctor }
@@ -33,7 +34,17 @@ const hasDoctorConflict = async ({ appointmentId, doctorId, doctor, date, time }
     return Boolean(conflict);
 };
 
+// Legacy create endpoint (compat)
 router.post("/createAppointment", auth(), async (req, res) => {
+    return createAppointmentHandler(req, res);
+});
+
+// RESTful create: POST /appointments
+router.post("/", auth(), async (req, res) => {
+    return createAppointmentHandler(req, res);
+});
+
+async function createAppointmentHandler(req, res) {
     const { doctor, date, time, reason } = req.body;
     if (!doctor || !date || !time || !reason) {
         return res.status(400).json({ message: "Missing fields" });
@@ -59,8 +70,8 @@ router.post("/createAppointment", auth(), async (req, res) => {
         return res.status(404).json({ message: "Doctor not found" });
     }
 
-    // New: Availability check
-    if (docProfile && docProfile.availableSlots && docProfile.availableSlots.length > 0) {
+    // Availability check
+    if (docProfile && Array.isArray(docProfile.availableSlots) && docProfile.availableSlots.length > 0) {
         if (!docProfile.availableSlots.includes(time)) {
             return res.status(400).json({ message: `Doctor is only available at: ${docProfile.availableSlots.join(", ")}` });
         }
@@ -73,7 +84,7 @@ router.post("/createAppointment", auth(), async (req, res) => {
         ],
         date: { $gte: bookingDate, $lte: bookingDayEnd },
         time,
-        status: { $in: ["pending", "approved"] }
+        status: { $in: ACTIVE_STATUSES }
     });
 
     if (existing) {
@@ -92,11 +103,23 @@ router.post("/createAppointment", auth(), async (req, res) => {
         status: 'pending'
     });
 
-    const populatedAppointment = await Appoitment.findById(appointment._id).populate("doctor");
+    const populatedAppointment = await Appoitment.findById(appointment._id)
+        .populate("doctor")
+        .populate("user", "name email");
     res.status(201).json(populatedAppointment);
+}
+
+// Legacy list (role-based aggregate) under /myAppointments
+router.get("/myAppointments", auth(), async (req, res) => {
+    return listAppointmentsHandler(req, res);
 });
 
-router.get("/myAppointments", auth(), async (req, res) => {
+// RESTful list for current user: GET /appointments/my
+router.get("/my", auth(), async (req, res) => {
+    return listAppointmentsHandler(req, res);
+});
+
+async function listAppointmentsHandler(req, res) {
     try {
         let appointments;
         if (req.user.role === "admin") {
@@ -105,7 +128,6 @@ router.get("/myAppointments", auth(), async (req, res) => {
                 .populate("user", "name email")
                 .sort({ createdAt: -1 });
         } else if (req.user.role === "doctor") {
-            // Find the doctor doc for this user account
             const doctorDoc = await getDoctorProfileForUser(req.user.id);
             if (!doctorDoc) {
                 return res.status(404).json({ message: "Doctor profile not found" });
@@ -129,16 +151,63 @@ router.get("/myAppointments", auth(), async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Error fetching appointments" });
     }
-});
+}
 
+// Legacy delete endpoint (compat) - destructive delete
 router.post("/deleteAppointment/:id", auth(), async (req, res) => {
     try {
         const { id } = req.params;
-        const appointment = await Appoitment.findByIdAndDelete(id);
+        const appointment = await Appoitment.findById(id);
         if (!appointment) {
-            res.status(404).json({ message: "Appointment not found" });
+            return res.status(404).json({ message: "Appointment not found" });
+        }
+        const isOwner = appointment.user?.toString() === req.user.id;
+        const isAdmin = req.user.role === "admin";
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ message: "Access denied." });
+        }
+        await Appoitment.findByIdAndDelete(id);
+        return res.status(200).json({ message: "Appointment deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// RESTful cancel/delete: DELETE /appointments/:id
+// - Users cancel their own (status -> cancelled)
+// - Admins may hard-delete
+router.delete("/:id", auth(), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const appointment = await Appoitment.findById(id);
+        if (!appointment) {
+            return res.status(404).json({ message: "Appointment not found" });
+        }
+        const isOwner = appointment.user?.toString() === req.user.id;
+        const isAdmin = req.user.role === "admin";
+
+        if (isAdmin) {
+            await Appoitment.findByIdAndDelete(id);
+            return res.json({ message: "Appointment removed by admin" });
+        }
+
+        if (!isOwner) {
+            return res.status(403).json({ message: "Access denied." });
+        }
+
+        // User cancel -> set status
+        if (["approved", "pending"].includes(appointment.status)) {
+            appointment.status = "cancelled";
+            await appointment.save();
+            const populated = await Appoitment.findById(appointment._id)
+                .populate("doctor")
+                .populate("user", "name email");
+            return res.json(populated);
         } else {
-            res.status(200).json({ message: "Appointment deleted successfully" });
+            // For rejected/cancelled/completed allow hard delete by owner if desired
+            await Appoitment.findByIdAndDelete(id);
+            return res.json({ message: "Appointment removed" });
         }
     } catch (error) {
         console.error(error);
@@ -146,19 +215,19 @@ router.post("/deleteAppointment/:id", auth(), async (req, res) => {
     }
 });
 
-// ✅ Update Appointment Status & Time (ADMIN & ASSIGNED DOCTOR)
+// Update Appointment Status & Time (ADMIN & ASSIGNED DOCTOR)
 router.put("/:id/status", auth(), async (req, res) => {
     try {
         const { id } = req.params;
         const { status, time, date } = req.body;
         const isAdmin = req.user.role === "admin";
         const isDoctor = req.user.role === "doctor";
-        
+
         if (!isAdmin && !isDoctor) {
             return res.status(403).json({ message: "Access denied." });
         }
-        
-        if (status && !['pending', 'approved', 'rejected'].includes(status)) {
+
+        if (status && !ALL_STATUSES.includes(status)) {
             return res.status(400).json({ message: "Invalid status" });
         }
 
@@ -167,7 +236,7 @@ router.put("/:id/status", auth(), async (req, res) => {
             return res.status(404).json({ message: "Appointment not found" });
         }
 
-        // Security Check: doctor must be explicitly assigned via doctorId
+        // Doctor ownership
         if (isDoctor && appointment.doctorId?.toString() !== req.user.id) {
             return res.status(403).json({ message: "Access denied. You are not assigned to this appointment." });
         }
@@ -186,7 +255,7 @@ router.put("/:id/status", auth(), async (req, res) => {
         const nextStatus = status || appointment.status;
 
         // Prevent double booking for active appointments.
-        if (nextStatus !== "rejected" && nextTime) {
+        if (nextStatus !== "rejected" && nextStatus !== "cancelled" && nextTime) {
             const conflictExists = await hasDoctorConflict({
                 appointmentId: id,
                 doctorId: appointment.doctorId,
@@ -213,17 +282,17 @@ router.put("/:id/status", auth(), async (req, res) => {
             appointment.status = status;
         }
 
-        // Rescheduling requires re-confirmation by default.
+        // Rescheduling requires re-confirmation by default if status not provided.
         if (isRescheduling && !status) {
             appointment.status = "pending";
         }
-        
+
         const updatedAppointment = await appointment.save();
-        
+
         const populated = await Appoitment.findById(updatedAppointment._id)
             .populate("doctor")
             .populate("user", "name email");
-        
+
         res.json(populated);
     } catch (error) {
         console.error("Error updating appointment:", error);
@@ -231,7 +300,7 @@ router.put("/:id/status", auth(), async (req, res) => {
     }
 });
 
-// ✅ Get Doctor's Appointments (DOCTOR ONLY)
+// Doctor: list appointments
 router.get("/doctor", auth("doctor"), async (req, res) => {
     try {
         const doctorDoc = await getDoctorProfileForUser(req.user.id);
@@ -252,6 +321,25 @@ router.get("/doctor", auth("doctor"), async (req, res) => {
         console.error("Error fetching doctor appointments:", error);
         res.status(500).json({ message: "Server error" });
     }
+});
+
+// Alias: GET /doctor/appointments
+router.get("/doctor/appointments", auth("doctor"), async (req, res) => {
+    return router.handle({ ...req, url: "/doctor", method: "GET" }, res);
+});
+
+// Doctor: approve
+router.put("/doctor/appointments/:id/approve", auth("doctor"), async (req, res) => {
+    req.params = req.params || {};
+    req.body = { ...req.body, status: "approved" };
+    return router.handle({ ...req, url: `/${req.params.id}/status`, method: "PUT" }, res);
+});
+
+// Doctor: reject
+router.put("/doctor/appointments/:id/reject", auth("doctor"), async (req, res) => {
+    req.params = req.params || {};
+    req.body = { ...req.body, status: "rejected" };
+    return router.handle({ ...req, url: `/${req.params.id}/status`, method: "PUT" }, res);
 });
 
 export default router;

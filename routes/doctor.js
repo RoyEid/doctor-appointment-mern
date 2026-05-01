@@ -15,13 +15,14 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        const ext = path.extname(file.originalname); // Get file extension
+        const ext = path.extname(file.originalname);
         cb(null, file.fieldname + "-" + uniqueSuffix + ext);
     },
 });
 
 const upload = multer({ storage });
 
+// Doctor self profile update
 router.put("/update-profile", auth("doctor"), upload.single("image"), async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -79,7 +80,17 @@ router.put("/update-profile", auth("doctor"), upload.single("image"), async (req
     }
 });
 
+// Admin: create doctor (alias) -> /admin/create-doctor
+router.post("/admin/create-doctor", auth("admin"), upload.single("image"), async (req, res) => {
+    return createDoctorHandler(req, res);
+});
+
+// Legacy admin: /addDoctors (compat)
 router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, res) => {
+    return createDoctorHandler(req, res);
+});
+
+async function createDoctorHandler(req, res) {
     try {
         const { name, specialty, description, experienceYears, email, password } = req.body;
         const normalizedEmail = email?.trim().toLowerCase();
@@ -88,16 +99,13 @@ router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, re
             return res.status(400).json({ message: "name, email, password and specialty are required" });
         }
 
-        // 1. Check if user already exists
         const userExist = await User.findOne({ email: normalizedEmail });
         if (userExist) {
             return res.status(400).json({ message: "A user with this email already exists" });
         }
 
-        // 2. Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. Create User account
         const newUser = await User.create({
             name,
             email: normalizedEmail,
@@ -105,7 +113,6 @@ router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, re
             role: "doctor"
         });
 
-        // 4. Create Doctor linked to User
         const newDoctor = new Doctor({
             name,
             specialty,
@@ -140,9 +147,16 @@ router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, re
         console.error("Error adding doctor:", error);
         res.status(500).json({ message: error.message || "Server error" });
     }
+}
+
+// Public list
+router.get("/allDoctors", async (req, res) => {
+    const doctors = await Doctor.find();
+    res.json(doctors);
 });
 
-router.get("/allDoctors", async (req, res) => {
+// Admin list (alias) -> /admin/doctors
+router.get("/admin/doctors", auth("admin"), async (req, res) => {
     const doctors = await Doctor.find();
     res.json(doctors);
 });
@@ -159,18 +173,15 @@ router.get("/count", async (req, res) => {
 router.get("/doctors/byspecialty/:specialty", async (req, res) => {
     try {
         const { specialty } = req.params;
-        console.log('Searching for specialty', specialty)
         const doctors = await Doctor.find({
             specialty: { $regex: new RegExp(specialty, "i") }
         })
-        console.log('Found doctors', doctors.length);
         res.json(doctors);
     } catch (error) {
         console.error("error", error)
         res.status(500).json({ message: error.message })
     }
 })
-
 
 router.get("/:id", async (req, res) => {
     const doctor = await Doctor.findById(req.params.id);
@@ -180,7 +191,7 @@ router.get("/:id", async (req, res) => {
     res.json(doctor);
 });
 
-// ✅ Delete Doctor (ADMIN ONLY)
+// Delete Doctor (ADMIN ONLY) legacy
 router.delete("/:id", auth("admin"), async (req, res) => {
     try {
         const deletedDoctor = await Doctor.findByIdAndDelete(req.params.id);
@@ -194,22 +205,36 @@ router.delete("/:id", auth("admin"), async (req, res) => {
     }
 });
 
-// ✅ Update Doctor (ADMIN ONLY)
+// Admin alias delete -> /admin/doctors/:id
+router.delete("/admin/doctors/:id", auth("admin"), async (req, res) => {
+    try {
+        const deletedDoctor = await Doctor.findByIdAndDelete(req.params.id);
+        if (!deletedDoctor) {
+            return res.status(404).json({ message: "Doctor not found" });
+        }
+        res.json({ message: "Doctor deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting doctor:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Update Doctor (ADMIN ONLY)
 router.put("/:id", auth("admin"), upload.single("image"), async (req, res) => {
     try {
         const { name, specialty, experienceYears, description } = req.body;
         const updateData = { name, specialty, experienceYears, description };
-        
+
         if (req.file) {
             updateData.image = req.file.filename;
         }
 
         const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, updateData, { new: true });
-        
+
         if (!updatedDoctor) {
             return res.status(404).json({ message: "Doctor not found" });
         }
-        
+
         res.json(updatedDoctor);
     } catch (error) {
         console.error("Error updating doctor:", error);
@@ -217,7 +242,7 @@ router.put("/:id", auth("admin"), upload.single("image"), async (req, res) => {
     }
 });
 
-// ✅ Update Availability (DOCTOR ONLY)
+// Update Availability (DOCTOR ONLY)
 router.put("/availability", auth("doctor"), async (req, res) => {
     try {
         const { availableSlots } = req.body;
