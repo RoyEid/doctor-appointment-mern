@@ -1,34 +1,4 @@
-# Dependencies (installed packages)
 node_modules/
-
-# Environment variables (secrets like DB URI, JWT)
 .env
-.env.local
-.env.*.local
-
-# Logs (auto-generated error logs)
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# OS-generated files (not related to project)
-.DS_Store
-Thumbs.db
-
-# Build outputs (generated files)
-dist/
-build/
-
-# IDE/editor settings (personal configs)
-.vscode/
-.idea/
-
-# Test coverage reports
-coverage/
-
-# Uploaded files (images/files from users)
-uploads/
-
-# VS Code history extension (junk files)
-.history/
+frontend/node_modules/
+frontend/build/
