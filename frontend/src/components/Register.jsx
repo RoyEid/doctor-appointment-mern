@@ -170,7 +170,7 @@ function Register() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors !bg-transparent !p-0 !border-none"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -229,7 +229,7 @@ function Register() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors !bg-transparent !p-0 !border-none"
                 aria-label={showConfirmPassword ? "Hide password" : "Show password"}
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
