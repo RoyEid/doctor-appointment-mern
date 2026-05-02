@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiConfig } from "../config/api";
+import { Stethoscope, Hospital, FlaskConical, Award } from "lucide-react";
 
 function Stats() {
   const [doctorsCount, setDoctorsCount] = useState(0);
@@ -31,25 +32,25 @@ function Stats() {
 
   const stats = [
     {
-      icon: "fas fa-user-md",
+      icon: <Stethoscope size={40} />,
       count: doctorsCount,
       label: "Doctors",
     },
 
     {
-      icon: "far fa-hospital",
+      icon: <Hospital size={40} />,
       count: departmentsCount,
       label: "Departments",
     },
 
     {
-      icon: "fas fa-flask",
+      icon: <FlaskConical size={40} />,
       count: 8,
       label: "Research Labs",
     },
 
     {
-      icon: "fas fa-award",
+      icon: <Award size={40} />,
       count: 150,
       label: "Awards",
     },
@@ -64,7 +65,9 @@ function Stats() {
               key={index}
             >
               <div className="bg-white p-4 rounded-full group-hover:bg-[#007a85] transition-colors duration-300 inline-block shadow-sm">
-                <i className={`${item.icon} text-[#46daea] text-4xl group-hover:text-white transition-colors duration-300`}></i>
+                <div className="text-[#46daea] group-hover:text-white transition-colors duration-300">
+                  {item.icon}
+                </div>
               </div>
 
               <div>
