@@ -13,6 +13,20 @@ const router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Get doctor self profile
+router.get("/me", auth("doctor"), async (req, res) => {
+    try {
+        const doctor = await getDoctorProfileForUser(req.user.id);
+        if (!doctor) {
+            return res.status(404).json({ message: "Doctor profile not found" });
+        }
+        res.json(doctor);
+    } catch (error) {
+        console.error("Error fetching doctor profile:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Doctor self profile update
 router.put("/update-profile", auth("doctor"), upload.single("image"), async (req, res) => {
     try {
