@@ -34,8 +34,9 @@ export const apiConfig = {
 
     // Image upload helper
     getDoctorImage: (image) => {
-        if (!image) return "/img/doctors/avatar.png";
+        if (!image) return "/default-doctor.png";
         if (image.startsWith("http")) return image;
+        if (image.startsWith("/")) return image;
         return `${API_BASE_URL}/uploads/${image}`;
     },
 };

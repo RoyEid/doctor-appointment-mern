@@ -7,11 +7,11 @@ import User from "../models/UserSchema.js";
 import bcrypt from "bcryptjs";
 import { getDoctorProfileForUser } from "../utils/doctorAccess.js";
 
-import { storage } from "../config/cloudinary.js";
+import imagekit from "../config/imagekit.js";
 
 const router = express.Router();
 
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Doctor self profile update
 router.put("/update-profile", auth("doctor"), upload.single("image"), async (req, res) => {
@@ -46,7 +46,12 @@ router.put("/update-profile", auth("doctor"), upload.single("image"), async (req
         }
 
         if (req.file) {
-            doctor.image = req.file.path;
+            const uploadResponse = await imagekit.upload({
+                file: req.file.buffer,
+                fileName: `${Date.now()}-${req.file.originalname}`,
+                folder: "/doctors",
+            });
+            doctor.image = uploadResponse.url;
         }
 
         await user.save();
@@ -104,12 +109,22 @@ async function createDoctorHandler(req, res) {
             role: "doctor"
         });
 
+        let imageUrl = null;
+        if (req.file) {
+            const uploadResponse = await imagekit.upload({
+                file: req.file.buffer,
+                fileName: `${Date.now()}-${req.file.originalname}`,
+                folder: "/doctors",
+            });
+            imageUrl = uploadResponse.url;
+        }
+
         const newDoctor = new Doctor({
             name,
             specialty,
             description,
             experienceYears,
-            image: req.file ? req.file.path : null,
+            image: imageUrl,
             userId: newUser._id
         });
 
@@ -217,7 +232,12 @@ router.put("/:id", auth("admin"), upload.single("image"), async (req, res) => {
         const updateData = { name, specialty, experienceYears, description };
 
         if (req.file) {
-            updateData.image = req.file.path;
+            const uploadResponse = await imagekit.upload({
+                file: req.file.buffer,
+                fileName: `${Date.now()}-${req.file.originalname}`,
+                folder: "/doctors",
+            });
+            updateData.image = uploadResponse.url;
         }
 
         const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, updateData, { new: true });
