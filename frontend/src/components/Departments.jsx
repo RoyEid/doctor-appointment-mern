@@ -2,7 +2,8 @@ import { useEffect, useState, useContext } from "react";
 import { apiConfig } from "../config/api";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
-import { Trash2, Info } from "lucide-react";
+import { Trash2, Info, PlusCircle } from "lucide-react";
+
 
 function Departments() {
   const { user } = useContext(AuthContext);
