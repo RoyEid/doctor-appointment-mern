@@ -10,6 +10,15 @@ router.post("/register", async (req,res)=>{
     if(!name || !email || !password)
          return res.status(400).json({ message: "All fields are required" });
 
+    // Password validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters and include uppercase, lowercase, and a number."
+        });
+    }
+
     const userExist = await User.findOne({email})
     if(userExist) return res.status(400).json({message:"User already exists"})
 
