@@ -17,6 +17,19 @@ A full-stack MERN application for booking doctor appointments with user, doctor,
 
 ---
 
+## 🔑 Demo Credentials
+
+Use the following account to test the admin dashboard:
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| Admin | `admin@test.com` | `admin123` |
+
+> [!NOTE]
+> This account is for demo purposes only.
+
+---
+
 ## 📖 Overview
 
 The **Doctor Appointment MERN App** is a comprehensive healthcare management platform. It allows patients to easily find doctors by department, book appointments, and track their consultation history. 
