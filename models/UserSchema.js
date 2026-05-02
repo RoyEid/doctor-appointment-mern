@@ -17,14 +17,24 @@ const UserSchema = new mongoose.Schema({
 
         password: {
         type: String,
-         required: true,
-
+         required: function() { return this.authProvider === "local"; }
        } ,
 
        role: {
         type: String,
         enum: ["user", "admin", "doctor"],
         default: "user"
+       },
+
+       authProvider: {
+        type: String,
+        enum: ["local", "google"],
+        default: "local"
+       },
+
+       googleId: {
+        type: String,
+        default: null
        },
 
        // Optional doctor profile fields (single User model for auth)

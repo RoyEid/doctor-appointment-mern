@@ -1,9 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiConfig } from "../config/api";
 import { Check, Circle, X, Eye, EyeOff } from "lucide-react";
+import { GoogleLogin } from '@react-oauth/google';
+import { AuthContext } from "../context/AuthContext";
 
 function Register() {
+  const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ 
     email: "", 
     password: "", 
@@ -16,6 +19,25 @@ function Register() {
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await fetch(apiConfig.googleLogin, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        login(data.token, data.user);
+        navigate("/");
+      } else {
+        setError(data.message || "Google registration failed");
+      }
+    } catch (err) {
+      setError("Google registration failed");
+    }
+  };
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -279,6 +301,25 @@ function Register() {
         >
           {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
         </button>
+
+        <div className="relative my-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500 uppercase tracking-wider text-[10px] font-bold">Or join with</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google Registration Failed")}
+            theme="filled_blue"
+            shape="pill"
+            width="100%"
+          />
+        </div>
       </form>
       
       <style jsx>{`

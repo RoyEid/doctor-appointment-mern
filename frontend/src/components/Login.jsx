@@ -2,12 +2,32 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { apiConfig } from "../config/api";
+import { GoogleLogin } from '@react-oauth/google';
 
 function Login() {
   const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await fetch(apiConfig.googleLogin, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        login(data.token, data.user);
+        navigate("/");
+      } else {
+        setError(data.message || "Google login failed");
+      }
+    } catch (err) {
+      setError("Google login failed");
+    }
+  };
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -87,6 +107,25 @@ function Login() {
         <button className="w-full mt-8 py-3.5 rounded-lg bg-[#008e9b] text-white font-bold tracking-wide hover:bg-[#007a85] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008e9b] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
           Login securely
         </button>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500 uppercase tracking-wider text-[10px] font-bold">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google Login Failed")}
+            theme="filled_blue"
+            shape="pill"
+            width="100%"
+          />
+        </div>
       </form>
     </div>
   );
