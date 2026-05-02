@@ -1,11 +1,9 @@
-import { useContext, useState, useMemo } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiConfig } from "../config/api";
 import { Check, Circle, X, Eye, EyeOff } from "lucide-react";
 
 function Register() {
-  const { login } = useContext(AuthContext);
   const [form, setForm] = useState({ 
     email: "", 
     password: "", 
@@ -15,6 +13,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -63,6 +62,7 @@ function Register() {
 
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       // Send only name, email, and password to the backend
@@ -75,9 +75,11 @@ function Register() {
       
       const data = await res.json();
       
-      if (res.ok && data.token) {
-        login(data.token, data.user);
-        navigate("/");
+      if (res.ok) {
+        setSuccess("Account created successfully. Please login.");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       } else {
         setError(data.message || "Registration failed. Please try again.");
       }
@@ -119,6 +121,12 @@ function Register() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm text-center animate-shake font-medium">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl mb-6 text-sm text-center font-medium animate-fadeIn">
+            {success}
           </div>
         )}
 

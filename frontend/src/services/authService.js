@@ -20,7 +20,6 @@ const tryPost = async (paths, segment, payload) => {
 
 export const register = async (payload) => {
   const data = await tryPost(AUTH_PREFIXES, "register", payload);
-  if (data?.token) localStorage.setItem("token", data.token);
   return data;
 };
 
