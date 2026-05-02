@@ -13,7 +13,8 @@ function AddDoctor() {
        navigate("/");
     }
   }, [user, navigate]);
-  const [preview, setPreview] = useState(null);
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState("./img/doctors/avatar.png");
 
   const [error, setError] = useState(null);
   const [createdCredentials, setCreatedCredentials] = useState(null);
@@ -24,19 +25,19 @@ function AddDoctor() {
     specialty: "",
     experienceYears: "",
     description: "",
-    image: null,
   });
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
 
-    if (files) {
-      const file = files[0];
-      setForm({ ...form, image: file });
-      setPreview(URL.createObjectURL(file));
-    } else {
-      setForm({ ...form, [name]: value });
-    }
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -53,7 +54,7 @@ function AddDoctor() {
       formData.append("specialty", form.specialty);
       formData.append("experienceYears", form.experienceYears);
       formData.append("description", form.description);
-      if (form.image) formData.append("image", form.image);
+      if (image) formData.append("image", image);
 
       const res = await fetch(apiConfig.addDoctor, {
         method: "POST",
@@ -83,7 +84,8 @@ function AddDoctor() {
         description: "",
         image: null,
       });
-      setPreview(null);
+      setPreview("./img/doctors/avatar.png");
+      setImage(null);
     } catch (error) {
       console.error("Error submitting form", error);
       setError(error.message);
@@ -116,19 +118,11 @@ function AddDoctor() {
       >
         <div className="flex flex-col items-center w-full md:w-1/3 space-y-4">
           <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-300">
-            {preview ? (
-              <img
-                src={preview}
-                alt="preview"
-                className="object-cover w-full h-full"
-              />
-            ) : (
-              <img
-                src="./img/doctors/avatar.png"
-                alt="Default avatar"
-                className="object-cover w-full h-full"
-              />
-            )}
+            <img
+              src={preview}
+              alt="Doctor preview"
+              className="object-cover w-full h-full"
+            />
           </div>
           <button
             type="button"
@@ -139,7 +133,7 @@ function AddDoctor() {
           </button>
           <input
             id="fileInput"
-            onChange={handleChange}
+            onChange={handleImageChange}
             type="file"
             accept="image/*"
             className="hidden"
