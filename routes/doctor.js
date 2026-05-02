@@ -56,6 +56,13 @@ router.put("/update-profile", auth("doctor"), upload.single("image"), async (req
         }
 
         if (password) {
+            // Password validation
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                return res.status(400).json({
+                    message: "Password must be at least 8 characters and include uppercase, lowercase, and a number."
+                });
+            }
             user.password = await bcrypt.hash(password, 10);
         }
 
