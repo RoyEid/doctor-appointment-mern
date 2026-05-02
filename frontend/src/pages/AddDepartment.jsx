@@ -2,26 +2,31 @@ import { useState, useContext, useEffect } from "react";
 import { apiConfig } from "../config/api";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Loader2, PlusCircle } from "lucide-react";
 
 function AddDepartment() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user && user.role !== "admin") {
-       navigate("/");
-    }
-  }, [user, navigate]);
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+      toast.error("Unauthorized access");
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("You must be logged in as admin");
+      toast.error("Session expired. Please login again.");
       return;
     }
 
@@ -30,82 +35,104 @@ function AddDepartment() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // 🔥 REQUIRED
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ name, description }),
       });
 
       const data = await res.json();
 
-      if (res.ok) {
-        alert("Department added successfully!");
+      if (res.ok && data.success) {
+        toast.success(data.message || "Department added successfully!");
         setName("");
         setDescription("");
+        // Navigate back to departments or dashboard after a short delay
+        setTimeout(() => navigate("/"), 2000);
       } else {
-        alert(data.message || "Error adding department");
+        toast.error(data.message || "Error adding department");
       }
     } catch (err) {
       console.error(err);
-      alert("Network error");
+      toast.error("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   if (!user || user.role !== "admin") {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center border border-gray-100">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-6">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
-          <p className="text-gray-600 mb-6 font-medium">Only administrators can add departments to the system.</p>
-        </div>
-      </div>
-    );
+    return null; // The useEffect handles redirection
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100"
-      >
-        <h2 className="text-2xl sm:text-3xl font-extrabold mb-8 text-center text-gray-800">Add Department</h2>
-
-        <div className="space-y-5">
-          <div>
-            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Department Name</label>
-            <input
-              type="text"
-              placeholder="E.g. Cardiology"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
-              required
-            />
+    <div className="flex justify-center items-center min-h-[calc(100vh-80px)] bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-lg">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 overflow-hidden relative">
+          {/* Decorative element */}
+          <div className="absolute top-0 left-0 w-full h-2 bg-[#008e9b]"></div>
+          
+          <div className="flex items-center gap-3 mb-8">
+            <PlusCircle className="text-[#008e9b]" size={32} />
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-800">Add Department</h2>
           </div>
 
-          <div>
-            <label className="block mb-1.5 text-sm font-semibold text-gray-700">Description</label>
-            <textarea
-              placeholder="A brief description of this department..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 resize-none"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block mb-2 text-sm font-semibold text-gray-700">Department Name</label>
+              <input
+                type="text"
+                placeholder="E.g. Cardiology"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-semibold text-gray-700">Description</label>
+              <textarea
+                placeholder="Describe the medical services provided by this department..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+                className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800 resize-none"
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="pt-4 flex gap-4">
+              <button
+                type="button"
+                onClick={() => navigate("/")}
+                className="flex-1 py-3.5 rounded-xl border border-gray-300 text-gray-600 font-bold hover:bg-gray-50 transition-all duration-300"
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-[2] py-3.5 rounded-xl bg-[#008e9b] text-white font-bold tracking-wide hover:bg-[#007a85] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008e9b] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    Processing...
+                  </>
+                ) : (
+                  "Create Department"
+                )}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <button
-          type="submit"
-          className="w-full py-3.5 mt-8 rounded-lg bg-[#008e9b] text-white font-bold tracking-wide hover:bg-[#007a85] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008e9b] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
-        >
-          Add Department
-        </button>
-      </form>
+        
+        <p className="mt-6 text-center text-gray-500 text-sm">
+          Departments created here will immediately appear on the homepage services section.
+        </p>
+      </div>
     </div>
   );
 }

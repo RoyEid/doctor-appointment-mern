@@ -35,6 +35,7 @@ function Navbar() {
     admin: [
       { to: "/admin/dashboard", label: "Dashboard" },
       { to: "/add-doctor", label: "Add Doctor" },
+      { to: "/add-department", label: "Add Department" },
       { to: "/admin/appointments", label: "Manage Appointments" },
     ],
   };

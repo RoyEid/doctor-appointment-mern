@@ -51,7 +51,7 @@ The **Doctor Appointment MERN App** is a comprehensive healthcare management pla
 ### 🛡️ Admin Features
 - **Admin Authentication:** Secure login for administrative access.
 - **Doctor Management:** Add new doctors to the system and update or remove existing ones.
-- **Department Management:** Create and organize medical departments.
+- **Department Management:** Add new medical departments and delete existing ones through a dedicated management interface.
 - **Appointment Oversight:** View all system appointments in a centralized list.
 - **Status Management:** Approve or reject appointment requests.
 - **Dashboard Statistics:** View high-level metrics of the platform's activity.

@@ -10,8 +10,20 @@ router.post("/addDepartment", auth("admin"), async (req, res) => {
   try {
     const { name, description } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ message: "Name is required" });
+    if (!name || !description) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Name and description are required" 
+      });
+    }
+
+    // Check for duplicates
+    const existingDepartment = await Departments.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+    if (existingDepartment) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "A department with this name already exists" 
+      });
     }
 
     const department = await Departments.create({
@@ -19,11 +31,15 @@ router.post("/addDepartment", auth("admin"), async (req, res) => {
       description,
     });
 
-    res.status(201).json(department);
+    res.status(201).json({
+      success: true,
+      message: "Department added successfully",
+      department
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error adding department:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
