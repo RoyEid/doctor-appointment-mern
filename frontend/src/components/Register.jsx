@@ -2,7 +2,7 @@ import { useContext, useState, useMemo } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { apiConfig } from "../config/api";
-import { Check, Circle, X } from "lucide-react";
+import { Check, Circle, X, Eye, EyeOff } from "lucide-react";
 
 function Register() {
   const { login } = useContext(AuthContext);
@@ -12,6 +12,8 @@ function Register() {
     confirmPassword: "", 
     name: "" 
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -155,15 +157,25 @@ function Register() {
             <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
               Password
             </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full p-3.5 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
 
             {/* Password Strength Bar */}
             <div className="mt-3 px-1">
@@ -198,21 +210,31 @@ function Register() {
             <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
               Confirm Password
             </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="••••••••"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              className={`w-full p-3.5 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800 ${
-                form.confirmPassword === "" 
-                  ? "border-gray-200 focus:ring-[#008e9b]" 
-                  : passwordsMatch 
-                    ? "border-green-200 focus:ring-green-500" 
-                    : "border-red-200 focus:ring-red-500"
-              }`}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="••••••••"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                className={`w-full p-3.5 pr-12 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800 ${
+                  form.confirmPassword === "" 
+                    ? "border-gray-200 focus:ring-[#008e9b]" 
+                    : passwordsMatch 
+                      ? "border-green-200 focus:ring-green-500" 
+                      : "border-red-200 focus:ring-red-500"
+                }`}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             {form.confirmPassword !== "" && (
               <div className="mt-1.5 ml-1 flex items-center gap-1.5 transition-all duration-300">
                 {passwordsMatch ? (
