@@ -7,18 +7,9 @@ import User from "../models/UserSchema.js";
 import bcrypt from "bcryptjs";
 import { getDoctorProfileForUser } from "../utils/doctorAccess.js";
 
-const router = express.Router();
+import { storage } from "../config/cloudinary.js";
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "./uploads");
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        const ext = path.extname(file.originalname);
-        cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-    },
-});
+const router = express.Router();
 
 const upload = multer({ storage });
 
@@ -55,7 +46,7 @@ router.put("/update-profile", auth("doctor"), upload.single("image"), async (req
         }
 
         if (req.file) {
-            doctor.image = req.file.filename;
+            doctor.image = req.file.path;
         }
 
         await user.save();
@@ -118,7 +109,7 @@ async function createDoctorHandler(req, res) {
             specialty,
             description,
             experienceYears,
-            image: req.file ? req.file.filename : null,
+            image: req.file ? req.file.path : null,
             userId: newUser._id
         });
 
@@ -226,7 +217,7 @@ router.put("/:id", auth("admin"), upload.single("image"), async (req, res) => {
         const updateData = { name, specialty, experienceYears, description };
 
         if (req.file) {
-            updateData.image = req.file.filename;
+            updateData.image = req.file.path;
         }
 
         const updatedDoctor = await Doctor.findByIdAndUpdate(req.params.id, updateData, { new: true });

@@ -143,11 +143,7 @@ function MyAppointments() {
                     <img
                       alt={app?.doctor?.name || "Doctor"}
                       className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b]"
-                      src={
-                        app?.doctor?.image
-                          ? apiConfig.getImageUrl(app.doctor.image)
-                          : "/img/doctors/avatar.png"
-                      }
+                      src={apiConfig.getDoctorImage(app?.doctor?.image)}
                       onError={(e) => {
                         e.target.src = "/img/doctors/avatar.png";
                       }}

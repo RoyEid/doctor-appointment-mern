@@ -75,7 +75,7 @@ function AllDoctors() {
             )}
             <Link to={`/doctor/${doc._id}`} className="block">
               <img
-                src={apiConfig.getImageUrl(doc?.image)}
+                src={apiConfig.getDoctorImage(doc?.image)}
                 alt={doc?.name || "doctor"}
                 className="w-32 h-32 mx-auto rounded-full object-cover border mb-4"
               />

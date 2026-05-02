@@ -40,7 +40,7 @@ function EditDoctor() {
             image: null, // Image payload sits null until overwritten via the system
           });
           if (data.image) {
-            setPreview(apiConfig.getImageUrl(data.image));
+            setPreview(apiConfig.getDoctorImage(data.image));
           }
         }
       } catch (err) {

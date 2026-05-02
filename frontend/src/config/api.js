@@ -33,7 +33,11 @@ export const apiConfig = {
     deleteDepartment: (id) => `${API_BASE_URL}/departments/${id}`,
 
     // Image upload helper
-    getImageUrl: (filename) => `${API_BASE_URL}/uploads/${filename}`,
+    getDoctorImage: (image) => {
+        if (!image) return "/img/doctors/avatar.png";
+        if (image.startsWith("http")) return image;
+        return `${API_BASE_URL}/uploads/${image}`;
+    },
 };
 
 export default apiConfig;

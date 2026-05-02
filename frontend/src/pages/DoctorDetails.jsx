@@ -47,7 +47,7 @@ function DoctorDetails() {
         {/* Main Doctor Info */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 flex flex-col md:flex-row items-center md:items-start gap-8">
           <img
-            src={apiConfig.getImageUrl(doctor?.image)}
+            src={apiConfig.getDoctorImage(doctor?.image)}
             alt={doctor?.name || "doctor"}
             className="w-48 h-48 md:w-64 md:h-64 object-cover rounded-full md:rounded-2xl shadow-md border-4 border-white"
           />
@@ -81,7 +81,7 @@ function DoctorDetails() {
                 to={`/doctor/${doc?._id}`}
               >
                 <img
-                  src={apiConfig.getImageUrl(doc?.image)}
+                  src={apiConfig.getDoctorImage(doc?.image)}
                   alt={doc?.name || "doctor"}
                   className="w-16 h-16 rounded-full object-cover border-2 border-transparent group-hover:border-[#46daea] transition-colors mr-4 flex-shrink-0"
                 />
