@@ -23,3 +23,9 @@ button{
 button:hover{
   background: #43b0ba !important;
 }
+
+/* Hide default browser password reveal and clear buttons */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
