@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Slider from "react-slick";
 import carousel_1 from "../img/hero-carousel/hero-carousel-1.jpg";
 
@@ -6,6 +7,8 @@ import carousel_2 from "../img/hero-carousel/hero-carousel-2.jpg";
 import carousel_3 from "../img/hero-carousel/hero-carousel-3.jpg";
 
 function HeroSlider() {
+  const [activeSlide, setActiveSlide] = useState(0);
+
   const settings = {
     dots: true,
     infinite: true,
@@ -13,6 +16,7 @@ function HeroSlider() {
     autoplaySpeed: 5000,
     fade: true,
     arrows: false,
+    beforeChange: (current, next) => setActiveSlide(next),
   };
 
   const slides = [
@@ -54,6 +58,7 @@ function HeroSlider() {
 
               <a
                 href="#about"
+                tabIndex={index === activeSlide ? 0 : -1}
                 className="inline-block bg-[#46daea] bg-opacity-90 text-black font-bold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-lg hover:bg-[#43b0ba] hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
                 Read More
