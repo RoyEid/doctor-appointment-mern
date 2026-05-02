@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { apiConfig } from "../config/api";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
@@ -82,6 +83,18 @@ function Departments() {
             doctors dedicated to your health and well-being.
           </p>
         </div>
+        
+        {user?.role === "admin" && (
+          <div className="flex justify-center mb-10">
+            <Link
+              to="/add-department"
+              className="flex items-center gap-2 bg-[#008e9b] text-white font-bold px-8 py-3.5 rounded-full hover:bg-[#007a85] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <PlusCircle size={20} />
+              <span>Add Department</span>
+            </Link>
+          </div>
+        )}
 
         {departments.length === 0 ? (
           <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100 text-center">
