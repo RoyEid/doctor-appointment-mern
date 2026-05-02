@@ -89,11 +89,11 @@ function Register() {
   };
 
   const RuleItem = ({ valid, text }) => (
-    <div className={`flex items-center gap-2 text-xs font-medium transition-all duration-300 ${valid ? "text-green-600" : "text-gray-400"}`}>
+    <div className={`flex items-center gap-2 text-xs font-semibold transition-all duration-300 ${valid ? "text-green-600" : "text-gray-500"}`}>
       {valid ? (
         <Check size={14} className="stroke-[3px]" />
       ) : (
-        <Circle size={14} className="fill-gray-200 stroke-none" />
+        <Circle size={14} className="fill-gray-300 stroke-none" />
       )}
       <span>{text}</span>
     </div>
@@ -176,13 +176,21 @@ function Register() {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            <p className="text-[11px] text-gray-500 mt-1.5 ml-1 leading-tight font-medium">
+              Use at least 8 characters with uppercase, lowercase, and a number.
+            </p>
 
             {/* Password Strength Bar */}
-            <div className="mt-3 px-1">
+            <div className="mt-4 px-1">
               <div className="flex justify-between items-end mb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Strength</span>
-                <span className={`text-xs font-bold ${getStrengthLabel() === "Strong" ? "text-green-600" : "text-[#008e9b]"}`}>
-                  {getStrengthLabel()}
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Security Check</span>
+                <span className={`text-[11px] font-black uppercase ${
+                  strengthCount <= 1 ? "text-red-500" : 
+                  strengthCount === 2 ? "text-yellow-600" : 
+                  strengthCount === 3 ? "text-[#008e9b]" : 
+                  "text-green-600"
+                }`}>
+                  {form.password ? `Strength: ${getStrengthLabel()}` : ""}
                 </span>
               </div>
               <div className="grid grid-cols-4 gap-1.5">
@@ -190,7 +198,7 @@ function Register() {
                   <div
                     key={index}
                     className={`h-1.5 rounded-full transition-all duration-500 ${
-                      index <= strengthCount ? getStrengthColor() : "bg-gray-100"
+                      index <= strengthCount ? getStrengthColor() : "bg-gray-200"
                     }`}
                   />
                 ))}
