@@ -47,6 +47,7 @@ router.post("/google", async (req, res) => {
         );
 
         return res.status(200).json({
+            success: true,
             message: "Google login successful",
             token,
             user: {
@@ -57,8 +58,11 @@ router.post("/google", async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Google auth error:", error);
-        return res.status(400).json({ message: "Google authentication failed" });
+        console.error("GOOGLE_AUTH_ERROR:", error.message);
+        return res.status(400).json({ 
+            success: false,
+            message: "Google authentication failed. Please try again." 
+        });
     }
 });
 
