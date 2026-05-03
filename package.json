@@ -21,6 +21,7 @@
     "lucide-react": "^1.14.0",
     "mongoose": "^8.16.5",
     "multer": "^2.0.2",
+    "nodemailer": "^8.0.7",
     "nodemon": "^3.1.14"
   }
 }
