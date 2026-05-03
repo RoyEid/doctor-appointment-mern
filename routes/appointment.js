@@ -108,17 +108,23 @@ async function createAppointmentHandler(req, res) {
         .populate("doctor")
         .populate("user", "name email");
 
+    // Extract patient details
+    const patientEmail = populatedAppointment.user?.email;
+    const patientName = populatedAppointment.user?.name;
+
+    console.log(`EMAIL_DEBUG: appointment created, patient email = ${patientEmail || 'MISSING'}`);
+
     // Send confirmation email (non-blocking)
-    if (populatedAppointment.user && populatedAppointment.user.email) {
+    if (patientEmail) {
         setImmediate(async () => {
             try {
                 await sendEmail({
-                    to: populatedAppointment.user.email,
+                    to: patientEmail,
                     subject: "Appointment Request Submitted",
                     html: `
                         <div style="font-family: sans-serif; color: #333;">
                             <h2 style="color: #008e9b;">Appointment Request Submitted</h2>
-                            <p>Hello <strong>${populatedAppointment.user.name}</strong>,</p>
+                            <p>Hello <strong>${patientName}</strong>,</p>
                             <p>Your appointment request has been successfully submitted and is currently <strong>pending</strong> review.</p>
                             <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
                                 <p style="margin: 5px 0;"><strong>Doctor:</strong> Dr. ${populatedAppointment.doctor?.name || "N/A"}</p>
@@ -130,13 +136,13 @@ async function createAppointmentHandler(req, res) {
                         </div>
                     `
                 });
-                console.log("EMAIL_SENT: appointment request submitted");
+                console.log(`EMAIL_SENT: appointment submitted to ${patientEmail}`);
             } catch (emailError) {
-                console.error("EMAIL_ERROR (SUBMITTED):", emailError.message);
+                console.error(`EMAIL_ERROR: appointment submitted ${emailError.message}`);
             }
         });
     } else {
-        console.warn("EMAIL_SKIPPED: missing user email");
+        console.warn("EMAIL_SKIPPED: missing patient email for appointment creation");
     }
 
     res.status(201).json(populatedAppointment);
@@ -326,21 +332,25 @@ router.put("/:id/status", auth(), async (req, res) => {
             .populate("doctor")
             .populate("user", "name email");
 
-        // Send status update email if approved or rejected (non-blocking)
+        const patientEmail = populated.user?.email;
+        const patientName = populated.user?.name;
+
         if (status === "approved" || status === "rejected") {
-            if (populated.user && populated.user.email) {
+            console.log(`EMAIL_DEBUG: appointment status updated to ${status}, patient email = ${patientEmail || 'MISSING'}`);
+            
+            if (patientEmail) {
                 setImmediate(async () => {
                     try {
                         const isApproved = status === "approved";
                         await sendEmail({
-                            to: populated.user.email,
+                            to: patientEmail,
                             subject: isApproved ? "Appointment Approved" : "Appointment Rejected",
                             html: `
                                 <div style="font-family: sans-serif; color: #333;">
                                     <h2 style="color: ${isApproved ? "#28a745" : "#dc3545"};">
                                         Appointment ${isApproved ? "Approved" : "Rejected"}
                                     </h2>
-                                    <p>Hello <strong>${populated.user.name}</strong>,</p>
+                                    <p>Hello <strong>${patientName}</strong>,</p>
                                     <p>
                                         ${isApproved 
                                             ? "Good news! Your appointment has been <strong>approved</strong>." 
@@ -360,13 +370,13 @@ router.put("/:id/status", auth(), async (req, res) => {
                                 </div>
                             `
                         });
-                        console.log(`EMAIL_SENT: appointment ${status}`);
+                        console.log(`EMAIL_SENT: appointment ${status} to ${patientEmail}`);
                     } catch (emailError) {
-                        console.error(`EMAIL_ERROR (${status.toUpperCase()}):`, emailError.message);
+                        console.error(`EMAIL_ERROR: appointment status update ${emailError.message}`);
                     }
                 });
             } else {
-                console.warn("EMAIL_SKIPPED: missing user email");
+                console.warn("EMAIL_SKIPPED: missing patient email for appointment status update");
             }
         }
 
