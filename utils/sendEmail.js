@@ -1,4 +1,8 @@
 import nodemailer from "nodemailer";
+import dns from "dns";
+
+// Force IPv4 for DNS resolution to avoid Render IPv6 connection issues
+dns.setDefaultResultOrder("ipv4first");
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
