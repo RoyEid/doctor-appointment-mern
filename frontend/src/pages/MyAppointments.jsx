@@ -93,7 +93,33 @@ function MyAppointments() {
     }
   };
 
+  const handleRescheduleResponse = async (id, response) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(apiConfig.respondToReschedule(id), {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ response }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === id ? data : a))
+      );
+
+      toast.success(`Reschedule ${response === "accept" ? "accepted" : "rejected"}!`);
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   if (!user) return <AuthRequired />;
+
 
   if (loading) {
     return (
@@ -175,11 +201,30 @@ function MyAppointments() {
                             ? "bg-green-100 text-green-700"
                             : currentStatus === "rejected"
                               ? "bg-red-100 text-red-700"
-                              : "bg-yellow-100 text-yellow-700"
+                              : currentStatus === "reschedule_pending"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {currentStatus}
+                        {currentStatus === "reschedule_pending" ? "Reschedule Request" : currentStatus}
                       </span>
+
+                      {currentStatus === "reschedule_pending" && (
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => handleRescheduleResponse(app._id, "accept")}
+                            className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition"
+                          >
+                            Accept New Time
+                          </button>
+                          <button
+                            onClick={() => handleRescheduleResponse(app._id, "reject")}
+                            className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-lg shadow-sm transition"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -211,3 +256,4 @@ function MyAppointments() {
 }
 
 export default MyAppointments;
+

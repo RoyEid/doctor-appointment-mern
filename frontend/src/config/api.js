@@ -27,6 +27,8 @@ export const apiConfig = {
     getDoctorAppointments: `${API_BASE_URL}/appointments/doctor`,
     deleteAppointment: (id) => `${API_BASE_URL}/appointments/deleteAppointment/${id}`,
     updateAppointmentStatus: (id) => `${API_BASE_URL}/appointments/${id}/status`,
+    respondToReschedule: (id) => `${API_BASE_URL}/appointments/${id}/reschedule-response`,
+
 
     // Department endpoints
     getAllDepartments: `${API_BASE_URL}/departments/allDepartments`,
