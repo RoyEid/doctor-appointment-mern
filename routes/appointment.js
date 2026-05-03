@@ -108,32 +108,35 @@ async function createAppointmentHandler(req, res) {
         .populate("doctor")
         .populate("user", "name email");
 
-    // Send confirmation email
-    try {
-        if (populatedAppointment.user && populatedAppointment.user.email) {
-            await sendEmail({
-                to: populatedAppointment.user.email,
-                subject: "Appointment Request Submitted",
-                html: `
-                    <div style="font-family: sans-serif; color: #333;">
-                        <h2 style="color: #008e9b;">Appointment Request Submitted</h2>
-                        <p>Hello <strong>${populatedAppointment.user.name}</strong>,</p>
-                        <p>Your appointment request has been successfully submitted and is currently <strong>pending</strong> review.</p>
-                        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                            <p style="margin: 5px 0;"><strong>Doctor:</strong> Dr. ${populatedAppointment.doctor?.name || "N/A"}</p>
-                            <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(populatedAppointment.date).toDateString()}</p>
-                            <p style="margin: 5px 0;"><strong>Time:</strong> ${populatedAppointment.time}</p>
+    // Send confirmation email (non-blocking)
+    if (populatedAppointment.user && populatedAppointment.user.email) {
+        setImmediate(async () => {
+            try {
+                await sendEmail({
+                    to: populatedAppointment.user.email,
+                    subject: "Appointment Request Submitted",
+                    html: `
+                        <div style="font-family: sans-serif; color: #333;">
+                            <h2 style="color: #008e9b;">Appointment Request Submitted</h2>
+                            <p>Hello <strong>${populatedAppointment.user.name}</strong>,</p>
+                            <p>Your appointment request has been successfully submitted and is currently <strong>pending</strong> review.</p>
+                            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                                <p style="margin: 5px 0;"><strong>Doctor:</strong> Dr. ${populatedAppointment.doctor?.name || "N/A"}</p>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(populatedAppointment.date).toDateString()}</p>
+                                <p style="margin: 5px 0;"><strong>Time:</strong> ${populatedAppointment.time}</p>
+                            </div>
+                            <p>We will notify you once the status of your appointment changes.</p>
+                            <p>Best regards,<br/>MediCare Team</p>
                         </div>
-                        <p>We will notify you once the status of your appointment changes.</p>
-                        <p>Best regards,<br/>MediCare Team</p>
-                    </div>
-                `
-            });
-        } else {
-            console.warn("EMAIL_SKIPPED: No recipient email found for user.");
-        }
-    } catch (emailError) {
-        console.error("EMAIL_NOTIFICATION_ERROR (SUBMITTED):", emailError.message);
+                    `
+                });
+                console.log("EMAIL_SENT: appointment request submitted");
+            } catch (emailError) {
+                console.error("EMAIL_ERROR (SUBMITTED):", emailError.message);
+            }
+        });
+    } else {
+        console.warn("EMAIL_SKIPPED: missing user email");
     }
 
     res.status(201).json(populatedAppointment);
@@ -323,44 +326,47 @@ router.put("/:id/status", auth(), async (req, res) => {
             .populate("doctor")
             .populate("user", "name email");
 
-        // Send status update email if approved or rejected
+        // Send status update email if approved or rejected (non-blocking)
         if (status === "approved" || status === "rejected") {
-            try {
-                if (populated.user && populated.user.email) {
-                    const isApproved = status === "approved";
-                    await sendEmail({
-                        to: populated.user.email,
-                        subject: isApproved ? "Appointment Approved" : "Appointment Rejected",
-                        html: `
-                            <div style="font-family: sans-serif; color: #333;">
-                                <h2 style="color: ${isApproved ? "#28a745" : "#dc3545"};">
-                                    Appointment ${isApproved ? "Approved" : "Rejected"}
-                                </h2>
-                                <p>Hello <strong>${populated.user.name}</strong>,</p>
-                                <p>
-                                    ${isApproved 
-                                        ? "Good news! Your appointment has been <strong>approved</strong>." 
-                                        : "We regret to inform you that your appointment request has been <strong>rejected</strong>."}
-                                </p>
-                                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                                    <p style="margin: 5px 0;"><strong>Doctor:</strong> Dr. ${populated.doctor?.name || "N/A"}</p>
-                                    <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(populated.date).toDateString()}</p>
-                                    <p style="margin: 5px 0;"><strong>Time:</strong> ${populated.time}</p>
+            if (populated.user && populated.user.email) {
+                setImmediate(async () => {
+                    try {
+                        const isApproved = status === "approved";
+                        await sendEmail({
+                            to: populated.user.email,
+                            subject: isApproved ? "Appointment Approved" : "Appointment Rejected",
+                            html: `
+                                <div style="font-family: sans-serif; color: #333;">
+                                    <h2 style="color: ${isApproved ? "#28a745" : "#dc3545"};">
+                                        Appointment ${isApproved ? "Approved" : "Rejected"}
+                                    </h2>
+                                    <p>Hello <strong>${populated.user.name}</strong>,</p>
+                                    <p>
+                                        ${isApproved 
+                                            ? "Good news! Your appointment has been <strong>approved</strong>." 
+                                            : "We regret to inform you that your appointment request has been <strong>rejected</strong>."}
+                                    </p>
+                                    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                                        <p style="margin: 5px 0;"><strong>Doctor:</strong> Dr. ${populated.doctor?.name || "N/A"}</p>
+                                        <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(populated.date).toDateString()}</p>
+                                        <p style="margin: 5px 0;"><strong>Time:</strong> ${populated.time}</p>
+                                    </div>
+                                    <p>
+                                        ${isApproved 
+                                            ? "Please make sure to arrive 10 minutes early." 
+                                            : "If you have any questions, please contact the clinic."}
+                                    </p>
+                                    <p>Best regards,<br/>MediCare Team</p>
                                 </div>
-                                <p>
-                                    ${isApproved 
-                                        ? "Please make sure to arrive 10 minutes early." 
-                                        : "If you have any questions, please contact the clinic."}
-                                </p>
-                                <p>Best regards,<br/>MediCare Team</p>
-                            </div>
-                        `
-                    });
-                } else {
-                    console.warn(`EMAIL_SKIPPED: No recipient email found for user in ${status} update.`);
-                }
-            } catch (emailError) {
-                console.error(`EMAIL_NOTIFICATION_ERROR (${status.toUpperCase()}):`, emailError.message);
+                            `
+                        });
+                        console.log(`EMAIL_SENT: appointment ${status}`);
+                    } catch (emailError) {
+                        console.error(`EMAIL_ERROR (${status.toUpperCase()}):`, emailError.message);
+                    }
+                });
+            } else {
+                console.warn("EMAIL_SKIPPED: missing user email");
             }
         }
 

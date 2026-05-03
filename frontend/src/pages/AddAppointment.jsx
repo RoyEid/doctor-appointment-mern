@@ -22,6 +22,7 @@ function AddAppointment() {
     reason: "",
   });
   const [selectedDoctorSlots, setSelectedDoctorSlots] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (form.doctor && doctors.length > 0) {
@@ -53,11 +54,11 @@ function AddAppointment() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
-    console.log("Form data being sent:", form);
+    setSubmitting(true);
 
     const token = localStorage.getItem("token");
-    console.log("Token:", token);
 
     try {
       const res = await fetch(apiConfig.createAppointment, {
@@ -69,22 +70,20 @@ function AddAppointment() {
         body: JSON.stringify(form),
       });
 
-      console.log("Response status:", res.status);
-      console.log("Response ok:", res.ok);
-
       const data = await res.json();
-      console.log("Response data:", data);
 
       if (res.ok) {
         alert("Appointment added successfully!");
         setForm({ doctor: "", date: "", time: "", reason: "" });
+        navigate("/myAppointments"); // Redirect to list
       } else {
-        console.error("Error response:", data);
         alert(data.message || "Failed to add appointment");
       }
     } catch (error) {
       console.error("Network or parsing error:", error);
-      alert("Network error occurred. Check console for details.");
+      alert("Network error occurred.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -171,9 +170,14 @@ function AddAppointment() {
 
           <button
             type="submit"
-            className="w-full py-3.5 rounded-lg bg-[#008e9b] text-white font-bold tracking-wide hover:bg-[#007a85] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008e9b] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+            disabled={submitting}
+            className={`w-full py-3.5 rounded-lg text-white font-bold tracking-wide transition-all duration-300 transform shadow-md hover:shadow-lg ${
+              submitting 
+                ? "bg-gray-400 cursor-not-allowed translate-y-0" 
+                : "bg-[#008e9b] hover:bg-[#007a85] hover:-translate-y-0.5"
+            }`}
           >
-            Submit Request
+            {submitting ? "Submitting..." : "Submit Request"}
           </button>
         </div>
       </form>

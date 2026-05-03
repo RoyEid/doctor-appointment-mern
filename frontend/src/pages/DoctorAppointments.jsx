@@ -9,6 +9,7 @@ function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null); // Tracks button loading
   const [rescheduleForm, setRescheduleForm] = useState({ date: "", time: "" });
   const navigate = useNavigate();
 
@@ -59,6 +60,9 @@ function DoctorAppointments() {
   }, [fetchAppointments, user?.role]);
 
   const updateStatus = async (id, status) => {
+    if (updatingId) return;
+    setUpdatingId(id);
+
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(apiConfig.updateAppointmentStatus(id), {
@@ -86,6 +90,8 @@ function DoctorAppointments() {
     } catch (error) {
       console.error("Error updating appointment:", error);
       toast.error(error.message);
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -179,15 +185,21 @@ function DoctorAppointments() {
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                           <button
                             onClick={() => updateStatus(app._id, "approved")}
-                            className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm"
+                            disabled={updatingId === app._id}
+                            className={`w-full sm:w-auto text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm ${
+                              updatingId === app._id ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+                            }`}
                           >
-                            Approve
+                            {updatingId === app._id ? "..." : "Approve"}
                           </button>
                           <button
                             onClick={() => updateStatus(app._id, "rejected")}
-                            className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm"
+                            disabled={updatingId === app._id}
+                            className={`w-full sm:w-auto text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm ${
+                              updatingId === app._id ? "bg-gray-400" : "bg-red-500 hover:bg-red-600"
+                            }`}
                           >
-                            Reject
+                            {updatingId === app._id ? "..." : "Reject"}
                           </button>
                         </div>
                       )}
