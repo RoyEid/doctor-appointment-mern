@@ -1,29 +1,27 @@
-import { Resend } from 'resend';
+import * as Brevo from '@getbrevo/brevo';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiInstance = new Brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    console.log(`EMAIL_UTILITY_DEBUG: preparing email to ${to} via Resend`);
+    console.log(`EMAIL_UTILITY_DEBUG: preparing email to ${to}`);
     
-    const { data, error } = await resend.emails.send({
-      from: 'MediCare Appointments <onboarding@resend.dev>',
-      to,
-      subject,
-      html,
-    });
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
+    sendSmtpEmail.subject = subject;
+    sendSmtpEmail.htmlContent = html;
+    sendSmtpEmail.sender = { name: "MediCare Appointments", email: "doctor.appointment.notifications@gmail.com" };
+    sendSmtpEmail.to = [{ email: to }];
 
-    if (error) {
-      console.error("RESEND_ERROR:", error.message);
-      throw new Error(error.message);
-    }
+    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
 
-    console.log(`EMAIL_UTILITY_SENT: email sent to ${to}, id: ${data.id}`);
+    console.log(`EMAIL_UTILITY_SENT: email sent to ${to}`);
     return data;
   } catch (error) {
-    console.error("EMAIL_UTILITY_ERROR:", error.message);
+    console.error(`EMAIL_UTILITY_ERROR: ${error.message || error}`);
     throw error;
   }
 };
 
 export default sendEmail;
+

@@ -110,7 +110,7 @@ async function createAppointmentHandler(req, res) {
 
     // Extract patient details
     const patientEmail = populatedAppointment.user?.email;
-    const patientName = populatedAppointment.user?.name;
+    const patientName = populatedAppointment.user?.name || "Patient";
 
     console.log(`EMAIL_DEBUG: appointment created, patient email = ${patientEmail || 'MISSING'}`);
 
@@ -333,7 +333,7 @@ router.put("/:id/status", auth(), async (req, res) => {
             .populate("user", "name email");
 
         const patientEmail = populated.user?.email;
-        const patientName = populated.user?.name;
+        const patientName = populated.user?.name || "Patient";
 
         if (status === "approved" || status === "rejected") {
             console.log(`EMAIL_DEBUG: appointment status updated to ${status}, patient email = ${patientEmail || 'MISSING'}`);

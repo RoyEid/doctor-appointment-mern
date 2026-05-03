@@ -5,22 +5,23 @@
 
 
 
-*,body{
+*,
+body {
   font-family: roboto;
 }
 
 
-button{
+button {
   background: #46daea !important;
   padding: 15px;
-  color:black;
+  color: black;
   font-weight: bold;
   transition: ease-in-out 0.3s !important;
 
 
 }
 
-button:hover{
+button:hover {
   background: #43b0ba !important;
 }
 
