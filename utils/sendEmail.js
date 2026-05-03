@@ -1,35 +1,44 @@
-import SibApiV3Sdk from '@getbrevo/brevo';
+import { BrevoClient } from "@getbrevo/brevo";
 
 const sendEmail = async ({ to, subject, html }) => {
-  if (!process.env.BREVO_API_KEY) {
-    console.error("EMAIL_UTILITY_ERROR: BREVO_API_KEY is missing");
-    return;
-  }
-
   try {
+    if (!process.env.BREVO_API_KEY) {
+      console.error("EMAIL_UTILITY_ERROR: BREVO_API_KEY is missing");
+      return;
+    }
+
+    if (!to) {
+      console.warn("EMAIL_UTILITY_ERROR: missing recipient email");
+      return;
+    }
+
     console.log(`EMAIL_UTILITY_DEBUG: preparing email to ${to}`);
-    
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    apiInstance.authentications['apiKey'].apiKey = process.env.BREVO_API_KEY;
 
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendSmtpEmail.subject = subject;
-    sendSmtpEmail.htmlContent = html;
-    sendSmtpEmail.sender = { 
-      name: "MediCare Appointments", 
-      email: "doctor.appointment.notifications@gmail.com" 
-    };
-    sendSmtpEmail.to = [{ email: to }];
+    const client = new BrevoClient({
+      apiKey: process.env.BREVO_API_KEY,
+    });
 
-    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    const response = await client.transactionalEmails.sendTransacEmail({
+      sender: {
+        name: "MediCare Appointments",
+        email: "doctor.appointment.notifications@gmail.com",
+      },
+      to: [{ email: to }],
+      subject,
+      htmlContent: html,
+    });
 
     console.log(`EMAIL_UTILITY_SENT: email sent to ${to}`);
-    return data;
+    return response;
   } catch (error) {
-    console.error(`EMAIL_UTILITY_ERROR: ${error.message || error}`);
+    console.error(
+      "EMAIL_UTILITY_ERROR:",
+      error?.body?.message || error?.message || error
+    );
   }
 };
 
 export default sendEmail;
+
 
 
