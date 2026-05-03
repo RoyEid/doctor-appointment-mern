@@ -1,37 +1,25 @@
-import nodemailer from "nodemailer";
-import dns from "dns";
+import { Resend } from 'resend';
 
-// Force IPv4 for DNS resolution to avoid Render IPv6 connection issues
-dns.setDefaultResultOrder("ipv4first");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    console.log(`EMAIL_UTILITY_DEBUG: preparing email to ${to}`);
+    console.log(`EMAIL_UTILITY_DEBUG: preparing email to ${to} via Resend`);
     
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // TLS
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      family: 4, // Force IPv4 to avoid Render connection issues
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
-
-    const mailOptions = {
-      from: `"MediCare Appointments" <${process.env.EMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: 'MediCare Appointments <onboarding@resend.dev>',
       to,
       subject,
       html,
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`EMAIL_UTILITY_SENT: email sent to ${to}`);
-    return info;
+    if (error) {
+      console.error("RESEND_ERROR:", error.message);
+      throw new Error(error.message);
+    }
+
+    console.log(`EMAIL_UTILITY_SENT: email sent to ${to}, id: ${data.id}`);
+    return data;
   } catch (error) {
     console.error("EMAIL_UTILITY_ERROR:", error.message);
     throw error;
