@@ -12,10 +12,72 @@ const ALL_STATUSES = ["pending", "approved", "rejected", "cancelled", "completed
 const formatDoctorName = (name) => {
     if (!name) return "N/A";
     const cleanName = name.trim();
-    if (cleanName.startsWith("Dr.") || cleanName.startsWith("Dr ")) {
-        return cleanName;
-    }
+    const prefixes = ["Dr.", "Dr ", "Doctor"];
+    const hasPrefix = prefixes.some(p => cleanName.toLowerCase().startsWith(p.toLowerCase()));
+    if (hasPrefix) return cleanName;
     return `Dr. ${cleanName}`;
+};
+
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+const formatTime = (time) => {
+    if (!time) return "N/A";
+    try {
+        if (time.includes('AM') || time.includes('PM')) {
+            return `${time} (Lebanon time)`;
+        }
+        const [hours, minutes] = time.split(':');
+        const h = parseInt(hours);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const formattedHours = h % 12 || 12;
+        return `${formattedHours}:${minutes} ${ampm} (Lebanon time)`;
+    } catch (e) {
+        return `${time} (Lebanon time)`;
+    }
+};
+
+const getEmailHtml = ({ patientName, doctorName, date, time, status, statusColor, message, oldDateTime = null }) => {
+    return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+        <div style="background-color: #008e9b; padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">MediCare Appointments</h1>
+        </div>
+        <div style="padding: 30px;">
+            <p style="font-size: 18px;">Hello <strong>${patientName}</strong>,</p>
+            <p style="line-height: 1.6; font-size: 16px;">${message}</p>
+            
+            <div style="margin: 25px 0; text-align: center;">
+                <span style="background-color: ${statusColor}; color: white; padding: 8px 20px; border-radius: 50px; font-weight: bold; text-transform: uppercase; font-size: 14px;">
+                    ${status}
+                </span>
+            </div>
+
+            <div style="background: #f4fbfc; padding: 20px; border-radius: 8px; border-left: 5px solid #008e9b;">
+                <h3 style="margin-top: 0; color: #008e9b; border-bottom: 1px solid #d1eef0; padding-bottom: 10px;">Appointment Details</h3>
+                <p style="margin: 10px 0;"><strong>Doctor:</strong> ${doctorName}</p>
+                <p style="margin: 10px 0;"><strong>Date:</strong> ${date}</p>
+                <p style="margin: 10px 0;"><strong>Time:</strong> ${time}</p>
+                ${oldDateTime ? `<p style="margin: 10px 0; color: #666; font-size: 14px; border-top: 1px dashed #ccc; padding-top: 10px;"><strong>Previous schedule:</strong> ${oldDateTime}</p>` : ''}
+            </div>
+
+            <p style="margin-top: 30px; line-height: 1.6; color: #555;">
+                Thank you for choosing MediCare. We’re here to support your health journey.
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            <p style="font-size: 12px; color: #999; text-align: center;">
+                This is an automated message, please do not reply.
+            </p>
+        </div>
+    </div>
+    `;
 };
 
 
@@ -129,29 +191,25 @@ async function createAppointmentHandler(req, res) {
         setImmediate(async () => {
             try {
                 const formattedDocName = formatDoctorName(populatedAppointment.doctor?.name);
-                const appointmentDate = new Date(populatedAppointment.date).toDateString();
-                const appointmentTime = populatedAppointment.time;
+                const appDateFormatted = formatDate(populatedAppointment.date);
+                const appTimeFormatted = formatTime(populatedAppointment.time);
 
                 await sendEmail({
                     to: patientEmail,
-                    subject: `Appointment Request Submitted - ${formattedDocName} - ${appointmentDate} ${appointmentTime}`,
-                    html: `
-                        <div style="font-family: sans-serif; color: #333;">
-                            <h2 style="color: #008e9b;">Appointment Request Submitted</h2>
-                            <p>Hello <strong>${patientName}</strong>,</p>
-                            <p>Your appointment request has been successfully submitted and is currently <strong>pending</strong> review.</p>
-                            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                                <p style="margin: 5px 0;"><strong>Doctor:</strong> ${formattedDocName}</p>
-                                <p style="margin: 5px 0;"><strong>Date:</strong> ${appointmentDate}</p>
-                                <p style="margin: 5px 0;"><strong>Time:</strong> ${appointmentTime}</p>
-                            </div>
-                            <p>We will notify you once the status of your appointment changes.</p>
-                            <p>Best regards,<br/>MediCare Team</p>
-                        </div>
-                    `
+                    subject: `Appointment Request Submitted - ${formattedDocName} - ${appDateFormatted} ${appTimeFormatted}`,
+                    html: getEmailHtml({
+                        patientName,
+                        doctorName: formattedDocName,
+                        date: appDateFormatted,
+                        time: appTimeFormatted,
+                        status: "Pending Review",
+                        statusColor: "#008e9b",
+                        message: "Your appointment request has been successfully submitted and is currently <strong>pending</strong> review. We will notify you once the status changes."
+                    })
                 });
 
                 console.log(`EMAIL_SENT: appointment submitted to ${patientEmail}`);
+
             } catch (emailError) {
                 console.error(`EMAIL_ERROR: appointment submitted ${emailError.message}`);
             }
@@ -304,6 +362,9 @@ router.put("/:id/status", auth(), async (req, res) => {
             }
         }
 
+        const oldDate = appointment.date;
+        const oldTime = appointment.time;
+
         const nextDate = date !== undefined ? date : appointment.date;
         const nextTime = time !== undefined ? time : appointment.time;
         const nextStatus = status || appointment.status;
@@ -350,55 +411,64 @@ router.put("/:id/status", auth(), async (req, res) => {
         const patientEmail = populated.user?.email;
         const patientName = populated.user?.name || "Patient";
 
-        if (status === "approved" || status === "rejected") {
-            console.log(`EMAIL_DEBUG: appointment status updated to ${status}, patient email = ${patientEmail || 'MISSING'}`);
-            
+        const isApproved = status === "approved";
+        const isRejected = status === "rejected";
+        const isRescheduledMail = isRescheduling && !isRejected; // Send reschedule mail if time changed and not rejected
+
+        if (isApproved || isRejected || isRescheduledMail) {
             if (patientEmail) {
                 setImmediate(async () => {
                     try {
-                        const isApproved = status === "approved";
                         const formattedDocName = formatDoctorName(populated.doctor?.name);
-                        const appointmentDate = new Date(populated.date).toDateString();
-                        const appointmentTime = populated.time;
+                        const appDateFormatted = formatDate(populated.date);
+                        const appTimeFormatted = formatTime(populated.time);
+                        
+                        let mailSubject, mailStatus, mailColor, mailMessage, oldDateTime = null;
+
+                        if (isRescheduledMail && !isApproved) {
+                            mailSubject = `Appointment Rescheduled - ${formattedDocName} - ${appDateFormatted} ${appTimeFormatted}`;
+                            mailStatus = "Rescheduled";
+                            mailColor = "#17a2b8";
+                            mailMessage = "Your appointment has been <strong>rescheduled</strong> by the clinic. Please review the new details below.";
+                            oldDateTime = `${formatDate(oldDate)} at ${formatTime(oldTime)}`;
+                        } else if (isApproved) {
+                            mailSubject = `Appointment Approved - ${formattedDocName} - ${appDateFormatted} ${appTimeFormatted}`;
+                            mailStatus = "Approved";
+                            mailColor = "#28a745";
+                            mailMessage = "Good news! Your appointment has been <strong>approved</strong>. Please make sure to arrive 10 minutes early.";
+                        } else {
+                            mailSubject = `Appointment Rejected - ${formattedDocName} - ${appDateFormatted} ${appTimeFormatted}`;
+                            mailStatus = "Rejected";
+                            mailColor = "#dc3545";
+                            mailMessage = "We regret to inform you that your appointment request has been <strong>rejected</strong>. If you have any questions, please contact the clinic.";
+                        }
 
                         await sendEmail({
                             to: patientEmail,
-                            subject: `Appointment ${isApproved ? "Approved" : "Rejected"} - ${formattedDocName} - ${appointmentDate} ${appointmentTime}`,
-                            html: `
-                                <div style="font-family: sans-serif; color: #333;">
-                                    <h2 style="color: ${isApproved ? "#28a745" : "#dc3545"};">
-                                        Appointment ${isApproved ? "Approved" : "Rejected"}
-                                    </h2>
-                                    <p>Hello <strong>${patientName}</strong>,</p>
-                                    <p>
-                                        ${isApproved 
-                                            ? "Good news! Your appointment has been <strong>approved</strong>." 
-                                            : "We regret to inform you that your appointment request has been <strong>rejected</strong>."}
-                                    </p>
-                                    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                                        <p style="margin: 5px 0;"><strong>Doctor:</strong> ${formattedDocName}</p>
-                                        <p style="margin: 5px 0;"><strong>Date:</strong> ${appointmentDate}</p>
-                                        <p style="margin: 5px 0;"><strong>Time:</strong> ${appointmentTime}</p>
-                                    </div>
-                                    <p>
-                                        ${isApproved 
-                                            ? "Please make sure to arrive 10 minutes early." 
-                                            : "If you have any questions, please contact the clinic."}
-                                    </p>
-                                    <p>Best regards,<br/>MediCare Team</p>
-                                </div>
-                            `
+                            subject: mailSubject,
+                            html: getEmailHtml({
+                                patientName,
+                                doctorName: formattedDocName,
+                                date: appDateFormatted,
+                                time: appTimeFormatted,
+                                status: mailStatus,
+                                statusColor: mailColor,
+                                message: mailMessage,
+                                oldDateTime
+                            })
                         });
 
-                        console.log(`EMAIL_SENT: appointment ${status} to ${patientEmail}`);
+                        const logType = isRescheduledMail && !isApproved ? "rescheduled" : (isApproved ? "approved" : "rejected");
+                        console.log(`EMAIL_SENT: appointment ${logType} to ${patientEmail}`);
                     } catch (emailError) {
-                        console.error(`EMAIL_ERROR: appointment status update ${emailError.message}`);
+                        console.error(`EMAIL_ERROR: appointment update ${emailError.message}`);
                     }
                 });
             } else {
                 console.warn("EMAIL_SKIPPED: missing patient email for appointment status update");
             }
         }
+
 
         res.json(populated);
     } catch (error) {
