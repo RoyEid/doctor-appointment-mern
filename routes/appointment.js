@@ -9,6 +9,16 @@ const router = express.Router();
 const ACTIVE_STATUSES = ["pending", "approved"];
 const ALL_STATUSES = ["pending", "approved", "rejected", "cancelled", "completed"];
 
+const formatDoctorName = (name) => {
+    if (!name) return "N/A";
+    const cleanName = name.trim();
+    if (cleanName.startsWith("Dr.") || cleanName.startsWith("Dr ")) {
+        return cleanName;
+    }
+    return `Dr. ${cleanName}`;
+};
+
+
 const getDayRange = (dateValue) => {
     const parsed = new Date(dateValue);
     if (Number.isNaN(parsed.getTime())) return null;
@@ -118,24 +128,29 @@ async function createAppointmentHandler(req, res) {
     if (patientEmail) {
         setImmediate(async () => {
             try {
+                const formattedDocName = formatDoctorName(populatedAppointment.doctor?.name);
+                const appointmentDate = new Date(populatedAppointment.date).toDateString();
+                const appointmentTime = populatedAppointment.time;
+
                 await sendEmail({
                     to: patientEmail,
-                    subject: "Appointment Request Submitted",
+                    subject: `Appointment Request Submitted - ${formattedDocName} - ${appointmentDate} ${appointmentTime}`,
                     html: `
                         <div style="font-family: sans-serif; color: #333;">
                             <h2 style="color: #008e9b;">Appointment Request Submitted</h2>
                             <p>Hello <strong>${patientName}</strong>,</p>
                             <p>Your appointment request has been successfully submitted and is currently <strong>pending</strong> review.</p>
                             <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                                <p style="margin: 5px 0;"><strong>Doctor:</strong> Dr. ${populatedAppointment.doctor?.name || "N/A"}</p>
-                                <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(populatedAppointment.date).toDateString()}</p>
-                                <p style="margin: 5px 0;"><strong>Time:</strong> ${populatedAppointment.time}</p>
+                                <p style="margin: 5px 0;"><strong>Doctor:</strong> ${formattedDocName}</p>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> ${appointmentDate}</p>
+                                <p style="margin: 5px 0;"><strong>Time:</strong> ${appointmentTime}</p>
                             </div>
                             <p>We will notify you once the status of your appointment changes.</p>
                             <p>Best regards,<br/>MediCare Team</p>
                         </div>
                     `
                 });
+
                 console.log(`EMAIL_SENT: appointment submitted to ${patientEmail}`);
             } catch (emailError) {
                 console.error(`EMAIL_ERROR: appointment submitted ${emailError.message}`);
@@ -342,9 +357,13 @@ router.put("/:id/status", auth(), async (req, res) => {
                 setImmediate(async () => {
                     try {
                         const isApproved = status === "approved";
+                        const formattedDocName = formatDoctorName(populated.doctor?.name);
+                        const appointmentDate = new Date(populated.date).toDateString();
+                        const appointmentTime = populated.time;
+
                         await sendEmail({
                             to: patientEmail,
-                            subject: isApproved ? "Appointment Approved" : "Appointment Rejected",
+                            subject: `Appointment ${isApproved ? "Approved" : "Rejected"} - ${formattedDocName} - ${appointmentDate} ${appointmentTime}`,
                             html: `
                                 <div style="font-family: sans-serif; color: #333;">
                                     <h2 style="color: ${isApproved ? "#28a745" : "#dc3545"};">
@@ -357,9 +376,9 @@ router.put("/:id/status", auth(), async (req, res) => {
                                             : "We regret to inform you that your appointment request has been <strong>rejected</strong>."}
                                     </p>
                                     <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                                        <p style="margin: 5px 0;"><strong>Doctor:</strong> Dr. ${populated.doctor?.name || "N/A"}</p>
-                                        <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(populated.date).toDateString()}</p>
-                                        <p style="margin: 5px 0;"><strong>Time:</strong> ${populated.time}</p>
+                                        <p style="margin: 5px 0;"><strong>Doctor:</strong> ${formattedDocName}</p>
+                                        <p style="margin: 5px 0;"><strong>Date:</strong> ${appointmentDate}</p>
+                                        <p style="margin: 5px 0;"><strong>Time:</strong> ${appointmentTime}</p>
                                     </div>
                                     <p>
                                         ${isApproved 
@@ -370,6 +389,7 @@ router.put("/:id/status", auth(), async (req, res) => {
                                 </div>
                             `
                         });
+
                         console.log(`EMAIL_SENT: appointment ${status} to ${patientEmail}`);
                     } catch (emailError) {
                         console.error(`EMAIL_ERROR: appointment status update ${emailError.message}`);
