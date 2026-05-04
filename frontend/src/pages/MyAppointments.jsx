@@ -11,15 +11,16 @@ function MyAppointments() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [respondingApptId, setRespondingApptId] = useState(null);
+
   useEffect(() => {
     if (user && user.role === "admin") {
       // Admins can see all, but they have their own page.
     }
   }, [user, navigate]);
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [respondingApptId, setRespondingApptId] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -93,7 +94,6 @@ function MyAppointments() {
       }
 
       setAppointments((prev) => prev.filter((a) => a._id !== id));
-
       toast.success("Appointment cancelled successfully!");
     } catch (error) {
       toast.error(error.message);
@@ -121,6 +121,19 @@ function MyAppointments() {
     }
   };
 
+  const getStatusStyle = (status, isReschedulePending) => {
+    if (status === "approved") return "bg-green-100 text-green-700";
+    if (status === "rejected") return "bg-red-100 text-red-700";
+    if (status === "cancelled") return "bg-gray-100 text-gray-600";
+    if (isReschedulePending) return "bg-blue-100 text-blue-700";
+    return "bg-yellow-100 text-yellow-700";
+  };
+
+  const formatDisplayStatus = (status, isReschedulePending) => {
+    if (isReschedulePending) return "Reschedule Request";
+    return status || "Pending";
+  };
+
   if (!user) return <AuthRequired />;
 
   if (loading) {
@@ -132,21 +145,21 @@ function MyAppointments() {
   }
 
   return (
-    <div className="px-4 sm:px-6 py-6 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
+    <div className="px-3 sm:px-6 py-6 bg-gray-100 min-h-screen">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-[#008e9b]">
         My Appointments
       </h2>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="max-w-3xl mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           <p className="text-center">{error}</p>
         </div>
       )}
 
       <div className="space-y-4 max-w-3xl mx-auto">
         {appointments.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
-            <p className="text-gray-500 text-lg mb-4">
+          <div className="bg-white rounded-2xl shadow-sm p-8 sm:p-10 text-center border border-gray-100">
+            <p className="text-gray-500 text-base sm:text-lg mb-4">
               You have no appointments booked.
             </p>
             <Link
@@ -159,103 +172,43 @@ function MyAppointments() {
         ) : (
           appointments.map((app) => {
             const currentStatus = app.status || "pending";
+            const normalizedStatus = currentStatus.toLowerCase();
             const isReschedulePending =
-              app.status?.toLowerCase() === "reschedule_pending";
+              normalizedStatus === "reschedule_pending";
+            const isResponding = respondingApptId === app._id;
 
             return (
               <div
                 key={app._id}
-                className="w-full bg-white rounded-2xl shadow-md p-4 border border-gray-50 hover:shadow-lg transition"
+                className="w-full bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition overflow-hidden"
               >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  {/* LEFT */}
-                  <div className="flex gap-3 min-w-0">
-                    <img
-                      alt={app?.doctor?.name || "Doctor"}
-                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b]"
-                      src={apiConfig.getDoctorImage(app?.doctor?.image)}
-                      onError={(e) => {
-                        e.target.src = "/img/doctors/avatar.png";
-                      }}
-                    />
+                <div className="p-4 sm:p-5">
+                  {/* Top row */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex gap-3 min-w-0 flex-1">
+                      <img
+                        alt={app?.doctor?.name || "Doctor"}
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b] shrink-0"
+                        src={apiConfig.getDoctorImage(app?.doctor?.image)}
+                        onError={(e) => {
+                          e.target.src = "/img/doctors/avatar.png";
+                        }}
+                      />
 
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-gray-800 text-base sm:text-lg">
-                        {app.doctor?.name || "Unknown Doctor"}
-                      </h3>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 text-base sm:text-lg truncate">
+                          {app.doctor?.name || "Unknown Doctor"}
+                        </h3>
 
-                      <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
-                        {app.reason}
-                      </p>
-
-                      <div className="text-xs sm:text-sm text-gray-400 mt-1.5 flex items-center gap-1.5 flex-wrap">
-                        <span>📅</span>
-                        {new Date(app.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                        <span className="mx-0.5">|</span>
-                        <span>🕒</span>
-                        {app.time || "N/A"}
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2 break-words">
+                          {app.reason || "No reason provided"}
+                        </p>
                       </div>
-
-                      <span
-                        className={`inline-block mt-2 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
-                          currentStatus === "approved"
-                            ? "bg-green-100 text-green-700"
-                            : currentStatus === "rejected"
-                              ? "bg-red-100 text-red-700"
-                              : isReschedulePending
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {isReschedulePending
-                          ? "Reschedule Request"
-                          : currentStatus}
-                      </span>
-
-                      {isReschedulePending && (
-                        <div className="flex gap-2 mt-3">
-                          <button
-                            onClick={() =>
-                              handleRescheduleResponse(app._id, "accept")
-                            }
-                            disabled={respondingApptId === app._id}
-                            className={`text-xs px-3 py-1.5 rounded-lg shadow-sm transition ${
-                              respondingApptId === app._id
-                                ? "bg-green-400 text-white cursor-not-allowed opacity-70"
-                                : "bg-green-500 hover:bg-green-600 text-white"
-                            }`}
-                          >
-                            {respondingApptId === app._id
-                              ? "Updating..."
-                              : "Accept New Time"}
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleRescheduleResponse(app._id, "reject")
-                            }
-                            disabled={respondingApptId === app._id}
-                            className={`text-xs px-3 py-1.5 rounded-lg shadow-sm transition ${
-                              respondingApptId === app._id
-                                ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-70"
-                                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                            }`}
-                          >
-                            {respondingApptId === app._id
-                              ? "Updating..."
-                              : "Reject New Time"}
-                          </button>
-                        </div>
-                      )}
                     </div>
-                  </div>
 
-                  {/* RIGHT */}
-                  <div className="shrink-0 self-end sm:self-start">
                     <button
-                      className="bg-red-500 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition"
+                      className="bg-cyan-400 hover:bg-cyan-500 text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md transition shrink-0"
+                      aria-label="Cancel appointment"
                       onClick={() => {
                         if (
                           window.confirm(
@@ -266,8 +219,72 @@ function MyAppointments() {
                         }
                       }}
                     >
-                      <X size={18} strokeWidth={2.5} />
+                      <X size={17} strokeWidth={2.5} />
                     </button>
+                  </div>
+
+                  {/* Details */}
+                  <div className="mt-3 ml-0 sm:ml-[76px]">
+                    <div className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
+                      <span>📅</span>
+                      <span>
+                        {new Date(app.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+
+                      <span className="text-gray-300">|</span>
+
+                      <span>🕒</span>
+                      <span>{app.time || "N/A"}</span>
+                    </div>
+
+                    <div className="mt-3">
+                      <span
+                        className={`inline-block text-xs px-3 py-1 rounded-full font-semibold capitalize ${getStatusStyle(
+                          normalizedStatus,
+                          isReschedulePending,
+                        )}`}
+                      >
+                        {formatDisplayStatus(
+                          normalizedStatus,
+                          isReschedulePending,
+                        )}
+                      </span>
+                    </div>
+
+                    {isReschedulePending && (
+                      <div className="mt-4 grid grid-cols-1 min-[380px]:grid-cols-2 gap-2">
+                        <button
+                          onClick={() =>
+                            handleRescheduleResponse(app._id, "accept")
+                          }
+                          disabled={isResponding}
+                          className={`w-full text-sm px-4 py-2 rounded-xl font-semibold shadow-sm transition ${
+                            isResponding
+                              ? "bg-green-300 text-white cursor-not-allowed opacity-70"
+                              : "bg-cyan-400 hover:bg-cyan-500 text-white"
+                          }`}
+                        >
+                          {isResponding ? "Updating..." : "Accept New Time"}
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleRescheduleResponse(app._id, "reject")
+                          }
+                          disabled={isResponding}
+                          className={`w-full text-sm px-4 py-2 rounded-xl font-semibold shadow-sm transition ${
+                            isResponding
+                              ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-70"
+                              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {isResponding ? "Updating..." : "Reject New Time"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
