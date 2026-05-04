@@ -51,7 +51,7 @@ function MyAppointments() {
         const apptArray = Array.isArray(data) ? data : data.appointments || [];
 
         const sorted = apptArray.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
 
         console.log("📋 Appointments loaded:", {
@@ -111,7 +111,7 @@ function MyAppointments() {
       setAppointments((prev) => prev.map((a) => (a._id === id ? data : a)));
 
       toast.success(
-        `Reschedule ${response === "accept" ? "accepted" : "rejected"}!`,
+        `Reschedule ${response === "accept" ? "accepted" : "rejected"}!`
       );
     } catch (err) {
       console.error("❌ Reschedule response error:", err);
@@ -183,7 +183,6 @@ function MyAppointments() {
                 className="w-full bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition overflow-hidden"
               >
                 <div className="p-4 sm:p-5">
-                  {/* Top row */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex gap-3 min-w-0 flex-1">
                       <img
@@ -207,23 +206,23 @@ function MyAppointments() {
                     </div>
 
                     <button
-                      className="bg-cyan-400 hover:bg-cyan-500 text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md transition shrink-0"
+                      className="bg-red-500 hover:bg-red-600 text-white w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md transition shrink-0 border-2 border-red-100"
                       aria-label="Cancel appointment"
+                      title="Cancel appointment"
                       onClick={() => {
                         if (
                           window.confirm(
-                            "Are you sure you want to cancel this appointment?",
+                            "Are you sure you want to cancel this appointment?"
                           )
                         ) {
                           cancelAppointment(app._id);
                         }
                       }}
                     >
-                      <X size={17} strokeWidth={2.5} />
+                      <X size={22} strokeWidth={3} />
                     </button>
                   </div>
 
-                  {/* Details */}
                   <div className="mt-3 ml-0 sm:ml-[76px]">
                     <div className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
                       <span>📅</span>
@@ -244,12 +243,12 @@ function MyAppointments() {
                       <span
                         className={`inline-block text-xs px-3 py-1 rounded-full font-semibold capitalize ${getStatusStyle(
                           normalizedStatus,
-                          isReschedulePending,
+                          isReschedulePending
                         )}`}
                       >
                         {formatDisplayStatus(
                           normalizedStatus,
-                          isReschedulePending,
+                          isReschedulePending
                         )}
                       </span>
                     </div>
@@ -264,7 +263,7 @@ function MyAppointments() {
                           className={`w-full text-sm px-4 py-2 rounded-xl font-semibold shadow-sm transition ${
                             isResponding
                               ? "bg-green-300 text-white cursor-not-allowed opacity-70"
-                              : "bg-cyan-400 hover:bg-cyan-500 text-white"
+                              : "bg-green-500 hover:bg-green-600 text-white"
                           }`}
                         >
                           {isResponding ? "Updating..." : "Accept New Time"}
@@ -275,10 +274,10 @@ function MyAppointments() {
                             handleRescheduleResponse(app._id, "reject")
                           }
                           disabled={isResponding}
-                          className={`w-full text-sm px-4 py-2 rounded-xl font-semibold shadow-sm transition ${
+                          className={`w-full text-sm px-4 py-2 rounded-xl font-semibold shadow-sm transition border ${
                             isResponding
-                              ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-70"
-                              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                              ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-70 border-gray-300"
+                              : "bg-white hover:bg-red-50 text-red-600 border-red-200"
                           }`}
                         >
                           {isResponding ? "Updating..." : "Reject New Time"}
