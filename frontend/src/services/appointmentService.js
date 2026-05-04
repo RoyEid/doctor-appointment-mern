@@ -93,5 +93,13 @@ export const doctorAppointments = async () => {
 };
 
 export const respondToReschedule = async (id, response) => {
-  return await putFirst(APPT_PREFIXES, `/${id}/reschedule-response`, { response });
+  console.log("📤 Sending reschedule response:", { id, response });
+  try {
+    const result = await putFirst(APPT_PREFIXES, `/${id}/reschedule-response`, { response });
+    console.log("📥 Reschedule response result:", result);
+    return result;
+  } catch (err) {
+    console.error("❌ Reschedule response failed:", err);
+    throw err;
+  }
 };

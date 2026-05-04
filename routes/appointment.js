@@ -409,7 +409,7 @@ router.put("/:id/status", auth(), async (req, res) => {
                         const formattedDocName = formatDoctorName(populated.doctor?.name);
                         const appDateFormatted = formatDate(populated.date);
                         const appTimeFormatted = formatTime(populated.time);
-                        
+
                         let mailSubject, mailTitle, mailMessage, oldSchedule = null;
 
                         if (isRescheduledMail) {
@@ -508,11 +508,24 @@ router.put("/:id/reschedule-response", auth(), async (req, res) => {
     try {
         const { id } = req.params;
         const { response } = req.body; // "accept" or "reject"
-        
+
+        console.log("🔄 Reschedule response request:", {
+            appointmentId: id,
+            response,
+            userId: req.user.id
+        });
+
         const appointment = await Appoitment.findById(id);
-        if (!appointment) return res.status(404).json({ message: "Appointment not found" });
+        if (!appointment) {
+            console.warn("⚠️ Appointment not found:", id);
+            return res.status(404).json({ message: "Appointment not found" });
+        }
 
         if (appointment.user?.toString() !== req.user.id) {
+            console.warn("⚠️ Access denied - user mismatch:", {
+                appointmentOwnerId: appointment.user?.toString(),
+                requestUserId: req.user.id
+            });
             return res.status(403).json({ message: "Access denied." });
         }
 
@@ -527,13 +540,19 @@ router.put("/:id/reschedule-response", auth(), async (req, res) => {
             .populate("doctor")
             .populate("user", "name email");
 
+        console.log("✅ Appointment updated:", {
+            id: saved._id,
+            newStatus: appointment.status,
+            patientEmail: populated.user?.email
+        });
+
         const patientEmail = populated.user?.email;
         if (patientEmail) {
             setImmediate(async () => {
                 try {
                     const formattedDocName = formatDoctorName(populated.doctor?.name);
                     const appDateFormatted = formatDate(populated.date);
-                    
+
                     await sendEmail({
                         to: patientEmail,
                         subject: `Appointment Reschedule ${response === "accept" ? "Accepted" : "Rejected"} - ${formattedDocName}`,
@@ -543,22 +562,23 @@ router.put("/:id/reschedule-response", auth(), async (req, res) => {
                             date: appDateFormatted,
                             time: formatTime(populated.time),
                             title: `Appointment Reschedule ${response === "accept" ? "Accepted" : "Rejected"}`,
-                            message: response === "accept" 
-                                ? "Your new appointment time is confirmed." 
+                            message: response === "accept"
+                                ? "Your new appointment time is confirmed."
                                 : "Your appointment is pending again. The doctor/admin can propose another time."
                         })
                     });
+                    console.log("📧 Email sent to:", patientEmail);
                 } catch (err) {
-                    console.error("EMAIL_ERROR: reschedule response", err.message);
+                    console.error("❌ EMAIL_ERROR: reschedule response", err.message);
                 }
             });
         }
 
         res.json(populated);
     } catch (error) {
-        console.error(error);
+        console.error("❌ Reschedule response error:", error);
         res.status(500).json({ message: "Server error" });
     }
 });
 
-export default router;
+export default router;

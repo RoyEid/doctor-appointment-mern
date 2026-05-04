@@ -19,6 +19,7 @@ function MyAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [respondingApptId, setRespondingApptId] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -51,6 +52,11 @@ function MyAppointments() {
         const sorted = apptArray.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
+
+        console.log("📋 Appointments loaded:", {
+          count: sorted.length,
+          statuses: sorted.map((a) => ({ id: a._id, status: a.status })),
+        });
 
         setAppointments(sorted);
       } catch (error) {
@@ -96,7 +102,11 @@ function MyAppointments() {
 
   const handleRescheduleResponse = async (id, response) => {
     try {
+      setRespondingApptId(id);
+      console.log("🔄 Reschedule response:", { appointmentId: id, response });
+
       const data = await respondToReschedule(id, response);
+      console.log("✅ Reschedule response received:", data);
 
       setAppointments((prev) => prev.map((a) => (a._id === id ? data : a)));
 
@@ -104,7 +114,10 @@ function MyAppointments() {
         `Reschedule ${response === "accept" ? "accepted" : "rejected"}!`,
       );
     } catch (err) {
+      console.error("❌ Reschedule response error:", err);
       toast.error(err.message || "Failed to respond to reschedule request");
+    } finally {
+      setRespondingApptId(null);
     }
   };
 
@@ -206,17 +219,31 @@ function MyAppointments() {
                             onClick={() =>
                               handleRescheduleResponse(app._id, "accept")
                             }
-                            className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition"
+                            disabled={respondingApptId === app._id}
+                            className={`text-xs px-3 py-1.5 rounded-lg shadow-sm transition ${
+                              respondingApptId === app._id
+                                ? "bg-green-400 text-white cursor-not-allowed opacity-70"
+                                : "bg-green-500 hover:bg-green-600 text-white"
+                            }`}
                           >
-                            Accept New Time
+                            {respondingApptId === app._id
+                              ? "Updating..."
+                              : "Accept New Time"}
                           </button>
                           <button
                             onClick={() =>
                               handleRescheduleResponse(app._id, "reject")
                             }
-                            className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-lg shadow-sm transition"
+                            disabled={respondingApptId === app._id}
+                            className={`text-xs px-3 py-1.5 rounded-lg shadow-sm transition ${
+                              respondingApptId === app._id
+                                ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-70"
+                                : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+                            }`}
                           >
-                            Reject New Time
+                            {respondingApptId === app._id
+                              ? "Updating..."
+                              : "Reject New Time"}
                           </button>
                         </div>
                       )}
