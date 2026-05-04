@@ -10,7 +10,7 @@ function AddAppointment() {
 
   useEffect(() => {
     if (user && user.role !== "user") {
-       navigate("/");
+      navigate("/");
     }
   }, [user, navigate]);
 
@@ -26,12 +26,12 @@ function AddAppointment() {
 
   useEffect(() => {
     if (form.doctor && doctors.length > 0) {
-      const doc = doctors.find(d => d._id === form.doctor);
+      const doc = doctors.find((d) => d._id === form.doctor);
       if (doc && doc.availableSlots && doc.availableSlots.length > 0) {
         setSelectedDoctorSlots(doc.availableSlots);
         // Default to first slot if nothing chosen or current not in list
         if (!form.time || !doc.availableSlots.includes(form.time)) {
-          setForm(prev => ({ ...prev, time: doc.availableSlots[0] }));
+          setForm((prev) => ({ ...prev, time: doc.availableSlots[0] }));
         }
       } else {
         setSelectedDoctorSlots([]);
@@ -75,7 +75,7 @@ function AddAppointment() {
       if (res.ok) {
         alert("Appointment added successfully!");
         setForm({ doctor: "", date: "", time: "", reason: "" });
-        navigate("/myAppointments"); // Redirect to list
+        navigate("/my-appointments"); // Redirect to list
       } else {
         alert(data.message || "Failed to add appointment");
       }
@@ -96,11 +96,15 @@ function AddAppointment() {
         onSubmit={handleSubmit}
         className="bg-white shadow-xl rounded-2xl p-6 sm:p-8 w-full max-w-md border border-gray-100"
       >
-        <h2 className="text-2xl sm:text-3xl font-extrabold mb-8 text-center text-gray-800">Add Appointment</h2>
+        <h2 className="text-2xl sm:text-3xl font-extrabold mb-8 text-center text-gray-800">
+          Add Appointment
+        </h2>
 
         <div className="space-y-4 sm:space-y-6">
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">Doctor</label>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">
+              Doctor
+            </label>
             <select
               name="doctor"
               value={form.doctor}
@@ -118,20 +122,24 @@ function AddAppointment() {
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">Date</label>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">
+              Date
+            </label>
             <input
               type="date"
               name="date"
               value={form.date}
               onChange={handleChange}
-              min={new Date().toISOString().split('T')[0]}
+              min={new Date().toISOString().split("T")[0]}
               required
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
             />
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">Time</label>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">
+              Time
+            </label>
             {selectedDoctorSlots.length > 0 ? (
               <select
                 name="time"
@@ -141,7 +149,9 @@ function AddAppointment() {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
               >
                 {selectedDoctorSlots.map((slot, i) => (
-                  <option key={i} value={slot}>{slot}</option>
+                  <option key={i} value={slot}>
+                    {slot}
+                  </option>
                 ))}
               </select>
             ) : (
@@ -157,7 +167,9 @@ function AddAppointment() {
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">Reason</label>
+            <label className="block mb-2 text-sm font-semibold text-gray-700">
+              Reason
+            </label>
             <textarea
               name="reason"
               value={form.reason}
@@ -172,8 +184,8 @@ function AddAppointment() {
             type="submit"
             disabled={submitting}
             className={`w-full py-3.5 rounded-lg text-white font-bold tracking-wide transition-all duration-300 transform shadow-md hover:shadow-lg ${
-              submitting 
-                ? "bg-gray-400 cursor-not-allowed translate-y-0" 
+              submitting
+                ? "bg-gray-400 cursor-not-allowed translate-y-0"
                 : "bg-[#008e9b] hover:bg-[#007a85] hover:-translate-y-0.5"
             }`}
           >
