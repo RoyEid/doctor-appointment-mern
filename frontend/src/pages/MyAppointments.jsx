@@ -6,6 +6,7 @@ import { apiConfig } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import AuthRequired from "../components/AuthRequired";
 import { respondToReschedule } from "../services/appointmentService";
+import Swal from "sweetalert2";
 
 function MyAppointments() {
   const { user } = useContext(AuthContext);
@@ -209,12 +210,19 @@ function MyAppointments() {
                       className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md transition shrink-0 border-2 border-red-100"
                       aria-label="Cancel appointment"
                       title="Cancel appointment"
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to cancel this appointment?",
-                          )
-                        ) {
+                      onClick={async () => {
+                        const result = await Swal.fire({
+                          icon: "question",
+                          title: "Cancel appointment?",
+                          text: "Are you sure you want to cancel this appointment?",
+                          showCancelButton: true,
+                          confirmButtonText: "Yes, cancel it",
+                          cancelButtonText: "Keep appointment",
+                          confirmButtonColor: "#ef4444",
+                          cancelButtonColor: "#06b6d4",
+                        });
+
+                        if (result.isConfirmed) {
                           cancelAppointment(app._id);
                         }
                       }}

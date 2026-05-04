@@ -4,6 +4,7 @@ import { apiConfig } from "../config/api";
 import AuthRequired from "../components/AuthRequired";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 function AddAppointment() {
   const { user } = useContext(AuthContext);
@@ -74,13 +75,23 @@ function AddAppointment() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("Appointment request submitted successfully!");
+        await Swal.fire({
+          icon: "success",
+          title: "Appointment submitted",
+          text: "Your appointment request has been sent successfully.",
+          confirmButtonText: "View appointments",
+          confirmButtonColor: "#06b6d4",
+        });
         setForm({ doctor: "", date: "", time: "", reason: "" });
-        navigate("/my-appointments"); // Redirect to list
+        navigate("/my-appointments");
       } else if (res.status === 403) {
-        toast.warning(
-          "Please verify your email before booking an appointment.",
-        );
+        await Swal.fire({
+          icon: "warning",
+          title: "Email verification required",
+          text: "Please verify your email before booking an appointment.",
+          confirmButtonText: "Got it",
+          confirmButtonColor: "#06b6d4",
+        });
       } else {
         toast.error(data.message || "Failed to add appointment");
       }

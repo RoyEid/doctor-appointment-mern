@@ -4,7 +4,7 @@ import { apiConfig } from "../config/api";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { Trash2, Info, PlusCircle } from "lucide-react";
-
+import Swal from "sweetalert2";
 
 function Departments() {
   const { user } = useContext(AuthContext);
@@ -35,22 +35,33 @@ function Departments() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this department? This action cannot be undone.")) return;
-    
+    const result = await Swal.fire({
+      icon: "question",
+      title: "Delete department?",
+      text: "Are you sure you want to delete this department? This action cannot be undone.",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#06b6d4",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(apiConfig.deleteDepartment(id), {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       const data = await res.json();
-      
+
       if (res.ok) {
         toast.success(data.message || "Department deleted successfully");
         const updatedDeps = departments.filter((d) => d._id !== id);
         setDepartments(updatedDeps);
-        
+
         if (activeTab === id) {
           setActiveTab(updatedDeps.length > 0 ? updatedDeps[0]._id : null);
         }
@@ -76,14 +87,16 @@ function Departments() {
     <section id="services" className="py-20 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-16 text-center">
-          <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-gray-800 tracking-tight">Our <span className="text-[#008e9b]">Departments</span></h2>
+          <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-gray-800 tracking-tight">
+            Our <span className="text-[#008e9b]">Departments</span>
+          </h2>
           <div className="w-24 h-1.5 bg-[#008e9b] mx-auto mb-6 rounded-full"></div>
           <p className="text-gray-600 max-w-2xl mx-auto text-lg md:text-xl">
             Explore our specialized medical departments staffed with expert
             doctors dedicated to your health and well-being.
           </p>
         </div>
-        
+
         {user?.role === "admin" && (
           <div className="flex justify-center mb-10">
             <Link
@@ -99,9 +112,13 @@ function Departments() {
         {departments.length === 0 ? (
           <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100 text-center">
             <Info className="mx-auto text-gray-300 mb-4" size={48} />
-            <p className="text-gray-500 text-lg">No departments available at the moment.</p>
+            <p className="text-gray-500 text-lg">
+              No departments available at the moment.
+            </p>
             {user?.role === "admin" && (
-              <p className="text-sm mt-2 text-[#008e9b] font-medium">Please add departments via the Admin Dashboard.</p>
+              <p className="text-sm mt-2 text-[#008e9b] font-medium">
+                Please add departments via the Admin Dashboard.
+              </p>
             )}
           </div>
         ) : (
@@ -141,7 +158,10 @@ function Departments() {
                           className="flex items-center gap-2 bg-red-50 text-red-500 font-bold px-4 py-2 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm group"
                           title="Delete Department"
                         >
-                          <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
+                          <Trash2
+                            size={18}
+                            className="group-hover:scale-110 transition-transform"
+                          />
                           <span className="hidden sm:inline">Delete</span>
                         </button>
                       )}
@@ -151,28 +171,36 @@ function Departments() {
                         {dep?.description}
                       </p>
                     </div>
-                    
+
                     <div className="mt-12 pt-8 border-t border-gray-50 flex items-center gap-4 text-[#008e9b]">
                       <div className="w-10 h-10 rounded-full bg-[#008e9b]/10 flex items-center justify-center">
                         <PlusCircle size={20} />
                       </div>
-                      <span className="font-bold">Fully equipped for specialized care</span>
+                      <span className="font-bold">
+                        Fully equipped for specialized care
+                      </span>
                     </div>
                   </div>
-                ) : null
+                ) : null,
               )}
             </div>
           </div>
         )}
       </div>
-      
+
       <style jsx>{`
         .animate-fadeIn {
           animation: fadeIn 0.4s ease-out forwards;
         }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         .hide-scrollbar::-webkit-scrollbar {
           display: none;

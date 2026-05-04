@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { apiConfig } from "../config/api";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 function Doctors() {
   const { user } = useContext(AuthContext);
@@ -23,7 +24,19 @@ function Doctors() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this doctor?")) return;
+    const result = await Swal.fire({
+      icon: "question",
+      title: "Delete doctor?",
+      text: "Are you sure you want to delete this doctor?",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#06b6d4",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(apiConfig.deleteDoctor(id), {
