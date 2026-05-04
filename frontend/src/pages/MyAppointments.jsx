@@ -159,6 +159,8 @@ function MyAppointments() {
         ) : (
           appointments.map((app) => {
             const currentStatus = app.status || "pending";
+            const isReschedulePending =
+              app.status?.toLowerCase() === "reschedule_pending";
 
             return (
               <div
@@ -203,17 +205,17 @@ function MyAppointments() {
                             ? "bg-green-100 text-green-700"
                             : currentStatus === "rejected"
                               ? "bg-red-100 text-red-700"
-                              : currentStatus === "reschedule_pending"
+                              : isReschedulePending
                                 ? "bg-blue-100 text-blue-700"
                                 : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {currentStatus === "reschedule_pending"
+                        {isReschedulePending
                           ? "Reschedule Request"
                           : currentStatus}
                       </span>
 
-                      {currentStatus === "reschedule_pending" && (
+                      {isReschedulePending && (
                         <div className="flex gap-2 mt-3">
                           <button
                             onClick={() =>
