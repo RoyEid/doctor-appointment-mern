@@ -51,7 +51,7 @@ function MyAppointments() {
         const apptArray = Array.isArray(data) ? data : data.appointments || [];
 
         const sorted = apptArray.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
 
         console.log("📋 Appointments loaded:", {
@@ -111,7 +111,7 @@ function MyAppointments() {
       setAppointments((prev) => prev.map((a) => (a._id === id ? data : a)));
 
       toast.success(
-        `Reschedule ${response === "accept" ? "accepted" : "rejected"}!`
+        `Reschedule ${response === "accept" ? "accepted" : "rejected"}!`,
       );
     } catch (err) {
       console.error("❌ Reschedule response error:", err);
@@ -212,7 +212,7 @@ function MyAppointments() {
                       onClick={() => {
                         if (
                           window.confirm(
-                            "Are you sure you want to cancel this appointment?"
+                            "Are you sure you want to cancel this appointment?",
                           )
                         ) {
                           cancelAppointment(app._id);
@@ -243,12 +243,12 @@ function MyAppointments() {
                       <span
                         className={`inline-block text-xs px-3 py-1 rounded-full font-semibold capitalize ${getStatusStyle(
                           normalizedStatus,
-                          isReschedulePending
+                          isReschedulePending,
                         )}`}
                       >
                         {formatDisplayStatus(
                           normalizedStatus,
-                          isReschedulePending
+                          isReschedulePending,
                         )}
                       </span>
                     </div>

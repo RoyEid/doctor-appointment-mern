@@ -1,6 +1,7 @@
 import express from "express";
 import Appoitment from "../models/AppointmentSchema.js";
 import Doctor from "../models/DoctorSchema.js";
+import User from "../models/UserSchema.js";
 import auth from "../auth/Middleware.js";
 import { getDoctorProfileForUser } from "../utils/doctorAccess.js";
 import sendEmail from "../utils/sendEmail.js";
@@ -105,11 +106,24 @@ router.post("/", auth(), async (req, res) => {
 
 async function createAppointmentHandler(req, res) {
     const { doctor, date, time, reason } = req.body;
+
     if (!doctor || !date || !time || !reason) {
         return res.status(400).json({ message: "Missing fields" });
     }
 
-    const appDate = new Date(date);
+    const currentUser = await User.findById(req.user.id);
+
+    if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!currentUser.isEmailVerified) {
+        return res.status(403).json({
+            message: "Please verify your email before booking an appointment.",
+        });
+    }
+
+    const appDate = new Date(date); 
     if (Number.isNaN(appDate.getTime())) {
         return res.status(400).json({ message: "Invalid appointment date" });
     }
