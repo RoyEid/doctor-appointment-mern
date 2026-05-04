@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { apiConfig } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import AuthRequired from "../components/AuthRequired";
+import { respondToReschedule } from "../services/appointmentService";
 
 function MyAppointments() {
   const { user } = useContext(AuthContext);
@@ -12,7 +13,7 @@ function MyAppointments() {
 
   useEffect(() => {
     if (user && user.role === "admin") {
-       // Admins can see all, but they have their own page.
+      // Admins can see all, but they have their own page.
     }
   }, [user, navigate]);
   const [appointments, setAppointments] = useState([]);
@@ -95,31 +96,19 @@ function MyAppointments() {
 
   const handleRescheduleResponse = async (id, response) => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(apiConfig.respondToReschedule(id), {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ response }),
-      });
+      const data = await respondToReschedule(id, response);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      setAppointments((prev) => prev.map((a) => (a._id === id ? data : a)));
 
-      setAppointments((prev) =>
-        prev.map((a) => (a._id === id ? data : a))
+      toast.success(
+        `Reschedule ${response === "accept" ? "accepted" : "rejected"}!`,
       );
-
-      toast.success(`Reschedule ${response === "accept" ? "accepted" : "rejected"}!`);
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Failed to respond to reschedule request");
     }
   };
 
   if (!user) return <AuthRequired />;
-
 
   if (loading) {
     return (
@@ -206,22 +195,28 @@ function MyAppointments() {
                                 : "bg-yellow-100 text-yellow-700"
                         }`}
                       >
-                        {currentStatus === "reschedule_pending" ? "Reschedule Request" : currentStatus}
+                        {currentStatus === "reschedule_pending"
+                          ? "Reschedule Request"
+                          : currentStatus}
                       </span>
 
                       {currentStatus === "reschedule_pending" && (
                         <div className="flex gap-2 mt-3">
                           <button
-                            onClick={() => handleRescheduleResponse(app._id, "accept")}
+                            onClick={() =>
+                              handleRescheduleResponse(app._id, "accept")
+                            }
                             className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg shadow-sm transition"
                           >
                             Accept New Time
                           </button>
                           <button
-                            onClick={() => handleRescheduleResponse(app._id, "reject")}
+                            onClick={() =>
+                              handleRescheduleResponse(app._id, "reject")
+                            }
                             className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-lg shadow-sm transition"
                           >
-                            Reject
+                            Reject New Time
                           </button>
                         </div>
                       )}
@@ -256,4 +251,3 @@ function MyAppointments() {
 }
 
 export default MyAppointments;
-

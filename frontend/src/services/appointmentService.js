@@ -10,7 +10,7 @@ const postFirst = async (paths, segment, body) => {
     try {
       const { data } = await api.post(`${p}${segment}`, body);
       return data;
-    } catch (e) {}
+    } catch (e) { }
   }
   throw new Error("All appointment endpoints failed");
 };
@@ -20,7 +20,7 @@ const getFirst = async (paths, segment) => {
     try {
       const { data } = await api.get(`${p}${segment}`);
       return data;
-    } catch (e) {}
+    } catch (e) { }
   }
   throw new Error("All appointment endpoints failed");
 };
@@ -30,7 +30,7 @@ const delFirst = async (paths, segment) => {
     try {
       const { data } = await api.delete(`${p}${segment}`);
       return data;
-    } catch (e) {}
+    } catch (e) { }
   }
   throw new Error("All appointment endpoints failed");
 };
@@ -40,7 +40,7 @@ const putFirst = async (paths, segment, body) => {
     try {
       const { data } = await api.put(`${p}${segment}`, body);
       return data;
-    } catch (e) {}
+    } catch (e) { }
   }
   throw new Error("All appointment endpoints failed");
 };
@@ -90,4 +90,8 @@ export const doctorAppointments = async () => {
     const { data } = await api.get(`/appointments/doctor`);
     return data;
   }
+};
+
+export const respondToReschedule = async (id, response) => {
+  return await putFirst(APPT_PREFIXES, `/${id}/reschedule-response`, { response });
 };
