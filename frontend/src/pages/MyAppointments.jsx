@@ -206,7 +206,7 @@ function MyAppointments() {
                     </div>
 
                     <button
-                      className="bg-red-500 hover:bg-red-600 text-white w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md transition shrink-0 border-2 border-red-100"
+                      className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md transition shrink-0 border-2 border-red-100"
                       aria-label="Cancel appointment"
                       title="Cancel appointment"
                       onClick={() => {
@@ -219,7 +219,7 @@ function MyAppointments() {
                         }
                       }}
                     >
-                      <X size={22} strokeWidth={3} />
+                      <X size={28} strokeWidth={3.5} />
                     </button>
                   </div>
 
