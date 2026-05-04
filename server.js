@@ -19,10 +19,18 @@ app.use("/user", User);
 app.use("/doctors", Doctor);
 app.use("/api/doctors", Doctor);
 
+
+
+app.get("/test-email-verification-route", (req, res) => {
+    res.json({
+        success: true,
+        message: "Email verification backend route is live",
+    });
+});
 app.use("/appointments", Appointment);
 app.use("/departments", Departments);
-app.use("/uploads",express.static("uploads"))
+app.use("/uploads", express.static("uploads"))
 
-app.listen(PORT , ()=>{
+app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`)
 })
