@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { apiConfig } from "../config/api";
 import { AuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 function Doctors() {
   const { user } = useContext(AuthContext);
@@ -27,17 +28,18 @@ function Doctors() {
       const token = localStorage.getItem("token");
       const res = await fetch(apiConfig.deleteDoctor(id), {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
+        toast.success("Doctor deleted successfully");
         setDoctors(doctors.filter((d) => d._id !== id));
       } else {
         const data = await res.json();
-        alert(data.message || "Failed to delete doctor");
+        toast.error(data.message || "Failed to delete doctor");
       }
     } catch (error) {
       console.error(error);
-      alert("Network error deleting doctor");
+      toast.error("Network error deleting doctor");
     }
   };
 

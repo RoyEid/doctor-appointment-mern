@@ -39,7 +39,17 @@ function App() {
         <Route path="/doctor/:id" element={<DoctorDetails />} />
         <Route path="/add-department" element={<RoleBasedRoute element={<AddDepartment />} requiredRole="admin" />} />
       </Routes>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </>
   );
 }

@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { apiConfig } from "../config/api";
 import AuthRequired from "../components/AuthRequired";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function AddAppointment() {
   const { user } = useContext(AuthContext);
@@ -73,15 +74,19 @@ function AddAppointment() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Appointment added successfully!");
+        toast.success("Appointment request submitted successfully!");
         setForm({ doctor: "", date: "", time: "", reason: "" });
         navigate("/my-appointments"); // Redirect to list
+      } else if (res.status === 403) {
+        toast.warning(
+          "Please verify your email before booking an appointment.",
+        );
       } else {
-        alert(data.message || "Failed to add appointment");
+        toast.error(data.message || "Failed to add appointment");
       }
     } catch (error) {
       console.error("Network or parsing error:", error);
-      alert("Network error occurred.");
+      toast.error("Network error occurred.");
     } finally {
       setSubmitting(false);
     }
