@@ -13,6 +13,10 @@ export const apiConfig = {
     resendVerificationPublic: `${API_BASE_URL}/user/resend-verification-public`,
     checkVerificationStatus: `${API_BASE_URL}/user/check-verification-status`,
 
+    // Forgot password endpoints
+    forgotPassword: `${API_BASE_URL}/user/forgot-password`,
+    resetPassword: (token) => `${API_BASE_URL}/user/reset-password/${token}`,
+
     // Doctor endpoints
     getAllDoctors: `${API_BASE_URL}/doctors/allDoctors`,
     getDoctorById: (id) => `${API_BASE_URL}/doctors/${id}`,

@@ -26,6 +26,10 @@ const createVerificationToken = () => {
     return crypto.randomBytes(32).toString("hex");
 };
 
+const createPasswordResetToken = () => {
+    return crypto.randomBytes(32).toString("hex");
+};
+
 const getBackendUrl = () => {
     return process.env.BACKEND_URL || "http://localhost:10000";
 };
@@ -84,6 +88,56 @@ const sendVerificationEmail = async (user) => {
     });
 };
 
+const sendPasswordResetEmail = async (user) => {
+    const resetToken = createPasswordResetToken();
+
+    user.passwordResetToken = resetToken;
+    user.passwordResetExpires = Date.now() + 1000 * 60 * 30;
+
+    await user.save();
+
+    const resetUrl = `${getFrontendUrl()}/reset-password/${resetToken}`;
+
+    await sendEmail({
+        to: user.email,
+        subject: "Reset your MediCare password",
+        html: `
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 540px; margin: auto; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
+        <div style="background: #f8fcfd; padding: 20px; border-bottom: 3px solid #008e9b;">
+          <h2 style="margin: 0; color: #008e9b;">Reset your MediCare password</h2>
+        </div>
+
+        <div style="padding: 22px;">
+          <p>Hello <strong>${user.name || "there"}</strong>,</p>
+
+          <p>
+            We received a request to reset the password for your MediCare account.
+          </p>
+
+          <p style="margin: 24px 0;">
+            <a href="${resetUrl}" style="background: #008e9b; color: white; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+              Reset Password
+            </a>
+          </p>
+
+          <p style="font-size: 13px; color: #666;">
+            This link expires in 30 minutes.
+          </p>
+
+          <p style="font-size: 13px; color: #666;">
+            If you did not request a password reset, you can safely ignore this email.
+          </p>
+
+          <p>
+            Thank you,<br />
+            <strong>MediCare Team</strong>
+          </p>
+        </div>
+      </div>
+    `,
+    });
+};
+
 /**
  * Google login/register
  */
@@ -127,12 +181,16 @@ router.post("/google", async (req, res) => {
                 isEmailVerified: true,
                 emailVerificationToken: null,
                 emailVerificationExpires: null,
+                passwordResetToken: null,
+                passwordResetExpires: null,
             });
         } else {
             user.googleId = sub;
             user.isEmailVerified = true;
             user.emailVerificationToken = null;
             user.emailVerificationExpires = null;
+            user.passwordResetToken = null;
+            user.passwordResetExpires = null;
 
             if (!user.authProvider) {
                 user.authProvider = "local";
@@ -218,6 +276,8 @@ router.post("/register", async (req, res) => {
             role: "user",
             authProvider: "local",
             isEmailVerified: false,
+            passwordResetToken: null,
+            passwordResetExpires: null,
         });
 
         try {
@@ -245,6 +305,120 @@ router.post("/register", async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Server error during registration.",
+        });
+    }
+});
+
+/**
+ * Forgot password
+ */
+router.post("/forgot-password", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required.",
+            });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "No account found with this email address.",
+            });
+        }
+
+        if (user.authProvider === "google" && !user.password) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "This account uses Google login. Please continue with Google instead.",
+            });
+        }
+
+        await sendPasswordResetEmail(user);
+
+        return res.status(200).json({
+            success: true,
+            message: "Password reset email sent. Please check your inbox.",
+        });
+    } catch (error) {
+        console.error("FORGOT_PASSWORD_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not send password reset email.",
+        });
+    }
+});
+
+/**
+ * Reset password
+ */
+router.put("/reset-password/:token", async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Reset token is required.",
+            });
+        }
+
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "New password is required.",
+            });
+        }
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Password must be at least 8 characters and include uppercase, lowercase, and a number.",
+            });
+        }
+
+        const user = await User.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Reset link is invalid or expired.",
+            });
+        }
+
+        user.password = await bcrypt.hash(password, 10);
+        user.authProvider = "local";
+        user.passwordResetToken = null;
+        user.passwordResetExpires = null;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Password reset successfully. You can now log in.",
+        });
+    } catch (error) {
+        console.error("RESET_PASSWORD_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not reset password.",
         });
     }
 });

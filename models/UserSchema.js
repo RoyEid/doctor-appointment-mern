@@ -54,6 +54,16 @@ const UserSchema = new mongoose.Schema(
       default: null,
     },
 
+    passwordResetToken: {
+      type: String,
+      default: null,
+    },
+
+    passwordResetExpires: {
+      type: Date,
+      default: null,
+    },
+
     // Optional doctor profile fields (single User model for auth)
     specialization: {
       type: String,

@@ -1,9 +1,21 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { apiConfig } from "../config/api";
 import { GoogleLogin } from "@react-oauth/google";
 import Swal from "sweetalert2";
+import {
+  ArrowRight,
+  CheckCircle2,
+  HeartPulse,
+  Lock,
+  Mail,
+  MailCheck,
+  ShieldCheck,
+  Sparkles,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 function Login() {
   const { login } = useContext(AuthContext);
@@ -12,6 +24,7 @@ function Login() {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const verificationIntervalRef = useRef(null);
 
@@ -322,105 +335,236 @@ function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-12">
-      <form
-        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100"
-        onSubmit={handleSubmit}
-      >
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-800">
-            Welcome Back
-          </h2>
-          <p className="text-gray-500 mt-2">
-            Log in to manage your appointments
-          </p>
-        </div>
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-10 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm text-center">
-            {error}
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] max-w-6xl items-center gap-10 lg:grid-cols-[1fr_0.9fr]">
+        {/* Left professional panel */}
+        <section className="hidden lg:block">
+          <div className="relative overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#008e9b] via-[#00a7b5] to-[#46daea] p-10 text-white shadow-[0_30px_90px_rgba(0,142,155,0.25)]">
+            <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+
+            <div className="relative z-10">
+              <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-xl">
+                <HeartPulse size={34} />
+              </div>
+
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-white/75">
+                Secure MediCare Login
+              </p>
+
+              <h1 className="max-w-xl text-5xl font-black leading-tight">
+                Manage your healthcare with confidence.
+              </h1>
+
+              <p className="mt-6 max-w-lg text-base font-medium leading-relaxed text-white/80">
+                Sign in to book appointments, track doctor responses, manage
+                reschedules, and continue your care journey securely.
+              </p>
+
+              <div className="mt-10 grid gap-4">
+                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
+                  <ShieldCheck size={26} />
+                  <div>
+                    <p className="font-black">Protected account access</p>
+                    <p className="text-sm text-white/75">
+                      Secure login with patient, doctor, and admin roles.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
+                  <MailCheck size={26} />
+                  <div>
+                    <p className="font-black">Email verification support</p>
+                    <p className="text-sm text-white/75">
+                      Verify from your phone and continue from your laptop.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
+                  <CheckCircle2 size={26} />
+                  <div>
+                    <p className="font-black">Password recovery ready</p>
+                    <p className="text-sm text-white/75">
+                      Reset your password safely if you forget it.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+        </section>
 
-        <div className="space-y-5">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
-              required
-            />
-          </div>
+        {/* Login card */}
+        <section className="mx-auto w-full max-w-md">
+          <form
+            className="relative overflow-hidden rounded-[2rem] border border-white bg-white/90 p-7 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-9"
+            onSubmit={handleSubmit}
+          >
+            <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-[#008e9b] via-[#46daea] to-[#008e9b]" />
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50"
-              required
-            />
-          </div>
-        </div>
+            <div className="mb-8 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
+                <Lock size={32} />
+              </div>
 
-        <button
-          disabled={loading}
-          className={`w-full mt-8 py-3.5 rounded-lg text-white font-bold tracking-wide focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008e9b] shadow-md hover:shadow-lg transition-all duration-300 transform ${
-            loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#008e9b] hover:bg-[#007a85] hover:-translate-y-0.5"
-          }`}
-        >
-          {loading ? "Logging in..." : "Login securely"}
-        </button>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+                <Sparkles size={15} />
+                Welcome Back
+              </div>
 
-        <div className="mt-5 text-center">
-          <p className="text-sm text-gray-500">
-            Didn't receive the email?{" "}
+              <h2 className="text-3xl font-black text-gray-900">
+                Login to MediCare
+              </h2>
+
+              <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500">
+                Access your dashboard and manage your healthcare appointments.
+              </p>
+            </div>
+
+            {error && (
+              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-5">
+              <div>
+                <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                  Email Address
+                </label>
+
+                <div className="relative">
+                  <Mail
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  />
+
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-1.5 flex items-center justify-between gap-3">
+                  <label className="block text-sm font-bold text-gray-700">
+                    Password
+                  </label>
+
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs font-black text-[#008e9b] transition-colors hover:text-[#007a85] hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+
+                <div className="relative">
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  />
+
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={handleChange}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                    required
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-gray-400 transition-colors hover:text-[#008e9b]"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <button
-              type="button"
-              onClick={handleResendVerificationEmail}
-              className="font-semibold text-[#008e9b] hover:text-[#007a85] hover:underline transition-colors bg-transparent border-none p-0"
+              disabled={loading}
+              className={`group mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
+                loading
+                  ? "cursor-not-allowed bg-gray-400"
+                  : "bg-[#008e9b] hover:-translate-y-0.5 hover:bg-[#007a85] hover:shadow-xl"
+              }`}
             >
-              Resend verification email
+              {loading ? "Logging in..." : "Login securely"}
+              {!loading && (
+                <ArrowRight
+                  size={19}
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              )}
             </button>
-          </p>
-        </div>
 
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200"></div>
-          </div>
+            <div className="mt-5 rounded-2xl bg-[#eefbfc] px-4 py-3 text-center">
+              <p className="text-sm text-gray-600">
+                Didn't receive the email?{" "}
+                <button
+                  type="button"
+                  onClick={handleResendVerificationEmail}
+                  className="border-none bg-transparent p-0 font-black text-[#008e9b] transition-colors hover:text-[#007a85] hover:underline"
+                >
+                  Resend verification
+                </button>
+              </p>
+            </div>
 
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500 uppercase tracking-wider text-[10px] font-bold">
-              Or continue with
-            </span>
-          </div>
-        </div>
+            <div className="relative my-7">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
 
-        <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setError("Google Login Failed")}
-            theme="filled_blue"
-            shape="pill"
-            width="100%"
-          />
-        </div>
-      </form>
-    </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google Login Failed")}
+                theme="filled_blue"
+                shape="pill"
+                width="100%"
+              />
+            </div>
+
+            <p className="mt-7 text-center text-sm font-medium text-gray-600">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="font-black text-[#008e9b] hover:text-[#007a85] hover:underline"
+              >
+                Create account
+              </Link>
+            </p>
+          </form>
+        </section>
+      </div>
+    </main>
   );
 }
 
