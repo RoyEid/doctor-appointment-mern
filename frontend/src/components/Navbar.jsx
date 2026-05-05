@@ -108,7 +108,7 @@ function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 shadow-sm backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-24 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           to="/"
           onClick={closeMenu}
@@ -116,7 +116,7 @@ function Navbar() {
         >
           <img
             alt="MediCare Logo"
-            className="h-14 w-auto object-contain"
+            className="h-16 w-auto object-contain md:h-20"
             src="/logo.png"
           />
         </Link>
