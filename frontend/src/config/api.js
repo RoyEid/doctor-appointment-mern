@@ -25,15 +25,11 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
     (res) => res,
-    (err) => Promise.reject(err),
+    (err) => Promise.reject(err)
 );
 
 const fullUrl = (path) => `${API_BASE_URL}${path}`;
 
-/*
-  Use API_ENDPOINTS with axios:
-  api.get(API_ENDPOINTS.getMyAppointments)
-*/
 export const API_ENDPOINTS = {
     // Auth
     login: "/auth/login",
@@ -42,6 +38,8 @@ export const API_ENDPOINTS = {
     forgotPassword: "/auth/forgot-password",
     resetPassword: (token) => `/auth/reset-password/${token}`,
     resendVerification: "/auth/resend-verification",
+    resendVerificationPublic: "/auth/resend-verification-public",
+    checkVerificationStatus: "/auth/check-verification-status",
     verifyEmail: (token) => `/auth/verify-email/${token}`,
 
     // Users
@@ -49,17 +47,17 @@ export const API_ENDPOINTS = {
     updateProfile: "/users/profile",
 
     // Doctors
-    getAllDoctors: "/doctors",
+    getAllDoctors: "/doctors/allDoctors",
     getDoctorById: (id) => `/doctors/${id}`,
-    addDoctor: "/doctors",
+    addDoctor: "/doctors/addDoctors",
     updateDoctor: (id) => `/doctors/${id}`,
     deleteDoctor: (id) => `/doctors/${id}`,
     updateDoctorAvailability: "/doctors/availability",
 
     // Departments
-    getAllDepartments: "/departments",
+    getAllDepartments: "/departments/allDepartments",
     getDepartmentById: (id) => `/departments/${id}`,
-    addDepartment: "/departments",
+    addDepartment: "/departments/addDepartment",
     updateDepartment: (id) => `/departments/${id}`,
     deleteDepartment: (id) => `/departments/${id}`,
 
@@ -92,10 +90,6 @@ export const API_ENDPOINTS = {
     adminDashboard: "/admin/dashboard",
 };
 
-/*
-  Use apiConfig with fetch:
-  fetch(apiConfig.getAllDoctors)
-*/
 export const apiConfig = {
     // Base
     baseURL: API_BASE_URL,
@@ -107,6 +101,8 @@ export const apiConfig = {
     forgotPassword: fullUrl("/auth/forgot-password"),
     resetPassword: (token) => fullUrl(`/auth/reset-password/${token}`),
     resendVerification: fullUrl("/auth/resend-verification"),
+    resendVerificationPublic: fullUrl("/auth/resend-verification-public"),
+    checkVerificationStatus: fullUrl("/auth/check-verification-status"),
     verifyEmail: (token) => fullUrl(`/auth/verify-email/${token}`),
 
     // Users
@@ -114,17 +110,17 @@ export const apiConfig = {
     updateProfile: fullUrl("/users/profile"),
 
     // Doctors
-    getAllDoctors: fullUrl("/doctors"),
+    getAllDoctors: fullUrl("/doctors/allDoctors"),
     getDoctorById: (id) => fullUrl(`/doctors/${id}`),
-    addDoctor: fullUrl("/doctors"),
+    addDoctor: fullUrl("/doctors/addDoctors"),
     updateDoctor: (id) => fullUrl(`/doctors/${id}`),
     deleteDoctor: (id) => fullUrl(`/doctors/${id}`),
     updateDoctorAvailability: fullUrl("/doctors/availability"),
 
     // Departments
-    getAllDepartments: fullUrl("/departments"),
+    getAllDepartments: fullUrl("/departments/allDepartments"),
     getDepartmentById: (id) => fullUrl(`/departments/${id}`),
-    addDepartment: fullUrl("/departments"),
+    addDepartment: fullUrl("/departments/addDepartment"),
     updateDepartment: (id) => fullUrl(`/departments/${id}`),
     deleteDepartment: (id) => fullUrl(`/departments/${id}`),
 
