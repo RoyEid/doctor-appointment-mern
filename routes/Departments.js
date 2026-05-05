@@ -4,79 +4,232 @@ import auth from "../auth/Middleware.js";
 
 const router = express.Router();
 
+const escapeRegExp = (value) => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
 
-// Add Department (ADMIN ONLY)
-router.post("/addDepartment", auth("admin"), async (req, res) => {
+const getAllDepartmentsHandler = async (req, res) => {
+  try {
+    const departments = await Departments.find().sort({ createdAt: -1 });
+    return res.json(departments);
+  } catch (error) {
+    console.error("Error fetching departments:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching departments",
+    });
+  }
+};
+
+const createDepartmentHandler = async (req, res) => {
   try {
     const { name, description } = req.body;
 
     if (!name || !description) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Name and description are required" 
+      return res.status(400).json({
+        success: false,
+        message: "Name and description are required",
       });
     }
 
-    // Check for duplicates
-    const existingDepartment = await Departments.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+    const cleanName = name.trim();
+    const cleanDescription = description.trim();
+
+    const existingDepartment = await Departments.findOne({
+      name: {
+        $regex: new RegExp(`^${escapeRegExp(cleanName)}$`, "i"),
+      },
+    });
+
     if (existingDepartment) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "A department with this name already exists" 
+      return res.status(400).json({
+        success: false,
+        message: "A department with this name already exists",
       });
     }
 
     const department = await Departments.create({
-      name,
-      description,
+      name: cleanName,
+      description: cleanDescription,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Department added successfully",
-      department
+      department,
     });
-
   } catch (error) {
     console.error("Error adding department:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
-});
+};
 
+/**
+ * Add Department
+ *
+ * New route:
+ * POST /departments
+ *
+ * Legacy route:
+ * POST /departments/addDepartment
+ */
+router.post("/", auth("admin"), createDepartmentHandler);
+router.post("/addDepartment", auth("admin"), createDepartmentHandler);
 
-//  Get all departments
-router.get("/allDepartments", async (req, res) => {
-  try {
-    const departments = await Departments.find();
-    res.json(departments);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching departments" });
-  }
-});
+/**
+ * Get all departments
+ *
+ * New route:
+ * GET /departments
+ *
+ * Legacy route:
+ * GET /departments/allDepartments
+ */
+router.get("/", getAllDepartmentsHandler);
+router.get("/allDepartments", getAllDepartmentsHandler);
 
-
-//  Get departments count (for dashboard)
+/**
+ * Get departments count
+ *
+ * GET /departments/count
+ */
 router.get("/count", async (req, res) => {
   try {
     const count = await Departments.countDocuments();
-    res.json({ count });
+
+    return res.json({ count });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching departments count" });
+    console.error("Error fetching departments count:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching departments count",
+    });
   }
 });
 
+/**
+ * Get one department by id
+ *
+ * GET /departments/:id
+ */
+router.get("/:id", async (req, res) => {
+  try {
+    const department = await Departments.findById(req.params.id);
 
-// Delete Department (ADMIN ONLY)
+    if (!department) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
+
+    return res.json(department);
+  } catch (error) {
+    console.error("Error fetching department:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
+/**
+ * Update Department
+ *
+ * PUT /departments/:id
+ */
+router.put("/:id", auth("admin"), async (req, res) => {
+  try {
+    const { name, description } = req.body;
+
+    if (!name || !description) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and description are required",
+      });
+    }
+
+    const cleanName = name.trim();
+    const cleanDescription = description.trim();
+
+    const existingDepartment = await Departments.findOne({
+      _id: { $ne: req.params.id },
+      name: {
+        $regex: new RegExp(`^${escapeRegExp(cleanName)}$`, "i"),
+      },
+    });
+
+    if (existingDepartment) {
+      return res.status(400).json({
+        success: false,
+        message: "A department with this name already exists",
+      });
+    }
+
+    const updatedDepartment = await Departments.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: cleanName,
+        description: cleanDescription,
+      },
+      { new: true }
+    );
+
+    if (!updatedDepartment) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Department updated successfully",
+      department: updatedDepartment,
+    });
+  } catch (error) {
+    console.error("Error updating department:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
+/**
+ * Delete Department
+ *
+ * DELETE /departments/:id
+ */
 router.delete("/:id", auth("admin"), async (req, res) => {
   try {
     const deletedDepartment = await Departments.findByIdAndDelete(req.params.id);
+
     if (!deletedDepartment) {
-      return res.status(404).json({ message: "Department not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
     }
-    res.json({ message: "Department deleted successfully" });
+
+    return res.json({
+      success: true,
+      message: "Department deleted successfully",
+    });
   } catch (error) {
     console.error("Error deleting department:", error);
-    res.status(500).json({ message: "Server error" });
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 });
 

@@ -12,6 +12,24 @@ const router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const getAllDoctorsHandler = async (req, res) => {
+    try {
+        const doctors = await Doctor.find();
+        return res.json(doctors);
+    } catch (error) {
+        console.error("Error fetching doctors:", error);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+// Public list
+// GET /doctors
+router.get("/", getAllDoctorsHandler);
+
+// Legacy public list
+// GET /doctors/allDoctors
+router.get("/allDoctors", getAllDoctorsHandler);
+
 // Get doctor self profile
 router.get("/me", auth("doctor"), async (req, res) => {
     try {
@@ -21,10 +39,10 @@ router.get("/me", auth("doctor"), async (req, res) => {
             return res.status(404).json({ message: "Doctor profile not found" });
         }
 
-        res.json(doctor);
+        return res.json(doctor);
     } catch (error) {
         console.error("Error fetching doctor profile:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 
@@ -112,12 +130,12 @@ router.put("/update-profile", auth("doctor"), upload.single("image"), async (req
     }
 });
 
-// Admin: create doctor alias -> /admin/create-doctor
+// Admin: create doctor alias -> /doctors/admin/create-doctor
 router.post("/admin/create-doctor", auth("admin"), upload.single("image"), async (req, res) => {
     return createDoctorHandler(req, res);
 });
 
-// Legacy admin: /addDoctors
+// Legacy admin: /doctors/addDoctors
 router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, res) => {
     return createDoctorHandler(req, res);
 });
@@ -181,7 +199,7 @@ async function createDoctorHandler(req, res) {
 
         const savedDoctor = await newDoctor.save();
 
-        res.status(201).json({
+        return res.status(201).json({
             message: "Doctor account created successfully",
             data: {
                 doctor: {
@@ -203,41 +221,49 @@ async function createDoctorHandler(req, res) {
         });
     } catch (error) {
         console.error("Error adding doctor:", error);
-        res.status(500).json({ message: error.message || "Server error" });
+        return res.status(500).json({ message: error.message || "Server error" });
     }
 }
 
-// Public list
-router.get("/allDoctors", async (req, res) => {
-    try {
-        const doctors = await Doctor.find();
-        res.json(doctors);
-    } catch (error) {
-        console.error("Error fetching doctors:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-
-// Admin list alias -> /admin/doctors
+// Admin list alias -> /doctors/admin/doctors
 router.get("/admin/doctors", auth("admin"), async (req, res) => {
     try {
         const doctors = await Doctor.find();
-        res.json(doctors);
+        return res.json(doctors);
     } catch (error) {
         console.error("Error fetching admin doctors:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 
 router.get("/count", async (req, res) => {
     try {
         const count = await Doctor.countDocuments();
-        res.json({ count });
+        return res.json({ count });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching doctors count" });
+        return res.status(500).json({ message: "Error fetching doctors count" });
     }
 });
 
+// Better specialty route
+// GET /doctors/byspecialty/Cardiology
+router.get("/byspecialty/:specialty", async (req, res) => {
+    try {
+        const { specialty } = req.params;
+
+        const doctors = await Doctor.find({
+            specialty: { $regex: new RegExp(specialty, "i") },
+        });
+
+        return res.json(doctors);
+    } catch (error) {
+        console.error("Error fetching doctors by specialty:", error);
+        return res.status(500).json({ message: error.message });
+    }
+});
+
+// Legacy specialty route
+// GET /doctors/doctors/byspecialty/Cardiology
 router.get("/doctors/byspecialty/:specialty", async (req, res) => {
     try {
         const { specialty } = req.params;
@@ -246,10 +272,10 @@ router.get("/doctors/byspecialty/:specialty", async (req, res) => {
             specialty: { $regex: new RegExp(specialty, "i") },
         });
 
-        res.json(doctors);
+        return res.json(doctors);
     } catch (error) {
-        console.error("error", error);
-        res.status(500).json({ message: error.message });
+        console.error("Error fetching doctors by specialty:", error);
+        return res.status(500).json({ message: error.message });
     }
 });
 
@@ -278,10 +304,10 @@ router.put("/availability", auth("doctor"), async (req, res) => {
 
         const updatedDoctor = await doctor.save();
 
-        res.json(updatedDoctor);
+        return res.json(updatedDoctor);
     } catch (error) {
         console.error("Error updating availability:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 
@@ -295,14 +321,14 @@ router.get("/:id", async (req, res) => {
             return res.status(404).json({ message: "Doctor not found" });
         }
 
-        res.json(doctor);
+        return res.json(doctor);
     } catch (error) {
         console.error("Error fetching doctor by id:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 
-// Admin alias delete -> /admin/doctors/:id
+// Admin alias delete -> /doctors/admin/doctors/:id
 // IMPORTANT: this must stay before router.delete("/:id")
 router.delete("/admin/doctors/:id", auth("admin"), async (req, res) => {
     try {
@@ -312,10 +338,10 @@ router.delete("/admin/doctors/:id", auth("admin"), async (req, res) => {
             return res.status(404).json({ message: "Doctor not found" });
         }
 
-        res.json({ message: "Doctor deleted successfully" });
+        return res.json({ message: "Doctor deleted successfully" });
     } catch (error) {
         console.error("Error deleting doctor:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 
@@ -328,10 +354,10 @@ router.delete("/:id", auth("admin"), async (req, res) => {
             return res.status(404).json({ message: "Doctor not found" });
         }
 
-        res.json({ message: "Doctor deleted successfully" });
+        return res.json({ message: "Doctor deleted successfully" });
     } catch (error) {
         console.error("Error deleting doctor:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 
@@ -367,10 +393,10 @@ router.put("/:id", auth("admin"), upload.single("image"), async (req, res) => {
             return res.status(404).json({ message: "Doctor not found" });
         }
 
-        res.json(updatedDoctor);
+        return res.json(updatedDoctor);
     } catch (error) {
         console.error("Error updating doctor:", error);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 
