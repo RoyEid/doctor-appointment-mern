@@ -102,12 +102,12 @@ const sendPasswordResetEmail = async (user) => {
         to: user.email,
         subject: "Reset your MediCare password",
         html: `
-      <div style="font-family: Arial, sans-serif; color: #333; max-width: 540px; margin: auto; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
-        <div style="background: #f8fcfd; padding: 20px; border-bottom: 3px solid #008e9b;">
+      <div style="font-family: Arial, sans-serif; color: #333; max-width: 560px; margin: auto; border: 1px solid #ddd; border-radius: 12px; overflow: hidden;">
+        <div style="background: #f8fcfd; padding: 22px; border-bottom: 3px solid #008e9b;">
           <h2 style="margin: 0; color: #008e9b;">Reset your MediCare password</h2>
         </div>
 
-        <div style="padding: 22px;">
+        <div style="padding: 24px;">
           <p>Hello <strong>${user.name || "there"}</strong>,</p>
 
           <p>
@@ -119,6 +119,12 @@ const sendPasswordResetEmail = async (user) => {
               Reset Password
             </a>
           </p>
+
+          <div style="background: #eefbfc; border-left: 4px solid #008e9b; padding: 12px 14px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 13px; color: #334155; line-height: 1.6;">
+              <strong>Important:</strong> If you requested multiple reset emails, only the newest reset link will work.
+            </p>
+          </div>
 
           <p style="font-size: 13px; color: #666;">
             This link expires in 30 minutes.
@@ -404,6 +410,15 @@ router.put("/reset-password/:token", async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "Reset link is invalid or expired.",
+            });
+        }
+
+        const isSamePassword = await bcrypt.compare(password, user.password);
+
+        if (isSamePassword) {
+            return res.status(400).json({
+                success: false,
+                message: "New password must be different from your current password.",
             });
         }
 
