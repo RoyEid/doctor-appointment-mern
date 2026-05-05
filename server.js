@@ -19,6 +19,26 @@ console.log("====================================");
 
 connectDB();
 
+/*
+  Request logger.
+  This helps us confirm every request that reaches Render.
+*/
+app.use((req, res, next) => {
+    console.log(`[REQUEST] ${req.method} ${req.originalUrl}`);
+
+    res.on("finish", () => {
+        console.log(
+            `[RESPONSE] ${req.method} ${req.originalUrl} ${res.statusCode}`
+        );
+    });
+
+    next();
+});
+
+/*
+  CORS fix.
+  This must be before routes.
+*/
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
@@ -39,6 +59,10 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+/*
+  Test routes.
+  These must be top-level routes, not inside another callback.
+*/
 app.get("/", (req, res) => {
     return res.status(200).json({
         success: true,
@@ -71,27 +95,30 @@ app.get("/test-email-verification-route", (req, res) => {
     });
 });
 
-// User/Auth routes
+/*
+  Main project routes.
+*/
 app.use("/user", User);
 app.use("/auth", User);
 app.use("/api/user", User);
 app.use("/api/auth", User);
 
-// Doctor routes
 app.use("/doctors", Doctor);
 app.use("/api/doctors", Doctor);
 
-// Appointment routes
 app.use("/appointments", Appointment);
 app.use("/api/appointments", Appointment);
 
-// Department routes
 app.use("/departments", Departments);
 app.use("/api/departments", Departments);
 
-// Static uploads
 app.use("/uploads", express.static("uploads"));
 
+/*
+  JSON 404 fallback.
+  If you see this, the request reached your backend,
+  but the route does not exist.
+*/
 app.use((req, res) => {
     return res.status(404).json({
         success: false,
