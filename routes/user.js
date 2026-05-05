@@ -38,7 +38,7 @@ const sendVerificationEmail = async (user) => {
     const verificationToken = createVerificationToken();
 
     user.emailVerificationToken = verificationToken;
-    user.emailVerificationExpires = Date.now() + 1000 * 60 * 60 * 24; // 24 hours
+    user.emailVerificationExpires = Date.now() + 1000 * 60 * 60 * 24;
 
     await user.save();
 
@@ -86,7 +86,6 @@ const sendVerificationEmail = async (user) => {
 
 /**
  * Google login/register
- * Google accounts are considered verified because Google already verifies ownership.
  */
 router.post("/google", async (req, res) => {
     const { credential } = req.body;
@@ -168,8 +167,6 @@ router.post("/google", async (req, res) => {
 
 /**
  * Normal email/password register
- * User is created as unverified.
- * Verification email is sent.
  */
 router.post("/register", async (req, res) => {
     try {
@@ -254,7 +251,6 @@ router.post("/register", async (req, res) => {
 
 /**
  * Verify email link
- * User clicks link from email.
  */
 router.get("/verify-email/:token", async (req, res) => {
     try {
@@ -285,7 +281,6 @@ router.get("/verify-email/:token", async (req, res) => {
 
 /**
  * Protected resend verification email
- * Works only if the user is already logged in.
  */
 router.post("/resend-verification", auth(), async (req, res) => {
     try {
@@ -323,7 +318,6 @@ router.post("/resend-verification", auth(), async (req, res) => {
 
 /**
  * Public resend verification email
- * Used when user cannot log in because email is not verified.
  */
 router.post("/resend-verification-public", async (req, res) => {
     try {
@@ -350,7 +344,8 @@ router.post("/resend-verification-public", async (req, res) => {
         if (user.authProvider === "google" && !user.password) {
             return res.status(400).json({
                 success: false,
-                message: "This account uses Google login and does not need email verification.",
+                message:
+                    "This account uses Google login and does not need email verification.",
             });
         }
 
@@ -378,9 +373,53 @@ router.post("/resend-verification-public", async (req, res) => {
 });
 
 /**
+ * Check verification status
+ * This is used by the laptop browser while the user verifies from phone.
+ */
+router.post("/check-verification-status", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required.",
+                isEmailVerified: false,
+            });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "No account found with this email address.",
+                isEmailVerified: false,
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            isEmailVerified: user.isEmailVerified,
+            message: user.isEmailVerified
+                ? "Email is verified."
+                : "Email is not verified yet.",
+        });
+    } catch (error) {
+        console.error("CHECK_VERIFICATION_STATUS_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not check verification status.",
+            isEmailVerified: false,
+        });
+    }
+});
+
+/**
  * Normal email/password login
- * Workflow B:
- * Register -> verify email -> login -> book appointment
  */
 router.post("/signin", async (req, res) => {
     try {
@@ -423,7 +462,8 @@ router.post("/signin", async (req, res) => {
         if (user.authProvider === "local" && !user.isEmailVerified) {
             return res.status(403).json({
                 success: false,
-                message: "Email verification required. Please verify your email before logging in.",
+                message:
+                    "Email verification required. Please verify your email before logging in.",
                 code: "EMAIL_NOT_VERIFIED",
             });
         }

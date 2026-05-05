@@ -11,6 +11,7 @@ export const apiConfig = {
     googleLogin: `${API_BASE_URL}/user/google`,
     resendVerification: `${API_BASE_URL}/user/resend-verification`,
     resendVerificationPublic: `${API_BASE_URL}/user/resend-verification-public`,
+    checkVerificationStatus: `${API_BASE_URL}/user/check-verification-status`,
 
     // Doctor endpoints
     getAllDoctors: `${API_BASE_URL}/doctors/allDoctors`,

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiConfig } from "../config/api";
@@ -13,6 +13,8 @@ function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const verificationIntervalRef = useRef(null);
+
   useEffect(() => {
     const verified = searchParams.get("verified");
 
@@ -20,7 +22,7 @@ function Login() {
       Swal.fire({
         icon: "success",
         title: "Email verified",
-        text: "Your email has been verified successfully. You can now log in.",
+        text: "Your email has been verified successfully. Go back to the browser where you were logging in and continue.",
         confirmButtonColor: "#008e9b",
       });
     }
@@ -34,6 +36,14 @@ function Login() {
       });
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    return () => {
+      if (verificationIntervalRef.current) {
+        clearInterval(verificationIntervalRef.current);
+      }
+    };
+  }, []);
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -61,6 +71,119 @@ function Login() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  const checkVerificationStatus = async (email) => {
+    const res = await fetch(apiConfig.checkVerificationStatus, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    return data;
+  };
+
+  const startWaitingForVerification = async () => {
+    const email = form.email.trim();
+
+    if (!email) {
+      Swal.fire({
+        icon: "warning",
+        title: "Email required",
+        text: "Please enter your email address first.",
+        confirmButtonColor: "#008e9b",
+      });
+      return;
+    }
+
+    if (verificationIntervalRef.current) {
+      clearInterval(verificationIntervalRef.current);
+    }
+
+    let checksCount = 0;
+    const maxChecks = 40;
+
+    Swal.fire({
+      title: "Waiting for email verification",
+      html: `
+        <div style="text-align: left; line-height: 1.6;">
+          <p style="margin-bottom: 10px;">
+            Open Gmail on your phone and press <strong>Verify Email</strong>.
+          </p>
+          <p style="margin-bottom: 10px;">
+            Keep this laptop page open. We will detect the verification automatically.
+          </p>
+          <p style="font-size: 13px; color: #6b7280;">
+            After it is verified, you can continue from this laptop.
+          </p>
+        </div>
+      `,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      cancelButtonColor: "#6b7280",
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    verificationIntervalRef.current = setInterval(async () => {
+      try {
+        checksCount += 1;
+
+        const data = await checkVerificationStatus(email);
+
+        if (data.success && data.isEmailVerified) {
+          clearInterval(verificationIntervalRef.current);
+          verificationIntervalRef.current = null;
+
+          Swal.fire({
+            icon: "success",
+            title: "Email verified",
+            html: `
+              <p>Your email is verified now.</p>
+              <p style="margin-top: 10px; color: #6b7280;">
+                Click the login button again to continue from this laptop.
+              </p>
+            `,
+            confirmButtonText: "Continue",
+            confirmButtonColor: "#008e9b",
+          });
+
+          return;
+        }
+
+        if (checksCount >= maxChecks) {
+          clearInterval(verificationIntervalRef.current);
+          verificationIntervalRef.current = null;
+
+          Swal.fire({
+            icon: "info",
+            title: "Still waiting",
+            html: `
+              <p>We could not detect verification yet.</p>
+              <p style="margin-top: 10px; color: #6b7280;">
+                If you already clicked the email link, press Login again.
+              </p>
+            `,
+            confirmButtonColor: "#008e9b",
+          });
+        }
+      } catch (err) {
+        clearInterval(verificationIntervalRef.current);
+        verificationIntervalRef.current = null;
+
+        Swal.fire({
+          icon: "error",
+          title: "Connection issue",
+          text: "Could not check verification status. Please try again.",
+          confirmButtonColor: "#008e9b",
+        });
+      }
+    }, 3000);
+  };
+
   const handleResendVerificationEmail = async () => {
     const email = form.email.trim();
 
@@ -68,7 +191,7 @@ function Login() {
       Swal.fire({
         icon: "warning",
         title: "Email required",
-        text: "Please enter your email address first, then click login again.",
+        text: "Please enter your email address first.",
         confirmButtonColor: "#008e9b",
       });
       return;
@@ -87,10 +210,16 @@ function Login() {
         Swal.fire({
           icon: "success",
           title: "Verification email sent",
-          text:
-            resendData.message ||
-            "A new verification email was sent. Please check your inbox.",
+          html: `
+            <p>${resendData.message || "A new verification email was sent."}</p>
+            <p style="margin-top: 10px; color: #6b7280;">
+              Open Gmail on your phone, press Verify Email, then return to this laptop.
+            </p>
+          `,
+          confirmButtonText: "Wait on this laptop",
           confirmButtonColor: "#008e9b",
+        }).then(() => {
+          startWaitingForVerification();
         });
       } else {
         Swal.fire({
@@ -116,15 +245,34 @@ function Login() {
     const result = await Swal.fire({
       icon: "warning",
       title: "Email verification required",
-      text: "Please verify your email before logging in.",
+      html: `
+        <div style="text-align: left; line-height: 1.6;">
+          <p style="margin-bottom: 10px;">
+            Your account exists, but your email is not verified yet.
+          </p>
+          <p style="margin-bottom: 10px;">
+            You can open Gmail on your phone and press <strong>Verify Email</strong>.
+          </p>
+          <p style="font-size: 13px; color: #6b7280;">
+            Keep this laptop page open. We can wait here and detect when your email becomes verified.
+          </p>
+        </div>
+      `,
+      showDenyButton: true,
       showCancelButton: true,
-      confirmButtonText: "Resend Email",
-      cancelButtonText: "OK",
+      confirmButtonText: "Wait here",
+      denyButtonText: "Resend Email",
+      cancelButtonText: "Cancel",
       confirmButtonColor: "#008e9b",
+      denyButtonColor: "#0ea5e9",
       cancelButtonColor: "#6b7280",
     });
 
     if (result.isConfirmed) {
+      await startWaitingForVerification();
+    }
+
+    if (result.isDenied) {
       await handleResendVerificationEmail();
     }
   };
@@ -145,8 +293,8 @@ function Login() {
 
       if (!res.ok) {
         if (data.code === "EMAIL_NOT_VERIFIED") {
-          await showEmailVerificationPopup();
           setLoading(false);
+          await showEmailVerificationPopup();
           return;
         }
 
@@ -237,13 +385,18 @@ function Login() {
           {loading ? "Logging in..." : "Login securely"}
         </button>
 
-        <button
-          type="button"
-          onClick={handleResendVerificationEmail}
-          className="w-full mt-4 text-sm font-semibold text-[#008e9b] hover:text-[#007a85] transition-colors"
-        >
-          Resend verification email
-        </button>
+        <div className="mt-5 text-center">
+          <p className="text-sm text-gray-500">
+            Didn't receive the email?{" "}
+            <button
+              type="button"
+              onClick={handleResendVerificationEmail}
+              className="font-semibold text-[#008e9b] hover:text-[#007a85] hover:underline transition-colors bg-transparent border-none p-0"
+            >
+              Resend verification email
+            </button>
+          </p>
+        </div>
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
