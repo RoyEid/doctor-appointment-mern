@@ -12,6 +12,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+console.log("====================================");
+console.log("UPDATED SERVER.JS IS RUNNING");
+console.log("CORS DEBUG VERSION 2026-05-06");
+console.log("====================================");
+
 connectDB();
 
 app.use((req, res, next) => {
@@ -38,6 +43,15 @@ app.get("/", (req, res) => {
     res.json({
         success: true,
         message: "MediCare backend is running - CORS fixed version",
+    });
+});
+
+app.get("/debug-version-roy", (req, res) => {
+    res.json({
+        success: true,
+        message: "This is Roy's updated backend server.js",
+        version: "cors-debug-2026-05-06",
+        time: new Date().toISOString(),
     });
 });
 
