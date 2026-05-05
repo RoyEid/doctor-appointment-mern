@@ -57,7 +57,7 @@ const sendVerificationEmail = async (user) => {
           <p>Hello <strong>${user.name || "there"}</strong>,</p>
 
           <p>
-            Please confirm your email address before booking appointments.
+            Please confirm your email address before logging in and booking appointments.
           </p>
 
           <p style="margin: 24px 0;">
@@ -114,7 +114,7 @@ router.post("/google", async (req, res) => {
             });
         }
 
-        const normalizedEmail = email.toLowerCase();
+        const normalizedEmail = email.toLowerCase().trim();
 
         let user = await User.findOne({ email: normalizedEmail });
 
@@ -135,8 +135,6 @@ router.post("/google", async (req, res) => {
             user.emailVerificationToken = null;
             user.emailVerificationExpires = null;
 
-            // Keep local users as local if they registered with password before.
-            // They are now verified because they proved ownership through Google.
             if (!user.authProvider) {
                 user.authProvider = "local";
             }
@@ -232,13 +230,10 @@ router.post("/register", async (req, res) => {
             console.error("EMAIL_ERROR: verification email", emailError.message);
         }
 
-        const token = createToken(newUser);
-
         return res.status(201).json({
             success: true,
             message:
-                "User registered successfully. Please check your email to verify your account before booking appointments.",
-            token,
+                "Account created successfully. Please check your email to verify your account before logging in.",
             user: {
                 id: newUser._id,
                 name: newUser.name,
@@ -289,8 +284,8 @@ router.get("/verify-email/:token", async (req, res) => {
 });
 
 /**
- * Resend verification email
- * Useful if email expired or user did not receive it.
+ * Protected resend verification email
+ * Works only if the user is already logged in.
  */
 router.post("/resend-verification", auth(), async (req, res) => {
     try {
@@ -327,7 +322,65 @@ router.post("/resend-verification", auth(), async (req, res) => {
 });
 
 /**
+ * Public resend verification email
+ * Used when user cannot log in because email is not verified.
+ */
+router.post("/resend-verification-public", async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required.",
+            });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "No account found with this email address.",
+            });
+        }
+
+        if (user.authProvider === "google" && !user.password) {
+            return res.status(400).json({
+                success: false,
+                message: "This account uses Google login and does not need email verification.",
+            });
+        }
+
+        if (user.isEmailVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is already verified. You can log in now.",
+            });
+        }
+
+        await sendVerificationEmail(user);
+
+        return res.status(200).json({
+            success: true,
+            message: "Verification email sent. Please check your inbox.",
+        });
+    } catch (error) {
+        console.error("PUBLIC_RESEND_VERIFICATION_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not resend verification email.",
+        });
+    }
+});
+
+/**
  * Normal email/password login
+ * Workflow B:
+ * Register -> verify email -> login -> book appointment
  */
 router.post("/signin", async (req, res) => {
     try {
@@ -354,8 +407,7 @@ router.post("/signin", async (req, res) => {
         if (user.authProvider === "google" && !user.password) {
             return res.status(400).json({
                 success: false,
-                message:
-                    "This account uses Google login. Please continue with Google.",
+                message: "This account uses Google login. Please continue with Google.",
             });
         }
 
@@ -368,13 +420,19 @@ router.post("/signin", async (req, res) => {
             });
         }
 
+        if (user.authProvider === "local" && !user.isEmailVerified) {
+            return res.status(403).json({
+                success: false,
+                message: "Email verification required. Please verify your email before logging in.",
+                code: "EMAIL_NOT_VERIFIED",
+            });
+        }
+
         const token = createToken(user);
 
         return res.status(200).json({
             success: true,
-            message: user.isEmailVerified
-                ? "User logged in successfully"
-                : "User logged in successfully. Please verify your email before booking appointments.",
+            message: "User logged in successfully",
             token,
             user: {
                 id: user._id,

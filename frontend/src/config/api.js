@@ -1,5 +1,6 @@
 // API Configuration - Uses environment variables for production
-const API_BASE_URL = process.env.REACT_APP_API_URL || "https://doctor-backend-46g2.onrender.com";
+const API_BASE_URL =
+    process.env.REACT_APP_API_URL || "https://doctor-backend-46g2.onrender.com";
 
 export const apiConfig = {
     baseURL: API_BASE_URL,
@@ -9,11 +10,13 @@ export const apiConfig = {
     register: `${API_BASE_URL}/user/register`,
     googleLogin: `${API_BASE_URL}/user/google`,
     resendVerification: `${API_BASE_URL}/user/resend-verification`,
+    resendVerificationPublic: `${API_BASE_URL}/user/resend-verification-public`,
 
     // Doctor endpoints
     getAllDoctors: `${API_BASE_URL}/doctors/allDoctors`,
     getDoctorById: (id) => `${API_BASE_URL}/doctors/${id}`,
-    getDoctorsBySpecialty: (specialty) => `${API_BASE_URL}/doctors/doctors/bySpecialty/${specialty}`,
+    getDoctorsBySpecialty: (specialty) =>
+        `${API_BASE_URL}/doctors/doctors/bySpecialty/${specialty}`,
     addDoctor: `${API_BASE_URL}/doctors/addDoctors`,
     getDoctorsCount: `${API_BASE_URL}/doctors/count`,
     deleteDoctor: (id) => `${API_BASE_URL}/doctors/${id}`,
@@ -26,10 +29,12 @@ export const apiConfig = {
     createAppointment: `${API_BASE_URL}/appointments/createAppointment`,
     getMyAppointments: `${API_BASE_URL}/appointments/myAppointments`,
     getDoctorAppointments: `${API_BASE_URL}/appointments/doctor`,
-    deleteAppointment: (id) => `${API_BASE_URL}/appointments/deleteAppointment/${id}`,
-    updateAppointmentStatus: (id) => `${API_BASE_URL}/appointments/${id}/status`,
-    respondToReschedule: (id) => `${API_BASE_URL}/appointments/${id}/reschedule-response`,
-
+    deleteAppointment: (id) =>
+        `${API_BASE_URL}/appointments/deleteAppointment/${id}`,
+    updateAppointmentStatus: (id) =>
+        `${API_BASE_URL}/appointments/${id}/status`,
+    respondToReschedule: (id) =>
+        `${API_BASE_URL}/appointments/${id}/reschedule-response`,
 
     // Department endpoints
     getAllDepartments: `${API_BASE_URL}/departments/allDepartments`,
