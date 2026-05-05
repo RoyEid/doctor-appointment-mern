@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "/";
+const RAW_API_BASE_URL =
+    process.env.REACT_APP_API_URL || "http://localhost:10000";
+
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/$/, "");
 
 export const api = axios.create({
     baseURL: API_BASE_URL,
@@ -22,37 +25,51 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
     (res) => res,
-    (err) => {
-        return Promise.reject(err);
-    },
+    (err) => Promise.reject(err),
 );
 
+const fullUrl = (path) => `${API_BASE_URL}${path}`;
+
+/*
+  Use API_ENDPOINTS with axios:
+  api.get(API_ENDPOINTS.getMyAppointments)
+*/
 export const API_ENDPOINTS = {
+    // Auth
+    login: "/auth/login",
+    register: "/auth/register",
+    googleLogin: "/auth/google",
+    forgotPassword: "/auth/forgot-password",
+    resetPassword: (token) => `/auth/reset-password/${token}`,
+    resendVerification: "/auth/resend-verification",
+    verifyEmail: (token) => `/auth/verify-email/${token}`,
+
+    // Users
+    getProfile: "/users/profile",
+    updateProfile: "/users/profile",
+
     // Doctors
     getAllDoctors: "/doctors",
     getDoctorById: (id) => `/doctors/${id}`,
+    addDoctor: "/doctors",
+    updateDoctor: (id) => `/doctors/${id}`,
+    deleteDoctor: (id) => `/doctors/${id}`,
+    updateDoctorAvailability: "/doctors/availability",
 
-    // Doctor image helper
-    getDoctorImage: (image) => {
-        if (!image) return "/img/doctors/avatar.png";
-
-        if (image.startsWith("http")) return image;
-
-        return `${API_BASE_URL}${image.startsWith("/") ? image : `/${image}`}`;
-    },
-
-    // Auth / verification
-    resendVerification: "/auth/resend-verification",
+    // Departments
+    getAllDepartments: "/departments",
+    getDepartmentById: (id) => `/departments/${id}`,
+    addDepartment: "/departments",
+    updateDepartment: (id) => `/departments/${id}`,
+    deleteDepartment: (id) => `/departments/${id}`,
 
     // Appointments
     createAppointment: "/appointments/createAppointment",
     getMyAppointments: "/appointments/myAppointments",
+    getDoctorAppointments: "/appointments/doctor/appointments",
+    getDoctorSchedule: (date) => `/appointments/doctor/schedule?date=${date}`,
 
-    // Your backend has both old POST delete and new DELETE.
-    // AddAppointment/MyAppointments old code may still use this.
     deleteAppointmentLegacy: (id) => `/appointments/deleteAppointment/${id}`,
-
-    // New REST delete endpoint
     deleteAppointment: (id) => `/appointments/${id}`,
 
     getAppointmentAvailability: (doctorId, date) =>
@@ -63,14 +80,97 @@ export const API_ENDPOINTS = {
 
     updateAppointmentStatus: (id) => `/appointments/${id}/status`,
 
+    approveAppointment: (id) => `/appointments/doctor/appointments/${id}/approve`,
+    rejectAppointment: (id) => `/appointments/doctor/appointments/${id}/reject`,
+
     respondToReschedule: (id) => `/appointments/${id}/reschedule-response`,
 
     patientRescheduleAppointment: (id) =>
         `/appointments/${id}/patient-reschedule`,
+
+    // Admin
+    adminDashboard: "/admin/dashboard",
 };
 
-// Keep this because your current files use:
-// import { apiConfig } from "../config/api";
-export const apiConfig = API_ENDPOINTS;
+/*
+  Use apiConfig with fetch:
+  fetch(apiConfig.getAllDoctors)
+*/
+export const apiConfig = {
+    // Base
+    baseURL: API_BASE_URL,
+
+    // Auth
+    login: fullUrl("/auth/login"),
+    register: fullUrl("/auth/register"),
+    googleLogin: fullUrl("/auth/google"),
+    forgotPassword: fullUrl("/auth/forgot-password"),
+    resetPassword: (token) => fullUrl(`/auth/reset-password/${token}`),
+    resendVerification: fullUrl("/auth/resend-verification"),
+    verifyEmail: (token) => fullUrl(`/auth/verify-email/${token}`),
+
+    // Users
+    getProfile: fullUrl("/users/profile"),
+    updateProfile: fullUrl("/users/profile"),
+
+    // Doctors
+    getAllDoctors: fullUrl("/doctors"),
+    getDoctorById: (id) => fullUrl(`/doctors/${id}`),
+    addDoctor: fullUrl("/doctors"),
+    updateDoctor: (id) => fullUrl(`/doctors/${id}`),
+    deleteDoctor: (id) => fullUrl(`/doctors/${id}`),
+    updateDoctorAvailability: fullUrl("/doctors/availability"),
+
+    // Departments
+    getAllDepartments: fullUrl("/departments"),
+    getDepartmentById: (id) => fullUrl(`/departments/${id}`),
+    addDepartment: fullUrl("/departments"),
+    updateDepartment: (id) => fullUrl(`/departments/${id}`),
+    deleteDepartment: (id) => fullUrl(`/departments/${id}`),
+
+    // Appointments
+    createAppointment: fullUrl("/appointments/createAppointment"),
+    getMyAppointments: fullUrl("/appointments/myAppointments"),
+    getDoctorAppointments: fullUrl("/appointments/doctor/appointments"),
+    getDoctorSchedule: (date) =>
+        fullUrl(`/appointments/doctor/schedule?date=${date}`),
+
+    deleteAppointmentLegacy: (id) =>
+        fullUrl(`/appointments/deleteAppointment/${id}`),
+
+    deleteAppointment: (id) => fullUrl(`/appointments/${id}`),
+
+    getAppointmentAvailability: (doctorId, date) =>
+        fullUrl(`/appointments/availability?doctorId=${doctorId}&date=${date}`),
+
+    getAvailability: (doctorId, date) =>
+        fullUrl(`/appointments/availability?doctorId=${doctorId}&date=${date}`),
+
+    updateAppointmentStatus: (id) => fullUrl(`/appointments/${id}/status`),
+
+    approveAppointment: (id) =>
+        fullUrl(`/appointments/doctor/appointments/${id}/approve`),
+
+    rejectAppointment: (id) =>
+        fullUrl(`/appointments/doctor/appointments/${id}/reject`),
+
+    respondToReschedule: (id) =>
+        fullUrl(`/appointments/${id}/reschedule-response`),
+
+    patientRescheduleAppointment: (id) =>
+        fullUrl(`/appointments/${id}/patient-reschedule`),
+
+    // Admin
+    adminDashboard: fullUrl("/admin/dashboard"),
+
+    // Images
+    getDoctorImage: (image) => {
+        if (!image) return "/img/doctors/avatar.png";
+
+        if (image.startsWith("http")) return image;
+
+        return `${API_BASE_URL}${image.startsWith("/") ? image : `/${image}`}`;
+    },
+};
 
 export default api;
