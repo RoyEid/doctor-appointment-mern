@@ -64,6 +64,11 @@ const UserSchema = new mongoose.Schema(
       default: null,
     },
 
+    passwordChangedAt: {
+      type: Date,
+      default: null,
+    },
+
     // Optional doctor profile fields (single User model for auth)
     specialization: {
       type: String,

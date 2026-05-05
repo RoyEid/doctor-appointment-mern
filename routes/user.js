@@ -183,6 +183,7 @@ router.post("/google", async (req, res) => {
                 emailVerificationExpires: null,
                 passwordResetToken: null,
                 passwordResetExpires: null,
+                passwordChangedAt: null,
             });
         } else {
             user.googleId = sub;
@@ -278,6 +279,7 @@ router.post("/register", async (req, res) => {
             isEmailVerified: false,
             passwordResetToken: null,
             passwordResetExpires: null,
+            passwordChangedAt: null,
         });
 
         try {
@@ -342,11 +344,14 @@ router.post("/forgot-password", async (req, res) => {
             });
         }
 
+        const resetRequestedAt = new Date();
+
         await sendPasswordResetEmail(user);
 
         return res.status(200).json({
             success: true,
             message: "Password reset email sent. Please check your inbox.",
+            resetRequestedAt: resetRequestedAt.toISOString(),
         });
     } catch (error) {
         console.error("FORGOT_PASSWORD_ERROR:", error);
@@ -406,6 +411,7 @@ router.put("/reset-password/:token", async (req, res) => {
         user.authProvider = "local";
         user.passwordResetToken = null;
         user.passwordResetExpires = null;
+        user.passwordChangedAt = new Date();
 
         await user.save();
 
@@ -588,6 +594,59 @@ router.post("/check-verification-status", async (req, res) => {
             success: false,
             message: "Could not check verification status.",
             isEmailVerified: false,
+        });
+    }
+});
+
+/**
+ * Check password reset status
+ * This lets the laptop browser detect when the password was reset from phone.
+ */
+router.post("/check-password-reset-status", async (req, res) => {
+    try {
+        const { email, resetRequestedAt } = req.body;
+
+        if (!email || !resetRequestedAt) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and reset request time are required.",
+                passwordResetCompleted: false,
+            });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "No account found with this email address.",
+                passwordResetCompleted: false,
+            });
+        }
+
+        const requestTime = new Date(resetRequestedAt).getTime();
+        const passwordChangedTime = user.passwordChangedAt
+            ? new Date(user.passwordChangedAt).getTime()
+            : 0;
+
+        const passwordResetCompleted = passwordChangedTime > requestTime;
+
+        return res.status(200).json({
+            success: true,
+            passwordResetCompleted,
+            message: passwordResetCompleted
+                ? "Password has been reset."
+                : "Password has not been reset yet.",
+        });
+    } catch (error) {
+        console.error("CHECK_PASSWORD_RESET_STATUS_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not check password reset status.",
+            passwordResetCompleted: false,
         });
     }
 });

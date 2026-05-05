@@ -16,6 +16,7 @@ export const apiConfig = {
     // Forgot password endpoints
     forgotPassword: `${API_BASE_URL}/user/forgot-password`,
     resetPassword: (token) => `${API_BASE_URL}/user/reset-password/${token}`,
+    checkPasswordResetStatus: `${API_BASE_URL}/user/check-password-reset-status`,
 
     // Doctor endpoints
     getAllDoctors: `${API_BASE_URL}/doctors/allDoctors`,
