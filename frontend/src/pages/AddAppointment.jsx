@@ -180,6 +180,43 @@ function AddAppointment() {
     }
   };
 
+  const showBookingError = async (message) => {
+    const lowerMessage = message.toLowerCase();
+
+    const isSameDoctorSameDayError =
+      lowerMessage.includes("already have an active appointment") ||
+      lowerMessage.includes("same doctor") ||
+      lowerMessage.includes("same day") ||
+      lowerMessage.includes("another day or book with another doctor");
+
+    if (isSameDoctorSameDayError) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Appointment Already Exists",
+        html: `
+          <div style="text-align: center;">
+            <p style="font-size: 15px; color: #475569; margin-bottom: 10px;">
+              You already have an active appointment with this doctor on this day.
+            </p>
+            <p style="font-size: 14px; color: #64748b;">
+              Please choose another day, or book with another doctor.
+            </p>
+          </div>
+        `,
+        confirmButtonText: "Choose Another Date",
+        confirmButtonColor: "#008e9b",
+      });
+      return;
+    }
+
+    await Swal.fire({
+      icon: "error",
+      title: "Booking Failed",
+      text: message || "Failed to add appointment.",
+      confirmButtonColor: "#008e9b",
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -242,11 +279,17 @@ function AddAppointment() {
           await resendVerificationEmail();
         }
       } else {
-        toast.error(data.message || "Failed to add appointment");
+        await showBookingError(data.message || "Failed to add appointment.");
       }
     } catch (error) {
       console.error("Network or parsing error:", error);
-      toast.error("Network error occurred.");
+
+      await Swal.fire({
+        icon: "error",
+        title: "Network Error",
+        text: "Network error occurred. Please check your connection and try again.",
+        confirmButtonColor: "#008e9b",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -257,6 +300,7 @@ function AddAppointment() {
   const availableCount = availabilitySlots.filter(
     (slot) => slot.available,
   ).length;
+
   const bookedCount = availabilitySlots.filter(
     (slot) => !slot.available,
   ).length;

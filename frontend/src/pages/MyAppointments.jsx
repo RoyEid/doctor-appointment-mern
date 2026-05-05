@@ -6,10 +6,11 @@ import {
   Check,
   Clock,
   Loader2,
+  RefreshCcw,
   Stethoscope,
   X,
 } from "lucide-react";
-import { apiConfig } from "../config/api";
+import api, { API_ENDPOINTS } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import AuthRequired from "../components/AuthRequired";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -23,8 +24,16 @@ function MyAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [respondingApptId, setRespondingApptId] = useState(null);
   const [cancelingId, setCancelingId] = useState(null);
+
+  const [openRescheduleId, setOpenRescheduleId] = useState(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [submittingRescheduleId, setSubmittingRescheduleId] = useState(null);
 
   useEffect(() => {
     if (user && user.role === "admin") {
@@ -32,53 +41,41 @@ function MyAppointments() {
     }
   }, [user, navigate]);
 
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await api.get(API_ENDPOINTS.getMyAppointments);
+
+      const data = res.data;
+      const apptArray = Array.isArray(data) ? data : data.appointments || [];
+
+      const sorted = apptArray.sort((a, b) => {
+        const dateA = new Date(
+          `${a.date?.split?.("T")?.[0] || a.date} ${a.time}`,
+        );
+        const dateB = new Date(
+          `${b.date?.split?.("T")?.[0] || b.date} ${b.time}`,
+        );
+        return dateB - dateA;
+      });
+
+      setAppointments(sorted);
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load appointments";
+
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          throw new Error("No authentication token. Please login first.");
-        }
-
-        const res = await fetch(apiConfig.getMyAppointments, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to fetch appointments");
-        }
-
-        const apptArray = Array.isArray(data) ? data : data.appointments || [];
-
-        const sorted = apptArray.sort((a, b) => {
-          const dateA = new Date(
-            `${a.date?.split?.("T")?.[0] || a.date} ${a.time}`,
-          );
-          const dateB = new Date(
-            `${b.date?.split?.("T")?.[0] || b.date} ${b.time}`,
-          );
-          return dateB - dateA;
-        });
-
-        setAppointments(sorted);
-      } catch (error) {
-        setError(error.message || "Failed to load appointments");
-        toast.error(error.message || "Error loading appointments");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (user) {
       fetchAppointments();
     } else {
@@ -86,30 +83,170 @@ function MyAppointments() {
     }
   }, [user]);
 
+  const getTodayDateInputValue = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const getDoctorImage = (image) => {
+    if (!image) return "/img/doctors/avatar.png";
+
+    if (image.startsWith("http")) return image;
+
+    const baseUrl = process.env.REACT_APP_API_URL || "";
+
+    return `${baseUrl}${image.startsWith("/") ? image : `/${image}`}`;
+  };
+
+  const getDoctorIdForAvailability = (appointment) => {
+    return (
+      appointment?.doctor?._id || appointment?.doctor || appointment?.doctorId
+    );
+  };
+
+  const toggleRescheduleForm = (appointment) => {
+    const isSameAppointment = openRescheduleId === appointment._id;
+
+    if (isSameAppointment) {
+      setOpenRescheduleId(null);
+      setRescheduleDate("");
+      setRescheduleTime("");
+      setAvailableSlots([]);
+      return;
+    }
+
+    setOpenRescheduleId(appointment._id);
+    setRescheduleDate("");
+    setRescheduleTime("");
+    setAvailableSlots([]);
+  };
+
+  const loadAvailableSlots = async (appointment, selectedDate) => {
+    try {
+      setLoadingSlots(true);
+      setAvailableSlots([]);
+      setRescheduleTime("");
+
+      const doctorId = getDoctorIdForAvailability(appointment);
+
+      if (!doctorId) {
+        throw new Error("Doctor information is missing for this appointment.");
+      }
+
+      const res = await api.get(
+        API_ENDPOINTS.getAvailability(doctorId, selectedDate),
+      );
+
+      const slots = Array.isArray(res.data?.availableSlots)
+        ? res.data.availableSlots
+        : [];
+
+      setAvailableSlots(slots);
+
+      if (slots.length === 0) {
+        toast.info(
+          "No available slots for this date. Please choose another date.",
+        );
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to load available slots";
+
+      toast.error(message);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  const handleRescheduleDateChange = async (appointment, value) => {
+    setRescheduleDate(value);
+    setRescheduleTime("");
+
+    if (value) {
+      await loadAvailableSlots(appointment, value);
+    }
+  };
+
+  const submitPatientReschedule = async (appointment) => {
+    try {
+      if (!rescheduleDate || !rescheduleTime) {
+        toast.error("Please select a new date and time.");
+        return;
+      }
+
+      const result = await Swal.fire({
+        icon: "question",
+        title: "Request reschedule?",
+        text: "Your appointment will go back to pending and the doctor must approve it again.",
+        showCancelButton: true,
+        confirmButtonText: "Yes, request it",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#008e9b",
+        cancelButtonColor: "#64748b",
+      });
+
+      if (!result.isConfirmed) return;
+
+      setSubmittingRescheduleId(appointment._id);
+
+      const res = await api.put(
+        API_ENDPOINTS.patientRescheduleAppointment(appointment._id),
+        {
+          date: rescheduleDate,
+          time: rescheduleTime,
+        },
+      );
+
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === appointment._id ? res.data : a)),
+      );
+
+      setOpenRescheduleId(null);
+      setRescheduleDate("");
+      setRescheduleTime("");
+      setAvailableSlots([]);
+
+      toast.success("Reschedule request sent. Waiting for doctor approval.");
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to request reschedule";
+
+      toast.error(message);
+    } finally {
+      setSubmittingRescheduleId(null);
+    }
+  };
+
   const cancelAppointment = async (id) => {
     try {
       setCancelingId(id);
 
-      const token = localStorage.getItem("token");
+      await api.delete(API_ENDPOINTS.deleteAppointment(id));
 
-      const res = await fetch(apiConfig.deleteAppointment(id), {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      setAppointments((prev) =>
+        prev.map((appointment) =>
+          appointment._id === id
+            ? { ...appointment, status: "cancelled" }
+            : appointment,
+        ),
+      );
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to cancel appointment");
-      }
-
-      setAppointments((prev) => prev.filter((a) => a._id !== id));
       toast.success("Appointment cancelled successfully!");
     } catch (error) {
-      toast.error(error.message);
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to cancel appointment";
+
+      toast.error(message);
     } finally {
       setCancelingId(null);
     }
@@ -197,8 +334,8 @@ function MyAppointments() {
         </h2>
 
         <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
-          Review your booked appointments, cancel if needed, or respond to
-          reschedule requests from your doctor.
+          Review your appointments, request a reschedule, cancel if needed, or
+          respond to doctor reschedule requests.
         </p>
       </div>
 
@@ -261,10 +398,18 @@ function MyAppointments() {
               normalizedStatus === "reschedule_pending";
             const isResponding = respondingApptId === app._id;
             const isCanceling = cancelingId === app._id;
+            const isSubmittingReschedule = submittingRescheduleId === app._id;
+            const isRescheduleOpen = openRescheduleId === app._id;
 
             const canCancel = !["cancelled", "rejected", "completed"].includes(
               normalizedStatus,
             );
+
+            const canRequestReschedule = [
+              "pending",
+              "approved",
+              "reschedule_pending",
+            ].includes(normalizedStatus);
 
             return (
               <div
@@ -277,7 +422,7 @@ function MyAppointments() {
                       <img
                         alt={app?.doctor?.name || "Doctor"}
                         className="h-14 w-14 shrink-0 rounded-full border border-[#008e9b] object-cover sm:h-16 sm:w-16"
-                        src={apiConfig.getDoctorImage(app?.doctor?.image)}
+                        src={getDoctorImage(app?.doctor?.image)}
                         onError={(e) => {
                           e.target.src = "/img/doctors/avatar.png";
                         }}
@@ -439,6 +584,111 @@ function MyAppointments() {
                             )}
                           </button>
                         </div>
+                      </div>
+                    )}
+
+                    {canRequestReschedule && (
+                      <div className="mt-4">
+                        <button
+                          onClick={() => toggleRescheduleForm(app)}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#008e9b]/20 !bg-[#e8fbfd] px-4 py-3 text-sm font-black text-[#008e9b] transition hover:!bg-[#d8f7fa] sm:w-auto"
+                        >
+                          <RefreshCcw size={17} />
+                          {isRescheduleOpen
+                            ? "Close Reschedule"
+                            : "Request Reschedule"}
+                        </button>
+
+                        {isRescheduleOpen && (
+                          <div className="mt-4 rounded-3xl border border-[#008e9b]/10 bg-[#f4fbfc] p-4">
+                            <p className="text-sm font-black text-gray-900">
+                              Choose a new date and available time
+                            </p>
+
+                            <p className="mt-1 text-xs font-semibold text-gray-500">
+                              After submitting, this appointment will become
+                              pending again until the doctor approves it.
+                            </p>
+
+                            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                              <div>
+                                <label className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-gray-500">
+                                  New Date
+                                </label>
+
+                                <input
+                                  type="date"
+                                  min={getTodayDateInputValue()}
+                                  value={rescheduleDate}
+                                  onChange={(e) =>
+                                    handleRescheduleDateChange(
+                                      app,
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 outline-none transition focus:border-[#008e9b] focus:ring-2 focus:ring-[#008e9b]/10"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-gray-500">
+                                  Available Time
+                                </label>
+
+                                <select
+                                  value={rescheduleTime}
+                                  onChange={(e) =>
+                                    setRescheduleTime(e.target.value)
+                                  }
+                                  disabled={!rescheduleDate || loadingSlots}
+                                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 outline-none transition focus:border-[#008e9b] focus:ring-2 focus:ring-[#008e9b]/10 disabled:cursor-not-allowed disabled:bg-gray-100"
+                                >
+                                  <option value="">
+                                    {loadingSlots
+                                      ? "Loading slots..."
+                                      : "Select time"}
+                                  </option>
+
+                                  {availableSlots.map((slot) => (
+                                    <option key={slot} value={slot}>
+                                      {slot}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => submitPatientReschedule(app)}
+                              disabled={
+                                isSubmittingReschedule ||
+                                loadingSlots ||
+                                !rescheduleDate ||
+                                !rescheduleTime
+                              }
+                              className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black text-white shadow-lg transition sm:w-auto ${
+                                isSubmittingReschedule ||
+                                loadingSlots ||
+                                !rescheduleDate ||
+                                !rescheduleTime
+                                  ? "cursor-not-allowed !bg-gray-400 opacity-70"
+                                  : "!bg-[#008e9b] hover:!bg-[#007a85]"
+                              }`}
+                            >
+                              {isSubmittingReschedule ? (
+                                <>
+                                  <Loader2 size={18} className="animate-spin" />
+                                  Sending Request...
+                                </>
+                              ) : (
+                                <>
+                                  <RefreshCcw size={18} />
+                                  Submit Reschedule Request
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
