@@ -11,12 +11,10 @@ import Appointment from "./routes/appointment.js";
 dotenv.config();
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
 
 connectDB();
 
-// CORS must be before routes
 app.use(
     cors({
         origin: "*",
@@ -25,7 +23,7 @@ app.use(
     })
 );
 
-app.options("*", cors());
+app.options(/.*/, cors());
 
 app.use(express.json());
 
@@ -61,7 +59,7 @@ app.use("/api/appointments", Appointment);
 app.use("/departments", Departments);
 app.use("/api/departments", Departments);
 
-// Uploads
+// Static uploads
 app.use("/uploads", express.static("uploads"));
 
 app.listen(PORT, () => {
