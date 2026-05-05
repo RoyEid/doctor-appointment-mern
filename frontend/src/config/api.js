@@ -8,6 +8,7 @@ export const apiConfig = {
     login: `${API_BASE_URL}/user/signin`,
     register: `${API_BASE_URL}/user/register`,
     googleLogin: `${API_BASE_URL}/user/google`,
+    resendVerification: `${API_BASE_URL}/user/resend-verification`,
 
     // Doctor endpoints
     getAllDoctors: `${API_BASE_URL}/doctors/allDoctors`,

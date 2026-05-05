@@ -29,9 +29,10 @@ function AddAppointment() {
   useEffect(() => {
     if (form.doctor && doctors.length > 0) {
       const doc = doctors.find((d) => d._id === form.doctor);
+
       if (doc && doc.availableSlots && doc.availableSlots.length > 0) {
         setSelectedDoctorSlots(doc.availableSlots);
-        // Default to first slot if nothing chosen or current not in list
+
         if (!form.time || !doc.availableSlots.includes(form.time)) {
           setForm((prev) => ({ ...prev, time: doc.availableSlots[0] }));
         }
@@ -43,9 +44,14 @@ function AddAppointment() {
 
   useEffect(() => {
     const fetchDoctor = async () => {
-      const res = await fetch(apiConfig.getAllDoctors);
-      const data = await res.json();
-      setDoctors(data);
+      try {
+        const res = await fetch(apiConfig.getAllDoctors);
+        const data = await res.json();
+        setDoctors(data);
+      } catch (error) {
+        console.error("FETCH_DOCTORS_ERROR:", error);
+        toast.error("Could not load doctors. Please try again.");
+      }
     };
 
     fetchDoctor();
@@ -54,8 +60,63 @@ function AddAppointment() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  const resendVerificationEmail = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      await Swal.fire({
+        icon: "error",
+        title: "Login required",
+        text: "Please log in again before requesting a new verification email.",
+        confirmButtonColor: "#06b6d4",
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch(apiConfig.resendVerification, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        await Swal.fire({
+          icon: "success",
+          title: "Verification email sent",
+          text:
+            data.message ||
+            "We sent you a new verification email. Please check your inbox.",
+          confirmButtonText: "Okay",
+          confirmButtonColor: "#06b6d4",
+        });
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Could not send email",
+          text: data.message || "Please try again later.",
+          confirmButtonColor: "#06b6d4",
+        });
+      }
+    } catch (error) {
+      console.error("RESEND_VERIFICATION_FRONTEND_ERROR:", error);
+
+      await Swal.fire({
+        icon: "error",
+        title: "Network error",
+        text: "Could not send verification email. Please check your connection.",
+        confirmButtonColor: "#06b6d4",
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (submitting) return;
 
     setSubmitting(true);
@@ -82,16 +143,32 @@ function AddAppointment() {
           confirmButtonText: "View appointments",
           confirmButtonColor: "#06b6d4",
         });
+
         setForm({ doctor: "", date: "", time: "", reason: "" });
         navigate("/my-appointments");
       } else if (res.status === 403) {
-        await Swal.fire({
+        const result = await Swal.fire({
           icon: "warning",
           title: "Email verification required",
-          text: "Please verify your email before booking an appointment.",
-          confirmButtonText: "Got it",
+          html: `
+            <p style="margin-bottom: 10px;">
+              Please verify your email before booking an appointment.
+            </p>
+            <p style="font-size: 14px; color: #666;">
+              If your verification link expired or you cannot find the email,
+              we can send you a new one.
+            </p>
+          `,
+          showCancelButton: true,
+          confirmButtonText: "Resend Email",
+          cancelButtonText: "Cancel",
           confirmButtonColor: "#06b6d4",
+          cancelButtonColor: "#6b7280",
         });
+
+        if (result.isConfirmed) {
+          await resendVerificationEmail();
+        }
       } else {
         toast.error(data.message || "Failed to add appointment");
       }
@@ -103,7 +180,6 @@ function AddAppointment() {
     }
   };
 
-  // FIXED: Added return statement
   if (!user) return <AuthRequired />;
 
   return (

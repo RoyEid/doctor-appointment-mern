@@ -2,16 +2,16 @@ import { useState, useMemo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiConfig } from "../config/api";
 import { Check, Circle, X, Eye, EyeOff } from "lucide-react";
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../context/AuthContext";
 
 function Register() {
   const { login } = useContext(AuthContext);
-  const [form, setForm] = useState({ 
-    email: "", 
-    password: "", 
-    confirmPassword: "", 
-    name: "" 
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    name: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -27,7 +27,9 @@ function Register() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: credentialResponse.credential }),
       });
+
       const data = await res.json();
+
       if (res.ok && data.token) {
         login(data.token, data.user);
         navigate("/");
@@ -42,9 +44,9 @@ function Register() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Password validation logic
   const passwordRules = useMemo(() => {
     const p = form.password;
+
     return {
       length: p.length >= 8,
       uppercase: /[A-Z]/.test(p),
@@ -54,7 +56,7 @@ function Register() {
   }, [form.password]);
 
   const strengthCount = Object.values(passwordRules).filter(Boolean).length;
-  
+
   const getStrengthLabel = () => {
     if (form.password === "") return "";
     if (strengthCount <= 1) return "Weak";
@@ -71,14 +73,24 @@ function Register() {
     return "bg-gray-200";
   };
 
-  const passwordsMatch = form.confirmPassword !== "" && form.password === form.confirmPassword;
+  const passwordsMatch =
+    form.confirmPassword !== "" && form.password === form.confirmPassword;
+
   const isPasswordValid = strengthCount === 4;
-  const isFormValid = form.name.trim() !== "" && form.email.trim() !== "" && isPasswordValid && passwordsMatch;
+
+  const isFormValid =
+    form.name.trim() !== "" &&
+    form.email.trim() !== "" &&
+    isPasswordValid &&
+    passwordsMatch;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isFormValid) {
-      setError("Please complete all fields and make sure your password meets the requirements.");
+      setError(
+        "Please complete all fields and make sure your password meets the requirements.",
+      );
       return;
     }
 
@@ -87,21 +99,24 @@ function Register() {
     setSuccess(null);
 
     try {
-      // Send only name, email, and password to the backend
       const { name, email, password } = form;
+
       const res = await fetch(apiConfig.register, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
-      
+
       const data = await res.json();
-      
+
       if (res.ok) {
-        setSuccess("Account created successfully. Please login.");
+        setSuccess(
+          "Account created successfully. Please check your email to verify your account before booking appointments.",
+        );
+
         setTimeout(() => {
           navigate("/login");
-        }, 2000);
+        }, 3000);
       } else {
         setError(data.message || "Registration failed. Please try again.");
       }
@@ -113,7 +128,11 @@ function Register() {
   };
 
   const RuleItem = ({ valid, text }) => (
-    <div className={`flex items-center gap-2 text-xs font-semibold transition-all duration-300 ${valid ? "text-green-600" : "text-gray-500"}`}>
+    <div
+      className={`flex items-center gap-2 text-xs font-semibold transition-all duration-300 ${
+        valid ? "text-green-600" : "text-gray-500"
+      }`}
+    >
       {valid ? (
         <Check size={14} className="stroke-[3px]" />
       ) : (
@@ -130,7 +149,7 @@ function Register() {
         onSubmit={handleSubmit}
       >
         <div className="absolute top-0 left-0 w-full h-1.5 bg-[#008e9b]"></div>
-        
+
         <div className="text-center mb-8">
           <h2 className="text-3xl font-black text-gray-800 tracking-tight">
             Create Account
@@ -187,6 +206,7 @@ function Register() {
             <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
               Password
             </label>
+
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -197,6 +217,7 @@ function Register() {
                 className="w-full p-3.5 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800"
                 required
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -206,36 +227,45 @@ function Register() {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+
             <p className="text-[11px] text-gray-500 mt-1.5 ml-1 leading-tight font-medium">
               Use at least 8 characters with uppercase, lowercase, and a number.
             </p>
 
-            {/* Password Strength Bar */}
             <div className="mt-4 px-1">
               <div className="flex justify-between items-end mb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Security Check</span>
-                <span className={`text-[11px] font-black uppercase ${
-                  strengthCount <= 1 ? "text-red-500" : 
-                  strengthCount === 2 ? "text-yellow-600" : 
-                  strengthCount === 3 ? "text-[#008e9b]" : 
-                  "text-green-600"
-                }`}>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  Security Check
+                </span>
+                <span
+                  className={`text-[11px] font-black uppercase ${
+                    strengthCount <= 1
+                      ? "text-red-500"
+                      : strengthCount === 2
+                        ? "text-yellow-600"
+                        : strengthCount === 3
+                          ? "text-[#008e9b]"
+                          : "text-green-600"
+                  }`}
+                >
                   {form.password ? `Strength: ${getStrengthLabel()}` : ""}
                 </span>
               </div>
+
               <div className="grid grid-cols-4 gap-1.5">
                 {[1, 2, 3, 4].map((index) => (
                   <div
                     key={index}
                     className={`h-1.5 rounded-full transition-all duration-500 ${
-                      index <= strengthCount ? getStrengthColor() : "bg-gray-200"
+                      index <= strengthCount
+                        ? getStrengthColor()
+                        : "bg-gray-200"
                     }`}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Password Rules Checklist */}
             <div className="grid grid-cols-2 gap-x-2 gap-y-2 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
               <RuleItem valid={passwordRules.length} text="8+ Characters" />
               <RuleItem valid={passwordRules.uppercase} text="Uppercase" />
@@ -248,6 +278,7 @@ function Register() {
             <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
               Confirm Password
             </label>
+
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -256,23 +287,27 @@ function Register() {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 className={`w-full p-3.5 pr-12 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800 ${
-                  form.confirmPassword === "" 
-                    ? "border-gray-200 focus:ring-[#008e9b]" 
-                    : passwordsMatch 
-                      ? "border-green-200 focus:ring-green-500" 
+                  form.confirmPassword === ""
+                    ? "border-gray-200 focus:ring-[#008e9b]"
+                    : passwordsMatch
+                      ? "border-green-200 focus:ring-green-500"
                       : "border-red-200 focus:ring-red-500"
                 }`}
                 required
               />
+
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors !bg-transparent !p-0 !border-none"
-                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+
             {form.confirmPassword !== "" && (
               <div className="mt-1.5 ml-1 flex items-center gap-1.5 transition-all duration-300">
                 {passwordsMatch ? (
@@ -306,8 +341,11 @@ function Register() {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-200"></div>
           </div>
+
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500 uppercase tracking-wider text-[10px] font-bold">Or join with</span>
+            <span className="px-2 bg-white text-gray-500 uppercase tracking-wider text-[10px] font-bold">
+              Or join with
+            </span>
           </div>
         </div>
 
@@ -321,13 +359,21 @@ function Register() {
           />
         </div>
       </form>
-      
+
       <style jsx>{`
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-5px);
+          }
+          75% {
+            transform: translateX(5px);
+          }
         }
+
         .animate-shake {
           animation: shake 0.4s ease-in-out;
         }
