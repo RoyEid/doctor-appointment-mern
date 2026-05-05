@@ -32,7 +32,8 @@ const fullUrl = (path) => `${API_BASE_URL}${path}`;
 
 export const API_ENDPOINTS = {
   // Auth
-  login: "/auth/login",
+  login: "/auth/signin",
+  signin: "/auth/signin",
   register: "/auth/register",
   googleLogin: "/auth/google",
   forgotPassword: "/auth/forgot-password",
@@ -40,6 +41,7 @@ export const API_ENDPOINTS = {
   resendVerification: "/auth/resend-verification",
   resendVerificationPublic: "/auth/resend-verification-public",
   checkVerificationStatus: "/auth/check-verification-status",
+  checkPasswordResetStatus: "/auth/check-password-reset-status",
   verifyEmail: (token) => `/auth/verify-email/${token}`,
 
   // Users
@@ -48,24 +50,25 @@ export const API_ENDPOINTS = {
 
   // Doctors
   getAllDoctors: "/doctors/allDoctors",
+  allDoctors: "/doctors/allDoctors",
   getDoctorById: (id) => `/doctors/${id}`,
   getDoctorsCount: "/doctors/count",
   getDoctorCount: "/doctors/count",
+  doctorsCount: "/doctors/count",
   addDoctor: "/doctors/addDoctors",
   updateDoctor: (id) => `/doctors/${id}`,
   deleteDoctor: (id) => `/doctors/${id}`,
   updateDoctorAvailability: "/doctors/availability",
-
-  // Your current backend legacy specialty route is:
-  // /doctors/doctors/byspecialty/:specialty
   getDoctorsBySpecialty: (specialty) =>
     `/doctors/doctors/byspecialty/${encodeURIComponent(specialty)}`,
 
   // Departments
   getAllDepartments: "/departments/allDepartments",
+  allDepartments: "/departments/allDepartments",
   getDepartmentById: (id) => `/departments/${id}`,
   getDepartmentsCount: "/departments/count",
   getDepartmentCount: "/departments/count",
+  departmentsCount: "/departments/count",
   addDepartment: "/departments/addDepartment",
   updateDepartment: (id) => `/departments/${id}`,
   deleteDepartment: (id) => `/departments/${id}`,
@@ -107,7 +110,8 @@ export const apiConfig = {
   baseURL: API_BASE_URL,
 
   // Auth
-  login: fullUrl("/auth/login"),
+  login: fullUrl("/auth/signin"),
+  signin: fullUrl("/auth/signin"),
   register: fullUrl("/auth/register"),
   googleLogin: fullUrl("/auth/google"),
   forgotPassword: fullUrl("/auth/forgot-password"),
@@ -115,6 +119,7 @@ export const apiConfig = {
   resendVerification: fullUrl("/auth/resend-verification"),
   resendVerificationPublic: fullUrl("/auth/resend-verification-public"),
   checkVerificationStatus: fullUrl("/auth/check-verification-status"),
+  checkPasswordResetStatus: fullUrl("/auth/check-password-reset-status"),
   verifyEmail: (token) => fullUrl(`/auth/verify-email/${token}`),
 
   // Users
