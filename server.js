@@ -14,10 +14,6 @@ const PORT = process.env.PORT || 3000;
 
 connectDB();
 
-/*
-  CORS middleware must be before express.json() and before all routes.
-  This handles browser preflight OPTIONS requests.
-*/
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
