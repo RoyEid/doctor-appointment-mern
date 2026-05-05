@@ -15,6 +15,7 @@ import {
   Sparkles,
   Eye,
   EyeOff,
+  RefreshCw,
 } from "lucide-react";
 
 function Login() {
@@ -335,60 +336,68 @@ function Login() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-10 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] max-w-6xl items-center gap-10 lg:grid-cols-[1fr_0.9fr]">
-        {/* Left professional panel */}
-        <section className="hidden lg:block">
-          <div className="relative overflow-hidden rounded-[2.25rem] bg-gradient-to-br from-[#008e9b] via-[#00a7b5] to-[#46daea] p-10 text-white shadow-[0_30px_90px_rgba(0,142,155,0.25)]">
-            <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1fr_0.88fr] xl:gap-10">
+        {/* Left panel */}
+        <section className="hidden lg:flex">
+          <div className="relative flex min-h-[560px] w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#063b44] via-[#008e9b] to-[#42d5e3] p-8 text-white shadow-[0_30px_90px_rgba(0,142,155,0.28)] xl:p-10">
+            <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-black/10 blur-3xl" />
 
-            <div className="relative z-10">
-              <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-xl">
-                <HeartPulse size={34} />
+            <div className="relative z-10 flex w-full flex-col justify-between">
+              <div>
+                <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-xl">
+                  <HeartPulse size={34} />
+                </div>
+
+                <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-white/75">
+                  Secure MediCare Login
+                </p>
+
+                <h1 className="max-w-xl text-4xl font-black leading-tight xl:text-5xl">
+                  Manage your healthcare with confidence.
+                </h1>
+
+                <p className="mt-6 max-w-lg text-base font-medium leading-relaxed text-white/85">
+                  Sign in to book appointments, track doctor responses, manage
+                  reschedules, and continue your care journey securely.
+                </p>
               </div>
 
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-white/75">
-                Secure MediCare Login
-              </p>
-
-              <h1 className="max-w-xl text-5xl font-black leading-tight">
-                Manage your healthcare with confidence.
-              </h1>
-
-              <p className="mt-6 max-w-lg text-base font-medium leading-relaxed text-white/80">
-                Sign in to book appointments, track doctor responses, manage
-                reschedules, and continue your care journey securely.
-              </p>
-
-              <div className="mt-10 grid gap-4">
-                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-                  <ShieldCheck size={26} />
+              <div className="mt-8 grid gap-4">
+                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl xl:p-5">
+                  <ShieldCheck size={25} className="flex-shrink-0" />
                   <div>
-                    <p className="font-black">Protected account access</p>
+                    <p className="font-black text-white">
+                      Protected account access
+                    </p>
                     <p className="text-sm text-white/75">
                       Secure login with patient, doctor, and admin roles.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-                  <MailCheck size={26} />
+                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl xl:p-5">
+                  <MailCheck size={25} className="flex-shrink-0" />
                   <div>
-                    <p className="font-black">Email verification support</p>
+                    <p className="font-black text-white">
+                      Email verification support
+                    </p>
                     <p className="text-sm text-white/75">
                       Verify from your phone and continue from your laptop.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-                  <CheckCircle2 size={26} />
+                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl xl:p-5">
+                  <CheckCircle2 size={25} className="flex-shrink-0" />
                   <div>
-                    <p className="font-black">Password recovery ready</p>
+                    <p className="font-black text-white">
+                      Password recovery ready
+                    </p>
                     <p className="text-sm text-white/75">
                       Reset your password safely if you forget it.
                     </p>
@@ -400,20 +409,20 @@ function Login() {
         </section>
 
         {/* Login card */}
-        <section className="mx-auto w-full max-w-md">
+        <section className="mx-auto flex w-full max-w-md items-center">
           <form
-            className="relative overflow-hidden rounded-[2rem] border border-white bg-white/90 p-7 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-9"
+            className="relative w-full overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8"
             onSubmit={handleSubmit}
           >
             <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-[#008e9b] via-[#46daea] to-[#008e9b]" />
 
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
-                <Lock size={32} />
+            <div className="mb-7 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
+                <Lock size={28} />
               </div>
 
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
-                <Sparkles size={15} />
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+                <Sparkles size={14} />
                 Welcome Back
               </div>
 
@@ -422,17 +431,17 @@ function Login() {
               </h2>
 
               <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500">
-                Access your dashboard and manage your healthcare appointments.
+                Access your dashboard and manage your appointments.
               </p>
             </div>
 
             {error && (
-              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
+              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
                 {error}
               </div>
             )}
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-sm font-bold text-gray-700">
                   Email Address
@@ -489,7 +498,7 @@ function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent p-0 text-gray-400 transition-colors hover:text-[#008e9b]"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -502,10 +511,10 @@ function Login() {
 
             <button
               disabled={loading}
-              className={`group mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
+              className={`group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
                 loading
-                  ? "cursor-not-allowed bg-gray-400"
-                  : "bg-[#008e9b] hover:-translate-y-0.5 hover:bg-[#007a85] hover:shadow-xl"
+                  ? "cursor-not-allowed !bg-gray-400"
+                  : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
               }`}
             >
               {loading ? "Logging in..." : "Login securely"}
@@ -517,14 +526,16 @@ function Login() {
               )}
             </button>
 
-            <div className="mt-5 rounded-2xl bg-[#eefbfc] px-4 py-3 text-center">
-              <p className="text-sm text-gray-600">
-                Didn't receive the email?{" "}
+            <div className="mt-5 rounded-2xl border border-[#008e9b]/10 bg-white px-4 py-3 text-center shadow-sm">
+              <p className="flex flex-col items-center justify-center gap-2 text-sm text-gray-600 sm:flex-row">
+                <span>Didn't receive the email?</span>
+
                 <button
                   type="button"
                   onClick={handleResendVerificationEmail}
-                  className="border-none bg-transparent p-0 font-black text-[#008e9b] transition-colors hover:text-[#007a85] hover:underline"
+                  className="inline-flex items-center justify-center gap-1.5 !border-none !bg-transparent !p-0 font-black text-[#008e9b] !shadow-none transition-colors hover:!bg-transparent hover:text-[#007a85] hover:underline"
                 >
+                  <RefreshCw size={15} />
                   Resend verification
                 </button>
               </p>
@@ -552,7 +563,7 @@ function Login() {
               />
             </div>
 
-            <p className="mt-7 text-center text-sm font-medium text-gray-600">
+            <p className="mt-6 text-center text-sm font-medium text-gray-600">
               Don't have an account?{" "}
               <Link
                 to="/register"
