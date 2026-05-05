@@ -1,22 +1,17 @@
 import { useContext } from "react";
-// import { Navigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import AuthRequired from "./AuthRequired";
+import LoadingSpinner from "./LoadingSpinner";
+import { AlertTriangle } from "lucide-react";
 
-/**
- * RoleBasedRoute component for protecting routes
- * @param {React.Component} element - The component to render if authorized
- * @param {string|string[]} requiredRole - The role(s) required to access this route
- * @returns {React.Component} - Either the protected component, login page, or access denied
- */
 function RoleBasedRoute({ element, requiredRole }) {
   const { user, isLoading } = useContext(AuthContext);
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        Loading...
-      </div>
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+        <LoadingSpinner text="Checking your access..." fullScreen />
+      </main>
     );
   }
 
@@ -28,32 +23,36 @@ function RoleBasedRoute({ element, requiredRole }) {
 
   if (!roles.includes(user.role)) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh] px-4">
-        <div className="bg-white shadow-xl rounded-2xl p-6 text-center max-w-md w-full border border-gray-100">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-6">
-            <svg
-              className="w-8 h-8 text-red-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4v2m0 0a9 9 0 110-18 9 9 0 010 18z"
-              />
-            </svg>
+      <main className="flex min-h-[75vh] items-center justify-center bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-10">
+        <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white bg-white/95 p-8 text-center shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+          <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-red-500 via-orange-400 to-red-500" />
+
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-red-50 text-red-500 shadow-sm">
+            <AlertTriangle size={34} />
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+
+          <div className="mb-3 inline-flex rounded-full bg-red-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-red-500">
             Access Denied
+          </div>
+
+          <h2 className="text-2xl font-black text-gray-900">
+            You do not have permission
           </h2>
-          <p className="text-gray-600 mb-4">
-            You don't have permission to access this page. Your role is:{" "}
-            <strong>{user.role}</strong>
+
+          <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-relaxed text-gray-500">
+            This page is only available for{" "}
+            <span className="font-black text-gray-700">{roles.join(", ")}</span>{" "}
+            accounts.
           </p>
+
+          <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-600">
+            Your current role:{" "}
+            <span className="font-black uppercase text-[#008e9b]">
+              {user.role}
+            </span>
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 

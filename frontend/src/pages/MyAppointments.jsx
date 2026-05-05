@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { apiConfig } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import AuthRequired from "../components/AuthRequired";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { respondToReschedule } from "../services/appointmentService";
 import Swal from "sweetalert2";
 
@@ -55,11 +56,6 @@ function MyAppointments() {
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
 
-        console.log("📋 Appointments loaded:", {
-          count: sorted.length,
-          statuses: sorted.map((a) => ({ id: a._id, status: a.status })),
-        });
-
         setAppointments(sorted);
       } catch (error) {
         setError(error.message || "Failed to load appointments");
@@ -104,10 +100,8 @@ function MyAppointments() {
   const handleRescheduleResponse = async (id, response) => {
     try {
       setRespondingApptId(id);
-      console.log("🔄 Reschedule response:", { appointmentId: id, response });
 
       const data = await respondToReschedule(id, response);
-      console.log("✅ Reschedule response received:", data);
 
       setAppointments((prev) => prev.map((a) => (a._id === id ? data : a)));
 
@@ -115,7 +109,6 @@ function MyAppointments() {
         `Reschedule ${response === "accept" ? "accepted" : "rejected"}!`,
       );
     } catch (err) {
-      console.error("❌ Reschedule response error:", err);
       toast.error(err.message || "Failed to respond to reschedule request");
     } finally {
       setRespondingApptId(null);
@@ -139,33 +132,45 @@ function MyAppointments() {
 
   if (loading) {
     return (
-      <div className="p-8 bg-gray-100 min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Loading appointments...</p>
-      </div>
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+        <LoadingSpinner text="Loading your appointments..." fullScreen />
+      </main>
     );
   }
 
   return (
-    <div className="px-3 sm:px-6 py-6 bg-gray-100 min-h-screen">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-[#008e9b]">
-        My Appointments
-      </h2>
+    <div className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-3 py-8 sm:px-6">
+      <div className="mx-auto mb-8 max-w-3xl text-center">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+          Patient Area
+        </div>
+
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+          My Appointments
+        </h2>
+
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+          Review your booked appointments, cancel if needed, or respond to
+          reschedule requests from your doctor.
+        </p>
+      </div>
 
       {error && (
-        <div className="max-w-3xl mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <p className="text-center">{error}</p>
+        <div className="mx-auto mb-5 max-w-3xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700">
+          {error}
         </div>
       )}
 
-      <div className="space-y-4 max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl space-y-4">
         {appointments.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-8 sm:p-10 text-center border border-gray-100">
-            <p className="text-gray-500 text-base sm:text-lg mb-4">
+          <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
+            <p className="mb-4 text-base font-medium text-gray-500 sm:text-lg">
               You have no appointments booked.
             </p>
+
             <Link
               to="/add-appointment"
-              className="text-[#008e9b] hover:underline font-medium"
+              className="inline-flex items-center justify-center rounded-2xl bg-[#008e9b] px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#007a85] hover:shadow-xl"
             >
               Book your first appointment
             </Link>
@@ -181,14 +186,14 @@ function MyAppointments() {
             return (
               <div
                 key={app._id}
-                className="w-full bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition overflow-hidden"
+                className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
               >
                 <div className="p-4 sm:p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex gap-3 min-w-0 flex-1">
+                    <div className="flex min-w-0 flex-1 gap-3">
                       <img
                         alt={app?.doctor?.name || "Doctor"}
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b] shrink-0"
+                        className="h-14 w-14 shrink-0 rounded-full border border-[#008e9b] object-cover sm:h-16 sm:w-16"
                         src={apiConfig.getDoctorImage(app?.doctor?.image)}
                         onError={(e) => {
                           e.target.src = "/img/doctors/avatar.png";
@@ -196,18 +201,18 @@ function MyAppointments() {
                       />
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-gray-900 text-base sm:text-lg truncate">
+                        <h3 className="truncate text-base font-black text-gray-900 sm:text-lg">
                           {app.doctor?.name || "Unknown Doctor"}
                         </h3>
 
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2 break-words">
+                        <p className="mt-1 line-clamp-2 break-words text-sm font-medium text-gray-500">
                           {app.reason || "No reason provided"}
                         </p>
                       </div>
                     </div>
 
                     <button
-                      className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md transition shrink-0 border-2 border-red-100"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-red-100 !bg-red-500 text-white shadow-md transition hover:!bg-red-600 sm:h-11 sm:w-11"
                       aria-label="Cancel appointment"
                       title="Cancel appointment"
                       onClick={async () => {
@@ -227,12 +232,12 @@ function MyAppointments() {
                         }
                       }}
                     >
-                      <X size={28} strokeWidth={3.5} />
+                      <X size={24} strokeWidth={3.5} />
                     </button>
                   </div>
 
-                  <div className="mt-3 ml-0 sm:ml-[76px]">
-                    <div className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
+                  <div className="mt-3 sm:ml-[76px]">
+                    <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-500">
                       <span>📅</span>
                       <span>
                         {new Date(app.date).toLocaleDateString("en-US", {
@@ -249,7 +254,7 @@ function MyAppointments() {
 
                     <div className="mt-3">
                       <span
-                        className={`inline-block text-xs px-3 py-1 rounded-full font-semibold capitalize ${getStatusStyle(
+                        className={`inline-block rounded-full px-3 py-1 text-xs font-bold capitalize ${getStatusStyle(
                           normalizedStatus,
                           isReschedulePending,
                         )}`}
@@ -262,16 +267,16 @@ function MyAppointments() {
                     </div>
 
                     {isReschedulePending && (
-                      <div className="mt-4 grid grid-cols-1 min-[380px]:grid-cols-2 gap-2">
+                      <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                         <button
                           onClick={() =>
                             handleRescheduleResponse(app._id, "accept")
                           }
                           disabled={isResponding}
-                          className={`w-full text-sm px-4 py-2 rounded-xl font-semibold shadow-sm transition ${
+                          className={`w-full rounded-xl px-4 py-2 text-sm font-bold shadow-sm transition ${
                             isResponding
-                              ? "bg-green-300 text-white cursor-not-allowed opacity-70"
-                              : "bg-green-500 hover:bg-green-600 text-white"
+                              ? "cursor-not-allowed !bg-green-300 text-white opacity-70"
+                              : "!bg-green-500 text-white hover:!bg-green-600"
                           }`}
                         >
                           {isResponding ? "Updating..." : "Accept New Time"}
@@ -282,10 +287,10 @@ function MyAppointments() {
                             handleRescheduleResponse(app._id, "reject")
                           }
                           disabled={isResponding}
-                          className={`w-full text-sm px-4 py-2 rounded-xl font-semibold shadow-sm transition border ${
+                          className={`w-full rounded-xl border px-4 py-2 text-sm font-bold shadow-sm transition ${
                             isResponding
-                              ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-70 border-gray-300"
-                              : "bg-white hover:bg-red-50 text-red-600 border-red-200"
+                              ? "cursor-not-allowed border-gray-300 !bg-gray-300 text-gray-600 opacity-70"
+                              : "border-red-200 !bg-white text-red-600 hover:!bg-red-50"
                           }`}
                         >
                           {isResponding ? "Updating..." : "Reject New Time"}

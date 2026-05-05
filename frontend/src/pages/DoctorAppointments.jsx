@@ -41,7 +41,8 @@ function DoctorAppointments() {
 
       const apptArray = Array.isArray(data) ? data : data.appointments || [];
       const onlyMyAppointments = apptArray.filter(
-        (appt) => appt?.doctorId === user?.id || appt?.doctorId?._id === user?.id,
+        (appt) =>
+          appt?.doctorId === user?.id || appt?.doctorId?._id === user?.id,
       );
       const sorted = onlyMyAppointments.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
@@ -127,7 +128,9 @@ function DoctorAppointments() {
       }
 
       setAppointments((prev) =>
-        prev.map((appointment) => (appointment._id === id ? data : appointment)),
+        prev.map((appointment) =>
+          appointment._id === id ? data : appointment,
+        ),
       );
       setEditingId(null);
       toast.success("Appointment rescheduled successfully!");
@@ -157,7 +160,9 @@ function DoctorAppointments() {
       <div className="space-y-4 max-w-3xl mx-auto">
         {appointments.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
-            <p className="text-gray-500 text-lg mb-4">No appointments assigned to you.</p>
+            <p className="text-gray-500 text-lg mb-4">
+              No appointments assigned to you.
+            </p>
           </div>
         ) : (
           appointments.map((app) => {
@@ -168,9 +173,9 @@ function DoctorAppointments() {
                 className="w-full mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col gap-4"
               >
                 <div className="flex gap-4 w-full min-w-0">
-                   <div className="flex-shrink-0 w-12 h-12 bg-[#008e9b] text-white rounded-full flex items-center justify-center font-bold text-xl uppercase">
-                      {app.user?.name ? app.user.name.charAt(0) : 'P'}
-                   </div>
+                  <div className="flex-shrink-0 w-12 h-12 bg-[#008e9b] text-white rounded-full flex items-center justify-center font-bold text-xl uppercase">
+                    {app.user?.name ? app.user.name.charAt(0) : "P"}
+                  </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
@@ -187,7 +192,9 @@ function DoctorAppointments() {
                             onClick={() => updateStatus(app._id, "approved")}
                             disabled={updatingId === app._id}
                             className={`w-full sm:w-auto text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm ${
-                              updatingId === app._id ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+                              updatingId === app._id
+                                ? "bg-gray-400"
+                                : "bg-green-500 hover:bg-green-600"
                             }`}
                           >
                             {updatingId === app._id ? "..." : "Approve"}
@@ -196,7 +203,9 @@ function DoctorAppointments() {
                             onClick={() => updateStatus(app._id, "rejected")}
                             disabled={updatingId === app._id}
                             className={`w-full sm:w-auto text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm ${
-                              updatingId === app._id ? "bg-gray-400" : "bg-red-500 hover:bg-red-600"
+                              updatingId === app._id
+                                ? "bg-gray-400"
+                                : "bg-red-500 hover:bg-red-600"
                             }`}
                           >
                             {updatingId === app._id ? "..." : "Reject"}
@@ -204,14 +213,18 @@ function DoctorAppointments() {
                         </div>
                       )}
                     </div>
-                    
+
                     <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                       <span className="font-bold">Reason:</span> {app.reason}
+                      <span className="font-bold">Reason:</span> {app.reason}
                     </p>
-                    
+
                     <div className="text-xs sm:text-sm text-gray-400 mt-1.5 flex flex-wrap items-center gap-1.5">
                       <span>📅</span>
-                      {new Date(app.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {new Date(app.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                       <span className="mx-0.5">|</span>
                       <span>🕒</span>
                       {app.time || "N/A"}
@@ -225,7 +238,10 @@ function DoctorAppointments() {
                             value={rescheduleForm.date}
                             min={new Date().toISOString().split("T")[0]}
                             onChange={(e) =>
-                              setRescheduleForm((prev) => ({ ...prev, date: e.target.value }))
+                              setRescheduleForm((prev) => ({
+                                ...prev,
+                                date: e.target.value,
+                              }))
                             }
                             className="w-full sm:w-auto p-2 border border-gray-300 rounded-md text-sm"
                           />
@@ -234,7 +250,10 @@ function DoctorAppointments() {
                             value={rescheduleForm.time}
                             placeholder="e.g. 10:30 AM"
                             onChange={(e) =>
-                              setRescheduleForm((prev) => ({ ...prev, time: e.target.value }))
+                              setRescheduleForm((prev) => ({
+                                ...prev,
+                                time: e.target.value,
+                              }))
                             }
                             className="w-full sm:w-auto p-2 border border-gray-300 rounded-md text-sm"
                           />
@@ -263,11 +282,13 @@ function DoctorAppointments() {
                       </button>
                     )}
 
-                    <span 
+                    <span
                       className={`inline-block mt-2 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
-                        currentStatus === 'approved' ? 'bg-green-100 text-green-700' : 
-                        currentStatus === 'rejected' ? 'bg-red-100 text-red-700' : 
-                        'bg-yellow-100 text-yellow-700'
+                        currentStatus === "approved"
+                          ? "bg-green-100 text-green-700"
+                          : currentStatus === "rejected"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
                       {currentStatus}

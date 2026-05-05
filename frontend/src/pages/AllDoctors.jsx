@@ -4,21 +4,34 @@ import { apiConfig } from "../config/api";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function AllDoctors() {
   const { user } = useContext(AuthContext);
   const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const fetchedDoctors = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch(apiConfig.getAllDoctors);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to fetch doctors");
-        setDoctors(data);
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch doctors");
+        }
+
+        setDoctors(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error(error);
+        toast.error(error.message || "Failed to load doctors");
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchedDoctors();
   }, []);
 
@@ -38,13 +51,15 @@ function AllDoctors() {
 
     try {
       const token = localStorage.getItem("token");
+
       const res = await fetch(apiConfig.deleteDoctor(id), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
         toast.success("Doctor deleted successfully");
-        setDoctors(doctors.filter((d) => d._id !== id));
+        setDoctors((prev) => prev.filter((d) => d._id !== id));
       } else {
         const data = await res.json();
         toast.error(data.message || "Failed to delete doctor");
@@ -55,57 +70,96 @@ function AllDoctors() {
     }
   };
 
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+        <LoadingSpinner text="Loading our doctors..." fullScreen />
+      </main>
+    );
+  }
+
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
-        Our Doctors
-      </h2>
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+      <div className="mx-auto mb-8 max-w-4xl text-center">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+          Medical Team
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
-        {doctors?.map((doc) => (
-          <div
-            className="bg-white rounded-lg shadow p-6 text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative"
-            key={doc?._id}
-          >
-            {user?.role === "admin" && (
-              <div className="absolute top-3 right-3 flex gap-2 z-10">
-                <Link
-                  to={`/edit-doctor/${doc._id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-blue-600 transition shadow-sm"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDelete(doc._id);
-                  }}
-                  className="bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-red-600 transition shadow-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-            <Link to={`/doctor/${doc._id}`} className="block">
-              <img
-                src={apiConfig.getDoctorImage(doc?.image)}
-                alt={doc?.name || "doctor"}
-                className="w-32 h-32 mx-auto rounded-full object-cover border mb-4"
-              />
-              <h3 className="text-xl font-semibold">{doc?.name}</h3>
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+          Our Doctors
+        </h2>
 
-              <p className="text-gray-600">{doc.specialty}</p>
-
-              <p className="text-sm text-gray-500">
-                {doc?.experienceYears} Years Of Exprerience
-              </p>
-            </Link>
-          </div>
-        ))}
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+          Browse our experienced medical team and choose the right specialist
+          for your appointment.
+        </p>
       </div>
-    </div>
+
+      {doctors.length === 0 ? (
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
+          <p className="text-base font-medium text-gray-500 sm:text-lg">
+            No doctors are available right now.
+          </p>
+        </div>
+      ) : (
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {doctors.map((doc) => (
+            <div
+              className="group relative overflow-hidden rounded-[1.75rem] border border-gray-100 bg-white p-6 text-center shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
+              key={doc?._id}
+            >
+              {user?.role === "admin" && (
+                <div className="absolute right-4 top-4 z-10 flex gap-2">
+                  <Link
+                    to={`/edit-doctor/${doc._id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="rounded-xl !bg-blue-500 px-3 py-1.5 text-xs font-black text-white shadow-sm transition hover:!bg-blue-600"
+                  >
+                    Edit
+                  </Link>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(doc._id);
+                    }}
+                    className="rounded-xl !bg-red-500 px-3 py-1.5 text-xs font-black text-white shadow-sm transition hover:!bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+
+              <Link to={`/doctor/${doc._id}`} className="block">
+                <div className="mx-auto mb-5 h-36 w-36 overflow-hidden rounded-full border-4 border-[#e8fbfd] bg-gray-50 shadow-md transition group-hover:border-[#46daea]">
+                  <img
+                    src={apiConfig.getDoctorImage(doc?.image)}
+                    alt={doc?.name || "doctor"}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.target.src = "/img/doctors/avatar.png";
+                    }}
+                  />
+                </div>
+
+                <h3 className="text-xl font-black text-gray-900 transition group-hover:text-[#008e9b]">
+                  {doc?.name}
+                </h3>
+
+                <p className="mt-2 inline-flex rounded-full bg-[#e8fbfd] px-4 py-1.5 text-sm font-bold text-[#008e9b]">
+                  {doc.specialty}
+                </p>
+
+                <p className="mt-3 text-sm font-medium text-gray-500">
+                  {doc?.experienceYears} Years of Experience
+                </p>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }
 

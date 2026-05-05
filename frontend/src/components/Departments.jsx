@@ -5,6 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { Trash2, Info, PlusCircle } from "lucide-react";
 import Swal from "sweetalert2";
+import LoadingSpinner from "./LoadingSpinner";
 
 function Departments() {
   const { user } = useContext(AuthContext);
@@ -15,10 +16,22 @@ function Departments() {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
+        setLoading(true);
+
         const res = await fetch(apiConfig.getAllDepartments);
         const data = await res.json();
-        setDepartments(data);
-        if (data.length > 0) setActiveTab(data[0]._id);
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to fetch departments");
+        }
+
+        const normalized = Array.isArray(data) ? data : [];
+
+        setDepartments(normalized);
+
+        if (normalized.length > 0) {
+          setActiveTab(normalized[0]._id);
+        }
       } catch (err) {
         console.error("Failed to fetch departments", err);
         toast.error("Could not load departments");
@@ -50,6 +63,7 @@ function Departments() {
 
     try {
       const token = localStorage.getItem("token");
+
       const res = await fetch(apiConfig.deleteDepartment(id), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -59,6 +73,7 @@ function Departments() {
 
       if (res.ok) {
         toast.success(data.message || "Department deleted successfully");
+
         const updatedDeps = departments.filter((d) => d._id !== id);
         setDepartments(updatedDeps);
 
@@ -76,32 +91,43 @@ function Departments() {
 
   if (loading) {
     return (
-      <div className="py-20 text-center">
-        <div className="animate-spin inline-block w-8 h-8 border-4 border-[#008e9b] border-t-transparent rounded-full mb-4"></div>
-        <p className="text-gray-500 font-medium">Loading departments...</p>
-      </div>
+      <section
+        id="services"
+        className="bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20"
+      >
+        <LoadingSpinner text="Loading departments..." compact />
+      </section>
     );
   }
 
   return (
-    <section id="services" className="py-20 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      id="services"
+      className="bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20"
+    >
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-16 text-center">
-          <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-gray-800 tracking-tight">
+          <div className="mb-4 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+            Services
+          </div>
+
+          <h2 className="mb-4 text-3xl font-black tracking-tight text-gray-900 md:text-5xl">
             Our <span className="text-[#008e9b]">Departments</span>
           </h2>
-          <div className="w-24 h-1.5 bg-[#008e9b] mx-auto mb-6 rounded-full"></div>
-          <p className="text-gray-600 max-w-2xl mx-auto text-lg md:text-xl">
+
+          <div className="mx-auto mb-6 h-1.5 w-24 rounded-full bg-[#008e9b]" />
+
+          <p className="mx-auto max-w-2xl text-lg font-medium text-gray-500 md:text-xl">
             Explore our specialized medical departments staffed with expert
             doctors dedicated to your health and well-being.
           </p>
         </div>
 
         {user?.role === "admin" && (
-          <div className="flex justify-center mb-10">
+          <div className="mb-10 flex justify-center">
             <Link
               to="/add-department"
-              className="flex items-center gap-2 bg-[#008e9b] text-white font-bold px-8 py-3.5 rounded-full hover:bg-[#007a85] transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-full !bg-[#008e9b] px-8 py-3.5 font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
             >
               <PlusCircle size={20} />
               <span>Add Department</span>
@@ -110,30 +136,32 @@ function Departments() {
         )}
 
         {departments.length === 0 ? (
-          <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100 text-center">
-            <Info className="mx-auto text-gray-300 mb-4" size={48} />
-            <p className="text-gray-500 text-lg">
+          <div className="rounded-[2rem] border border-gray-100 bg-white p-12 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+            <Info className="mx-auto mb-4 text-gray-300" size={48} />
+
+            <p className="text-lg font-medium text-gray-500">
               No departments available at the moment.
             </p>
+
             {user?.role === "admin" && (
-              <p className="text-sm mt-2 text-[#008e9b] font-medium">
+              <p className="mt-2 text-sm font-bold text-[#008e9b]">
                 Please add departments via the Admin Dashboard.
               </p>
             )}
           </div>
         ) : (
-          <div className="flex flex-col md:flex-row gap-8 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden min-h-[400px]">
+          <div className="flex min-h-[400px] flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.10)] md:flex-row">
             {/* Tabs List */}
-            <div className="md:w-72 border-b md:border-b-0 md:border-r border-gray-100 bg-gray-50/50 flex-shrink-0">
-              <ul className="flex flex-row overflow-x-auto md:flex-col hide-scrollbar p-3 md:p-6 gap-2.5">
+            <div className="flex-shrink-0 border-b border-gray-100 bg-gray-50/70 md:w-72 md:border-b-0 md:border-r">
+              <ul className="hide-scrollbar flex gap-2.5 overflow-x-auto p-3 md:flex-col md:p-6">
                 {departments.map((dep) => (
                   <li key={dep._id} className="flex-shrink-0">
                     <button
                       onClick={() => handleTabClick(dep._id)}
-                      className={`w-full text-left font-bold px-6 py-4 rounded-2xl whitespace-nowrap transition-all duration-300 transform ${
+                      className={`w-full whitespace-nowrap rounded-2xl px-6 py-4 text-left font-black transition-all duration-300 ${
                         activeTab === dep._id
-                          ? "bg-[#008e9b] text-white shadow-lg -translate-y-0.5"
-                          : "text-gray-500 hover:bg-white hover:text-[#008e9b] hover:shadow-md"
+                          ? "!bg-[#008e9b] text-white shadow-lg"
+                          : "!bg-transparent text-gray-500 hover:!bg-white hover:text-[#008e9b] hover:shadow-md"
                       }`}
                     >
                       {dep?.name}
@@ -144,39 +172,42 @@ function Departments() {
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 p-8 md:p-12 bg-white relative">
+            <div className="relative flex-1 bg-white p-8 md:p-12">
               {departments.map((dep) =>
                 dep._id === activeTab ? (
                   <div key={dep._id} className="animate-fadeIn">
-                    <div className="flex justify-between items-start mb-6">
-                      <h3 className="font-black text-gray-800 text-3xl md:text-4xl">
+                    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <h3 className="text-3xl font-black text-gray-900 md:text-4xl">
                         {dep?.name}
                       </h3>
+
                       {user?.role === "admin" && (
                         <button
                           onClick={() => handleDelete(dep._id)}
-                          className="flex items-center gap-2 bg-red-50 text-red-500 font-bold px-4 py-2 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm group"
+                          className="group inline-flex items-center justify-center gap-2 rounded-2xl !bg-red-50 px-4 py-2 font-black text-red-500 shadow-sm transition-all hover:!bg-red-500 hover:text-white"
                           title="Delete Department"
                         >
                           <Trash2
                             size={18}
-                            className="group-hover:scale-110 transition-transform"
+                            className="transition-transform group-hover:scale-110"
                           />
                           <span className="hidden sm:inline">Delete</span>
                         </button>
                       )}
                     </div>
-                    <div className="prose prose-lg text-gray-600 max-w-none">
-                      <p className="leading-relaxed whitespace-pre-line text-lg">
+
+                    <div className="prose prose-lg max-w-none text-gray-600">
+                      <p className="whitespace-pre-line text-lg leading-relaxed">
                         {dep?.description}
                       </p>
                     </div>
 
-                    <div className="mt-12 pt-8 border-t border-gray-50 flex items-center gap-4 text-[#008e9b]">
-                      <div className="w-10 h-10 rounded-full bg-[#008e9b]/10 flex items-center justify-center">
+                    <div className="mt-12 flex items-center gap-4 border-t border-gray-100 pt-8 text-[#008e9b]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#008e9b]/10">
                         <PlusCircle size={20} />
                       </div>
-                      <span className="font-bold">
+
+                      <span className="font-black">
                         Fully equipped for specialized care
                       </span>
                     </div>
@@ -192,19 +223,23 @@ function Departments() {
         .animate-fadeIn {
           animation: fadeIn 0.4s ease-out forwards;
         }
+
         @keyframes fadeIn {
           from {
             opacity: 0;
             transform: translateY(10px);
           }
+
           to {
             opacity: 1;
             transform: translateY(0);
           }
         }
+
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
+
         .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;

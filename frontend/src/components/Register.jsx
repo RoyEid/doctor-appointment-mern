@@ -1,27 +1,43 @@
 import { useState, useMemo, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiConfig } from "../config/api";
-import { Check, Circle, X, Eye, EyeOff } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Circle,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  Sparkles,
+  User,
+  X,
+  Loader2,
+} from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../context/AuthContext";
 
 function Register() {
   const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
     confirmPassword: "",
     name: "",
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
+      setError(null);
+
       const res = await fetch(apiConfig.googleLogin, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -114,6 +130,13 @@ function Register() {
           "Account created successfully. Please check your email to verify your account before booking appointments.",
         );
 
+        setForm({
+          email: "",
+          password: "",
+          confirmPassword: "",
+          name: "",
+        });
+
         setTimeout(() => {
           navigate("/login");
         }, 3000);
@@ -129,8 +152,8 @@ function Register() {
 
   const RuleItem = ({ valid, text }) => (
     <div
-      className={`flex items-center gap-2 text-xs font-semibold transition-all duration-300 ${
-        valid ? "text-green-600" : "text-gray-500"
+      className={`flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black transition-all duration-300 ${
+        valid ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-500"
       }`}
     >
       {valid ? (
@@ -143,242 +166,301 @@ function Register() {
   );
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8 py-12">
-      <form
-        className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-gray-100 relative overflow-hidden"
-        onSubmit={handleSubmit}
-      >
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-[#008e9b]"></div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">
-            Create Account
-          </h2>
-          <p className="text-gray-500 mt-2 font-medium">
-            Join MediCare to manage your health
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm text-center animate-shake font-medium">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl mb-6 text-sm text-center font-medium animate-fadeIn">
-            {success}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="John Doe"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
-              Password
-            </label>
-
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-                className="w-full p-3.5 pr-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800"
-                required
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors !bg-transparent !p-0 !border-none"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-
-            <p className="text-[11px] text-gray-500 mt-1.5 ml-1 leading-tight font-medium">
-              Use at least 8 characters with uppercase, lowercase, and a number.
-            </p>
-
-            <div className="mt-4 px-1">
-              <div className="flex justify-between items-end mb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  Security Check
-                </span>
-                <span
-                  className={`text-[11px] font-black uppercase ${
-                    strengthCount <= 1
-                      ? "text-red-500"
-                      : strengthCount === 2
-                        ? "text-yellow-600"
-                        : strengthCount === 3
-                          ? "text-[#008e9b]"
-                          : "text-green-600"
-                  }`}
-                >
-                  {form.password ? `Strength: ${getStrengthLabel()}` : ""}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-4 gap-1.5">
-                {[1, 2, 3, 4].map((index) => (
-                  <div
-                    key={index}
-                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                      index <= strengthCount
-                        ? getStrengthColor()
-                        : "bg-gray-200"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-2 gap-y-2 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
-              <RuleItem valid={passwordRules.length} text="8+ Characters" />
-              <RuleItem valid={passwordRules.uppercase} text="Uppercase" />
-              <RuleItem valid={passwordRules.lowercase} text="Lowercase" />
-              <RuleItem valid={passwordRules.number} text="Number" />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">
-              Confirm Password
-            </label>
-
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="••••••••"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className={`w-full p-3.5 pr-12 border rounded-xl focus:ring-2 focus:border-transparent outline-none transition-all bg-gray-50 text-gray-800 ${
-                  form.confirmPassword === ""
-                    ? "border-gray-200 focus:ring-[#008e9b]"
-                    : passwordsMatch
-                      ? "border-green-200 focus:ring-green-500"
-                      : "border-red-200 focus:ring-red-500"
-                }`}
-                required
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors !bg-transparent !p-0 !border-none"
-                aria-label={
-                  showConfirmPassword ? "Hide password" : "Show password"
-                }
-              >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-
-            {form.confirmPassword !== "" && (
-              <div className="mt-1.5 ml-1 flex items-center gap-1.5 transition-all duration-300">
-                {passwordsMatch ? (
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-green-600 uppercase tracking-tight">
-                    <Check size={12} strokeWidth={4} />
-                    Passwords match
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-red-500 uppercase tracking-tight">
-                    <X size={12} strokeWidth={4} />
-                    Passwords do not match
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <button
-          disabled={!isFormValid || loading}
-          className={`w-full mt-10 py-4 rounded-2xl font-black tracking-widest shadow-lg transition-all duration-300 transform active:scale-95 ${
-            isFormValid && !loading
-              ? "bg-[#008e9b] text-white hover:bg-[#007a85] hover:shadow-xl hover:-translate-y-1 cursor-pointer"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed grayscale"
-          }`}
+      <section className="relative z-10 flex w-full max-w-md items-center">
+        <form
+          onSubmit={handleSubmit}
+          className="relative w-full overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8"
         >
-          {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
-        </button>
+          <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-[#008e9b] via-[#46daea] to-[#008e9b]" />
 
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200"></div>
+          <div className="mb-7 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
+              <User size={28} />
+            </div>
+
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+              <Sparkles size={14} />
+              Join MediCare
+            </div>
+
+            <h2 className="text-3xl font-black text-gray-900">
+              Create Account
+            </h2>
+
+            <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500">
+              Create your account to book and manage healthcare appointments.
+            </p>
           </div>
 
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500 uppercase tracking-wider text-[10px] font-bold">
-              Or join with
-            </span>
+          {error && (
+            <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-center text-sm font-semibold text-green-700">
+              {success}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                Full Name
+              </label>
+
+              <div className="relative">
+                <User
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                />
+
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="John Doe"
+                  value={form.name}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                Email Address
+              </label>
+
+              <div className="relative">
+                <Mail
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                />
+
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                Password
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                />
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                </button>
+              </div>
+
+              <p className="mt-2 text-xs font-medium leading-relaxed text-gray-500">
+                Use at least 8 characters with uppercase, lowercase, and a
+                number.
+              </p>
+
+              {form.password && (
+                <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                      Security Check
+                    </span>
+
+                    <span
+                      className={`text-xs font-black uppercase ${
+                        strengthCount <= 1
+                          ? "text-red-500"
+                          : strengthCount === 2
+                            ? "text-yellow-600"
+                            : strengthCount === 3
+                              ? "text-[#008e9b]"
+                              : "text-green-600"
+                      }`}
+                    >
+                      Strength: {getStrengthLabel()}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[1, 2, 3, 4].map((index) => (
+                      <div
+                        key={index}
+                        className={`h-2 rounded-full transition-all duration-500 ${
+                          index <= strengthCount
+                            ? getStrengthColor()
+                            : "bg-gray-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <RuleItem
+                      valid={passwordRules.length}
+                      text="8+ Characters"
+                    />
+                    <RuleItem
+                      valid={passwordRules.uppercase}
+                      text="Uppercase"
+                    />
+                    <RuleItem
+                      valid={passwordRules.lowercase}
+                      text="Lowercase"
+                    />
+                    <RuleItem valid={passwordRules.number} text="Number" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                Confirm Password
+              </label>
+
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                />
+
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="••••••••"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 ${
+                    form.confirmPassword === ""
+                      ? "border-gray-200 focus:ring-[#008e9b]"
+                      : passwordsMatch
+                        ? "border-green-200 focus:ring-green-500"
+                        : "border-red-200 focus:ring-red-500"
+                  }`}
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={19} />
+                  ) : (
+                    <Eye size={19} />
+                  )}
+                </button>
+              </div>
+
+              {form.confirmPassword !== "" && (
+                <div className="mt-2 ml-1 flex items-center gap-1.5">
+                  {passwordsMatch ? (
+                    <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-green-600">
+                      <Check size={14} strokeWidth={3} />
+                      Passwords match
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-red-500">
+                      <X size={14} strokeWidth={3} />
+                      Passwords do not match
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="flex justify-center mb-4">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setError("Google Registration Failed")}
-            theme="filled_blue"
-            shape="pill"
-            width="100%"
-          />
-        </div>
-      </form>
+          <button
+            disabled={!isFormValid || loading}
+            className={`mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
+              isFormValid && !loading
+                ? "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+                : "cursor-not-allowed !bg-gray-400 opacity-70"
+            }`}
+          >
+            {loading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Creating account...
+              </>
+            ) : (
+              <>
+                Create Account
+                <ArrowRight size={19} />
+              </>
+            )}
+          </button>
 
-      <style jsx>{`
-        @keyframes shake {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          25% {
-            transform: translateX(-5px);
-          }
-          75% {
-            transform: translateX(5px);
-          }
-        }
+          <div className="relative my-7">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
 
-        .animate-shake {
-          animation: shake 0.4s ease-in-out;
-        }
-      `}</style>
-    </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                Or join with
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google Registration Failed")}
+              theme="filled_blue"
+              shape="pill"
+              width="100%"
+            />
+          </div>
+
+          <p className="mt-6 text-center text-sm font-medium text-gray-600">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-black text-[#008e9b] hover:text-[#007a85] hover:underline"
+            >
+              Log in here
+            </Link>
+          </p>
+        </form>
+      </section>
+    </main>
   );
 }
 

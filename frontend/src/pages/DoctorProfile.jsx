@@ -1,14 +1,27 @@
-import { useContext, useEffect, useState, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { apiConfig } from "../config/api";
-import { Check, Circle, X, Eye, EyeOff } from "lucide-react";
+import {
+  Check,
+  Circle,
+  X,
+  Eye,
+  EyeOff,
+  UserRound,
+  Mail,
+  Lock,
+  ImagePlus,
+  Loader2,
+} from "lucide-react";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function DoctorProfile() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -16,10 +29,12 @@ function DoctorProfile() {
     confirmPassword: "",
     image: null,
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [preview, setPreview] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (user && user.role !== "doctor") {
@@ -29,23 +44,28 @@ function DoctorProfile() {
 
     const fetchProfile = async () => {
       try {
+        setPageLoading(true);
+
         const token = localStorage.getItem("token");
+
         const { data } = await axios.get(apiConfig.getMyProfile, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // The backend returns the doctor object directly
         setForm((prev) => ({
           ...prev,
           name: data.name || user.name || "",
           email: data.email || user.email || "",
         }));
-        
+
         if (data.image) {
           setPreview(apiConfig.getDoctorImage(data.image));
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
+        toast.error("Failed to load doctor profile");
+      } finally {
+        setPageLoading(false);
       }
     };
 
@@ -54,9 +74,9 @@ function DoctorProfile() {
     }
   }, [user, navigate]);
 
-  // Password validation logic
   const passwordRules = useMemo(() => {
     const p = form.password;
+
     return {
       length: p.length >= 8,
       uppercase: /[A-Z]/.test(p),
@@ -66,7 +86,7 @@ function DoctorProfile() {
   }, [form.password]);
 
   const strengthCount = Object.values(passwordRules).filter(Boolean).length;
-  
+
   const getStrengthLabel = () => {
     if (form.password === "") return "";
     if (strengthCount <= 1) return "Weak";
@@ -83,39 +103,55 @@ function DoctorProfile() {
     return "bg-gray-200";
   };
 
-  const passwordsMatch = form.confirmPassword !== "" && form.password === form.confirmPassword;
+  const passwordsMatch =
+    form.confirmPassword !== "" && form.password === form.confirmPassword;
+
   const isPasswordValid = !form.password || strengthCount === 4;
   const isConfirmValid = !form.password || passwordsMatch;
-  const isFormValid = form.name.trim() !== "" && form.email.trim() !== "" && isPasswordValid && isConfirmValid;
+
+  const isFormValid =
+    form.name.trim() !== "" &&
+    form.email.trim() !== "" &&
+    isPasswordValid &&
+    isConfirmValid;
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     if (files && files[0]) {
       const file = files[0];
+
       setForm((prev) => ({ ...prev, image: file }));
       setPreview(URL.createObjectURL(file));
       return;
     }
+
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isFormValid) {
       if (form.password && !passwordsMatch) {
         toast.error("Password and confirm password must match");
       } else if (form.password && !isPasswordValid) {
-        toast.error("Please make sure your new password meets the requirements.");
+        toast.error(
+          "Please make sure your new password meets the requirements.",
+        );
       } else {
         toast.error("Please fill all required fields correctly.");
       }
+
       return;
     }
 
     try {
-      setLoading(true);
+      setSaving(true);
+
       const token = localStorage.getItem("token");
       const payload = new FormData();
+
       if (form.name) payload.append("name", form.name);
       if (form.email) payload.append("email", form.email);
       if (form.password) payload.append("password", form.password);
@@ -128,153 +164,246 @@ function DoctorProfile() {
         },
       });
 
-      // Update local storage if user data changed
       if (data.user) {
         localStorage.setItem("userData", JSON.stringify(data.user));
       }
-      
+
       toast.success(data.message || "Profile updated successfully");
-      
+
       setForm((prev) => ({
         ...prev,
         password: "",
         confirmPassword: "",
+        image: null,
       }));
-      
+
       if (data.doctor && data.doctor.image) {
         setPreview(apiConfig.getDoctorImage(data.doctor.image));
       }
     } catch (error) {
-      const message = error?.response?.data?.message || "Failed to update profile";
+      const message =
+        error?.response?.data?.message || "Failed to update profile";
       toast.error(message);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   const RuleItem = ({ valid, text }) => (
-    <div className={`flex items-center gap-2 text-xs font-semibold transition-all duration-300 ${valid ? "text-green-600" : "text-gray-500"}`}>
+    <div
+      className={`flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black transition-all duration-300 ${
+        valid ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-500"
+      }`}
+    >
       {valid ? (
         <Check size={14} className="stroke-[3px]" />
       ) : (
         <Circle size={14} className="fill-gray-300 stroke-none" />
       )}
+
       <span>{text}</span>
     </div>
   );
 
   if (!user || user.role !== "doctor") return null;
 
+  if (pageLoading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+        <LoadingSpinner text="Loading your doctor profile..." fullScreen />
+      </main>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 py-10">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-md border border-gray-100 p-6 sm:p-8">
-        <h2 className="text-3xl font-bold text-[#008e9b] mb-6 text-center sm:text-left">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+      <div className="mx-auto mb-8 max-w-2xl text-center">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+          Doctor Area
+        </div>
+
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
           Doctor Profile
         </h2>
-        <form className="space-y-4" onSubmit={handleSubmit} encType="multipart/form-data">
-          <div className="flex flex-col items-center sm:items-start gap-3">
-            <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-300">
-              <img
-                src={preview || "/img/doctors/avatar.png"}
-                alt="Doctor profile"
-                className="w-full h-full object-cover"
-              />
+
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+          Update your profile information, profile image, and account security.
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8">
+        <form
+          className="space-y-5"
+          onSubmit={handleSubmit}
+          encType="multipart/form-data"
+        >
+          <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
+              <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
+                <img
+                  src={preview || "/img/doctors/avatar.png"}
+                  alt="Doctor profile"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+
+              <div className="w-full flex-1 text-center sm:text-left">
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b] shadow-sm">
+                  <ImagePlus size={15} />
+                  Profile Image
+                </div>
+
+                <p className="mb-3 text-sm font-medium text-gray-500">
+                  Upload a clear professional image for your doctor profile.
+                </p>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleChange}
+                  className="w-full cursor-pointer text-xs text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-cyan-50 file:px-4 file:py-2 file:text-xs file:font-bold file:text-cyan-700 hover:file:bg-cyan-100"
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-600">Profile Image</label>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handleChange} 
-                className="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 cursor-pointer" 
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              Name
+            </label>
+
+            <div className="relative">
+              <UserRound
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+              />
+
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                type="text"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              type="text"
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#008e9b] outline-none"
-              required
-            />
+            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              Email
+            </label>
+
+            <div className="relative">
+              <Mail
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+              />
+
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                type="email"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-            <input
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              type="email"
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#008e9b] outline-none"
-              required
-            />
-          </div>
+          <div className="mt-7 border-t border-gray-100 pt-7">
+            <div className="mb-5">
+              <h3 className="text-xl font-black text-gray-900">
+                Account Security
+              </h3>
 
-          <div className="pt-6 mt-6 border-t border-gray-100">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Account Security</h3>
-            <div className="space-y-6">
+              <p className="mt-1 text-sm font-medium text-gray-500">
+                Leave the password fields empty if you do not want to change
+                your password.
+              </p>
+            </div>
+
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">New Password</label>
+                <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                  New Password
+                </label>
+
                 <div className="relative">
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  />
+
                   <input
                     name="password"
                     value={form.password}
                     onChange={handleChange}
                     type={showPassword ? "text" : "password"}
                     placeholder="Leave empty to keep current"
-                    className="w-full p-3.5 pr-12 border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all"
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
                   />
+
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors !bg-transparent !p-0 !border-none"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>
                 </div>
-                
+
                 {form.password && (
-                  <div className="mt-3 animate-fadeIn">
-                    <p className="text-[11px] text-gray-500 mb-3 font-medium">
-                      Use at least 8 characters with uppercase, lowercase, and a number.
-                    </p>
-                    
-                    {/* Password Strength Bar */}
-                    <div className="px-1">
-                      <div className="flex justify-between items-end mb-1.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Security Check</span>
-                        <span className={`text-[11px] font-black uppercase ${
-                          strengthCount <= 1 ? "text-red-500" : 
-                          strengthCount === 2 ? "text-yellow-600" : 
-                          strengthCount === 3 ? "text-[#008e9b]" : 
-                          "text-green-600"
-                        }`}>
-                          Strength: {getStrengthLabel()}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-4 gap-1.5">
-                        {[1, 2, 3, 4].map((index) => (
-                          <div
-                            key={index}
-                            className={`h-1.5 rounded-full transition-all duration-500 ${
-                              index <= strengthCount ? getStrengthColor() : "bg-gray-200"
-                            }`}
-                          />
-                        ))}
-                      </div>
+                  <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                        Security Check
+                      </span>
+
+                      <span
+                        className={`text-xs font-black uppercase ${
+                          strengthCount <= 1
+                            ? "text-red-500"
+                            : strengthCount === 2
+                              ? "text-yellow-600"
+                              : strengthCount === 3
+                                ? "text-[#008e9b]"
+                                : "text-green-600"
+                        }`}
+                      >
+                        Strength: {getStrengthLabel()}
+                      </span>
                     </div>
 
-                    {/* Password Rules Checklist */}
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-2 mt-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                      <RuleItem valid={passwordRules.length} text="8+ Characters" />
-                      <RuleItem valid={passwordRules.uppercase} text="Uppercase" />
-                      <RuleItem valid={passwordRules.lowercase} text="Lowercase" />
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[1, 2, 3, 4].map((index) => (
+                        <div
+                          key={index}
+                          className={`h-2 rounded-full transition-all duration-500 ${
+                            index <= strengthCount
+                              ? getStrengthColor()
+                              : "bg-gray-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <RuleItem
+                        valid={passwordRules.length}
+                        text="8+ Characters"
+                      />
+                      <RuleItem
+                        valid={passwordRules.uppercase}
+                        text="Uppercase"
+                      />
+                      <RuleItem
+                        valid={passwordRules.lowercase}
+                        text="Lowercase"
+                      />
                       <RuleItem valid={passwordRules.number} text="Number" />
                     </div>
                   </div>
@@ -282,42 +411,58 @@ function DoctorProfile() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Confirm New Password</label>
+                <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                  Confirm New Password
+                </label>
+
                 <div className="relative">
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  />
+
                   <input
                     name="confirmPassword"
                     value={form.confirmPassword}
                     onChange={handleChange}
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Re-enter new password"
-                    className={`w-full p-3.5 pr-12 border rounded-xl bg-gray-50 focus:ring-2 focus:border-transparent outline-none transition-all ${
-                      form.confirmPassword === "" 
-                        ? "border-gray-200 focus:ring-[#008e9b]" 
-                        : passwordsMatch 
-                          ? "border-green-200 focus:ring-green-500" 
+                    className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 ${
+                      form.confirmPassword === ""
+                        ? "border-gray-200 focus:ring-[#008e9b]"
+                        : passwordsMatch
+                          ? "border-green-200 focus:ring-green-500"
                           : "border-red-200 focus:ring-red-500"
                     }`}
                     required={!!form.password}
                   />
+
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#008e9b] transition-colors !bg-transparent !p-0 !border-none"
-                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                    aria-label={
+                      showConfirmPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={19} />
+                    ) : (
+                      <Eye size={19} />
+                    )}
                   </button>
                 </div>
+
                 {form.confirmPassword !== "" && form.password !== "" && (
-                  <div className="mt-2 ml-1 flex items-center gap-1.5 transition-all duration-300">
+                  <div className="mt-2 ml-1 flex items-center gap-1.5">
                     {passwordsMatch ? (
-                      <div className="flex items-center gap-1 text-[11px] font-bold text-green-600 uppercase tracking-tight">
-                        <Check size={12} strokeWidth={4} />
+                      <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-green-600">
+                        <Check size={14} strokeWidth={3} />
                         Passwords match
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 text-[11px] font-bold text-red-500 uppercase tracking-tight">
-                        <X size={12} strokeWidth={4} />
+                      <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-red-500">
+                        <X size={14} strokeWidth={3} />
                         Passwords do not match
                       </div>
                     )}
@@ -329,28 +474,25 @@ function DoctorProfile() {
 
           <button
             type="submit"
-            disabled={loading || !isFormValid}
-            className={`w-full mt-10 py-4 rounded-xl font-black tracking-widest shadow-lg transition-all duration-300 transform active:scale-95 ${
-              isFormValid && !loading
-                ? "bg-[#008e9b] text-white hover:bg-[#007a85] hover:shadow-xl hover:-translate-y-0.5"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed grayscale"
+            disabled={saving || !isFormValid}
+            className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
+              isFormValid && !saving
+                ? "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+                : "cursor-not-allowed !bg-gray-400 opacity-70"
             }`}
           >
-            {loading ? "UPDATING PROFILE..." : "SAVE CHANGES"}
+            {saving ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Saving changes...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </button>
         </form>
       </div>
-      
-      <style jsx>{`
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-5px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </div>
+    </main>
   );
 }
 

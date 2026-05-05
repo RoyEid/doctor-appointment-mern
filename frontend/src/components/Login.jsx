@@ -12,6 +12,7 @@ import {
   Eye,
   EyeOff,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 
 function Login() {
@@ -438,16 +439,23 @@ function Login() {
             disabled={loading}
             className={`group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
               loading
-                ? "cursor-not-allowed !bg-gray-400"
+                ? "cursor-not-allowed !bg-gray-400 opacity-80"
                 : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
             }`}
           >
-            {loading ? "Logging in..." : "Login securely"}
-            {!loading && (
-              <ArrowRight
-                size={19}
-                className="transition-transform group-hover:translate-x-1"
-              />
+            {loading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              <>
+                Login securely
+                <ArrowRight
+                  size={19}
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              </>
             )}
           </button>
 

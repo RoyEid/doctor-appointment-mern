@@ -3,6 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function AdminAppointments() {
   const { user } = useContext(AuthContext);
@@ -11,7 +12,6 @@ function AdminAppointments() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Basic redirect guard for normal users navigating to the route directly
     if (user && user.role !== "admin") {
       navigate("/");
     }
@@ -21,6 +21,7 @@ function AdminAppointments() {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
+
         const token = localStorage.getItem("token");
         if (!token) return;
 
@@ -33,15 +34,16 @@ function AdminAppointments() {
         });
 
         const data = await res.json();
-        
+
         if (!res.ok) {
           throw new Error(data.message || "Failed to fetch appointments");
         }
-        
-        // Ensure data is array and sort newest first
+
         const apptArray = Array.isArray(data) ? data : data.appointments || [];
-        const sorted = apptArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
+        const sorted = apptArray.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        );
+
         setAppointments(sorted);
       } catch (error) {
         console.error("Error fetching appointments:", error);
@@ -57,93 +59,118 @@ function AdminAppointments() {
   }, [user]);
 
   if (!user || user.role !== "admin") {
-    return null; // Don't flash UI before navigate fires
+    return null;
   }
 
   if (loading) {
     return (
-      <div className="p-8 bg-gray-100 min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Loading appointments...</p>
-      </div>
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+        <LoadingSpinner text="Loading all appointments..." fullScreen />
+      </main>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
-        Admin Supervisor - All Appointments
-      </h2>
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+      <div className="mx-auto mb-8 max-w-3xl text-center">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+          Admin Area
+        </div>
 
-      <div className="space-y-4 px-4 max-w-3xl mx-auto">
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+          All Appointments
+        </h2>
+
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+          Review appointment activity across the platform. Approval actions are
+          handled by the assigned doctors.
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-3xl space-y-4">
         {appointments.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
-            <p className="text-gray-500 text-lg mb-4">No appointments found across the platform.</p>
+          <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
+            <p className="text-base font-medium text-gray-500 sm:text-lg">
+              No appointments found across the platform.
+            </p>
           </div>
         ) : (
           appointments.map((app) => {
             const currentStatus = app.status || "pending";
+
             return (
               <div
                 key={app._id}
-                className="w-full mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col gap-4"
+                className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
               >
-                {/* LEFT SIDE */}
-                <div className="flex gap-3 min-w-0">
-                  <img
-                    alt={app?.doctor?.name || "Doctor"}
-                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border border-[#008e9b]"
-                    src={apiConfig.getDoctorImage(app?.doctor?.image)}
-                    onError={(e) => {
-                      e.target.src = "./img/doctors/avatar.png";
-                    }}
-                  />
+                <div className="p-4 sm:p-5">
+                  <div className="flex min-w-0 gap-3">
+                    <img
+                      alt={app?.doctor?.name || "Doctor"}
+                      className="h-14 w-14 rounded-full border border-[#008e9b] object-cover sm:h-16 sm:w-16"
+                      src={apiConfig.getDoctorImage(app?.doctor?.image)}
+                      onError={(e) => {
+                        e.target.src = "/img/doctors/avatar.png";
+                      }}
+                    />
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-col mb-1 gap-0.5">
-                      <h3 className="font-semibold text-gray-800 text-base sm:text-lg leading-tight">
-                        {app.doctor?.name || "Unknown Doctor"}
-                      </h3>
-                      {app.user && (
-                        <p className="text-sm font-medium text-[#008e9b]">
-                          {app.user.name}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{app.reason}</p>
-                    
-                    <div className="text-xs sm:text-sm text-gray-400 mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span>📅</span>
-                      {new Date(app.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                      <span className="mx-0.5">|</span>
-                      <span>🕒</span>
-                      {app.time || "N/A"}
-                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex flex-col gap-0.5">
+                        <h3 className="text-base font-black leading-tight text-gray-900 sm:text-lg">
+                          {app.doctor?.name || "Unknown Doctor"}
+                        </h3>
 
-                    <span 
-                      className={`inline-block mt-2 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
-                        currentStatus === 'approved' ? 'bg-green-100 text-green-700' : 
-                        currentStatus === 'rejected' ? 'bg-red-100 text-red-700' : 
-                        'bg-yellow-100 text-yellow-700'
-                      }`}
-                    >
-                      {currentStatus}
-                    </span>
+                        {app.user && (
+                          <p className="text-sm font-bold text-[#008e9b]">
+                            Patient: {app.user.name}
+                          </p>
+                        )}
+                      </div>
+
+                      <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500">
+                        {app.reason || "No reason provided"}
+                      </p>
+
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs font-medium text-gray-400 sm:text-sm">
+                        <span>📅</span>
+                        <span>
+                          {new Date(app.date).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </span>
+
+                        <span className="mx-0.5">|</span>
+
+                        <span>🕒</span>
+                        <span>{app.time || "N/A"}</span>
+                      </div>
+
+                      <span
+                        className={`mt-3 inline-block rounded-full px-3 py-1 text-xs font-bold capitalize ${
+                          currentStatus === "approved"
+                            ? "bg-green-100 text-green-700"
+                            : currentStatus === "rejected"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {currentStatus}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="text-xs text-gray-500 mt-1">
-                  Review only. Approval actions are handled by assigned doctors.
+                  <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-xs font-medium text-gray-500">
+                    Review only. Approval actions are handled by assigned
+                    doctors.
+                  </div>
                 </div>
               </div>
             );
           })
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

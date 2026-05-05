@@ -2,29 +2,40 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { apiConfig } from "../config/api";
 import AuthRequired from "../components/AuthRequired";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import {
+  CalendarDays,
+  Clock,
+  FileText,
+  Loader2,
+  Stethoscope,
+} from "lucide-react";
 
 function AddAppointment() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user && user.role !== "user") {
-      navigate("/");
-    }
-  }, [user, navigate]);
-
   const [doctors, setDoctors] = useState([]);
+  const [doctorsLoading, setDoctorsLoading] = useState(true);
+
   const [form, setForm] = useState({
     doctor: "",
     date: "",
     time: "",
     reason: "",
   });
+
   const [selectedDoctorSlots, setSelectedDoctorSlots] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user && user.role !== "user") {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     if (form.doctor && doctors.length > 0) {
@@ -45,12 +56,21 @@ function AddAppointment() {
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
+        setDoctorsLoading(true);
+
         const res = await fetch(apiConfig.getAllDoctors);
         const data = await res.json();
-        setDoctors(data);
+
+        if (!res.ok) {
+          throw new Error(data.message || "Could not load doctors.");
+        }
+
+        setDoctors(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("FETCH_DOCTORS_ERROR:", error);
         toast.error("Could not load doctors. Please try again.");
+      } finally {
+        setDoctorsLoading(false);
       }
     };
 
@@ -182,110 +202,168 @@ function AddAppointment() {
 
   if (!user) return <AuthRequired />;
 
+  if (doctorsLoading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+        <LoadingSpinner text="Preparing appointment form..." fullScreen />
+      </main>
+    );
+  }
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-xl rounded-2xl p-6 sm:p-8 w-full max-w-md border border-gray-100"
-      >
-        <h2 className="text-2xl sm:text-3xl font-extrabold mb-8 text-center text-gray-800">
-          Add Appointment
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+      <div className="mx-auto mb-8 max-w-2xl text-center">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+          Appointment Request
+        </div>
+
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+          Book an Appointment
         </h2>
 
-        <div className="space-y-4 sm:space-y-6">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+          Choose your doctor, preferred date and time, and tell us the reason
+          for your visit.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto w-full max-w-md overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8"
+      >
+        <div className="space-y-5">
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700">
               Doctor
             </label>
-            <select
-              name="doctor"
-              value={form.doctor}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
-            >
-              <option value="">Select doctor</option>
-              {doctors?.map((doc) => (
-                <option key={doc._id} value={doc._id}>
-                  {doc?.name} - {doc?.specialty}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">
-              Date
-            </label>
-            <input
-              type="date"
-              name="date"
-              value={form.date}
-              onChange={handleChange}
-              min={new Date().toISOString().split("T")[0]}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
-            />
-          </div>
+            <div className="relative">
+              <Stethoscope
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+              />
 
-          <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">
-              Time
-            </label>
-            {selectedDoctorSlots.length > 0 ? (
               <select
-                name="time"
-                value={form.time}
+                name="doctor"
+                value={form.doctor}
                 onChange={handleChange}
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
+                className="w-full appearance-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               >
-                {selectedDoctorSlots.map((slot, i) => (
-                  <option key={i} value={slot}>
-                    {slot}
+                <option value="">Select doctor</option>
+                {doctors?.map((doc) => (
+                  <option key={doc._id} value={doc._id}>
+                    {doc?.name} - {doc?.specialty}
                   </option>
                 ))}
               </select>
-            ) : (
-              <input
-                type="time"
-                name="time"
-                value={form.time}
-                onChange={handleChange}
-                required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
-              />
-            )}
+            </div>
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              Date
+            </label>
+
+            <div className="relative">
+              <CalendarDays
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+              />
+
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                min={new Date().toISOString().split("T")[0]}
+                required
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              Time
+            </label>
+
+            <div className="relative">
+              <Clock
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+              />
+
+              {selectedDoctorSlots.length > 0 ? (
+                <select
+                  name="time"
+                  value={form.time}
+                  onChange={handleChange}
+                  required
+                  className="w-full appearance-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                >
+                  {selectedDoctorSlots.map((slot, i) => (
+                    <option key={i} value={slot}>
+                      {slot}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="time"
+                  name="time"
+                  value={form.time}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                />
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-bold text-gray-700">
               Reason
             </label>
-            <textarea
-              name="reason"
-              value={form.reason}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg h-32 resize-none focus:ring-2 focus:ring-[#008e9b] focus:border-transparent outline-none transition-all duration-200 bg-gray-50"
-              placeholder="Describe your reason for the appointment..."
-            />
+
+            <div className="relative">
+              <FileText
+                size={18}
+                className="absolute left-4 top-4 text-[#008e9b]"
+              />
+
+              <textarea
+                name="reason"
+                value={form.reason}
+                onChange={handleChange}
+                required
+                className="h-32 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                placeholder="Describe your reason for the appointment..."
+              />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className={`w-full py-3.5 rounded-lg text-white font-bold tracking-wide transition-all duration-300 transform shadow-md hover:shadow-lg ${
+            className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
               submitting
-                ? "bg-gray-400 cursor-not-allowed translate-y-0"
-                : "bg-[#008e9b] hover:bg-[#007a85] hover:-translate-y-0.5"
+                ? "cursor-not-allowed !bg-gray-400 opacity-80"
+                : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
             }`}
           >
-            {submitting ? "Submitting..." : "Submit Request"}
+            {submitting ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                Submitting request...
+              </>
+            ) : (
+              "Submit Request"
+            )}
           </button>
         </div>
       </form>
-    </div>
+    </main>
   );
 }
 

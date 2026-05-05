@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { ArrowRight } from "lucide-react";
+
 import carousel_1 from "../img/hero-carousel/hero-carousel-1.jpg";
 import carousel_2 from "../img/hero-carousel/hero-carousel-2.jpg";
 import carousel_3 from "../img/hero-carousel/hero-carousel-3.jpg";
@@ -28,59 +30,105 @@ function HeroSlider() {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }, 5000);
+
     return () => clearInterval(timer);
   }, [slides.length]);
 
   return (
-    <section className="relative w-full h-[80vh] overflow-hidden bg-gray-900">
+    <section className="relative h-[82vh] min-h-[560px] w-full overflow-hidden bg-gray-950 sm:h-[86vh]">
+      {/* Soft background glow */}
+      <div className="pointer-events-none absolute right-[-120px] top-[-120px] z-20 h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] z-20 h-96 w-96 rounded-full bg-[#008e9b]/20 blur-3xl" />
+
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-            index === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+          className={`absolute inset-0 h-full w-full transition-all duration-1000 ease-in-out ${
+            index === currentIndex
+              ? "z-10 scale-100 opacity-100"
+              : "z-0 scale-105 opacity-0"
           }`}
           aria-hidden={index !== currentIndex}
         >
           <img
             src={slide.image}
             alt={slide.title}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/60 flex flex-col justify-center items-center text-center text-white px-6">
-            <h2 className="text-3xl md:text-5xl text-[#46daea] font-extrabold mb-4 md:mb-6">
-              {slide.title}
-            </h2>
 
-            <p className="max-w-2xl text-lg md:text-2xl font-light mb-8 opacity-90">
-              {slide.text}
-            </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/55 to-[#008e9b]/35" />
 
-            <a
-              href="#about"
-              tabIndex={index === currentIndex ? 0 : -1}
-              className="inline-block bg-[#46daea] bg-opacity-90 text-black font-bold py-3 md:py-4 px-8 md:px-10 rounded-full shadow-lg hover:bg-[#43b0ba] hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-            >
-              Read More
-            </a>
+          <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl text-center text-white">
+              <div className="mb-5 inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#bdf8ff] backdrop-blur-md">
+                MediCare Appointment System
+              </div>
+
+              <h1 className="text-4xl font-black leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                {slide.title.split(",")[0]}
+                {slide.title.includes(",") && (
+                  <>
+                    ,{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#46daea] to-[#bdf8ff]">
+                      {slide.title.split(",").slice(1).join(",").trim()}
+                    </span>
+                  </>
+                )}
+              </h1>
+
+              {!slide.title.includes(",") && (
+                <div className="mx-auto mt-4 h-1.5 w-24 rounded-full bg-[#46daea]" />
+              )}
+
+              <p className="mx-auto mt-6 max-w-2xl text-base font-medium leading-relaxed text-white/85 sm:text-lg md:text-xl">
+                {slide.text}
+              </p>
+
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <a
+                  href="#about"
+                  tabIndex={index === currentIndex ? 0 : -1}
+                  className="group inline-flex items-center justify-center gap-2 rounded-2xl !bg-[#008e9b] px-8 py-4 text-sm font-black text-white shadow-2xl shadow-[#008e9b]/25 transition-all duration-300 hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-[#008e9b]/35"
+                >
+                  Read More
+                  <ArrowRight
+                    size={19}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </a>
+
+                <a
+                  href="#services"
+                  tabIndex={index === currentIndex ? 0 : -1}
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 px-8 py-4 text-sm font-black text-white backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20"
+                >
+                  Explore Departments
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       ))}
 
-      {/* Pagination Dots */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-3">
+      {/* Pagination dots */}
+      <div className="absolute bottom-8 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3">
         {slides.map((_, index) => (
           <button
             key={index}
+            type="button"
             onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            className={`!border-none !p-0 !shadow-none transition-all duration-300 hover:!bg-white ${
               index === currentIndex
-                ? "bg-[#46daea] scale-125"
-                : "bg-white/50 hover:bg-white"
+                ? "h-3 w-9 rounded-full !bg-[#46daea]"
+                : "h-3 w-3 rounded-full !bg-white/60"
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
+
+      {/* Bottom fade */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 h-28 bg-gradient-to-t from-[#f4fbfc] to-transparent" />
     </section>
   );
 }
