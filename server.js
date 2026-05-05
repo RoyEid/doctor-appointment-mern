@@ -13,8 +13,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 console.log("====================================");
-console.log("UPDATED SERVER.JS IS RUNNING");
-console.log("CORS DEBUG VERSION 2026-05-06");
+console.log("SERVER VERSION WITH HEALTH ROUTE IS RUNNING");
+console.log("CORS + HEALTH FIX VERSION 2026-05-06");
 console.log("====================================");
 
 connectDB();
@@ -42,7 +42,7 @@ app.use(express.json());
 app.get("/", (req, res) => {
     return res.status(200).json({
         success: true,
-        message: "MediCare backend is running - CORS fixed version",
+        message: "MediCare backend is running",
     });
 });
 
@@ -50,6 +50,7 @@ app.get("/health", (req, res) => {
     return res.status(200).json({
         success: true,
         message: "Backend health check passed",
+        version: "cors-health-fix-2026-05-06",
         time: new Date().toISOString(),
     });
 });
@@ -58,7 +59,7 @@ app.get("/debug-version-roy", (req, res) => {
     return res.status(200).json({
         success: true,
         message: "This is Roy's updated backend server.js",
-        version: "cors-debug-2026-05-06",
+        version: "cors-health-fix-2026-05-06",
         time: new Date().toISOString(),
     });
 });
