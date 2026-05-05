@@ -20,6 +20,8 @@ function AddAppointment() {
 
   const [doctors, setDoctors] = useState([]);
   const [doctorsLoading, setDoctorsLoading] = useState(true);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [availabilitySlots, setAvailabilitySlots] = useState([]);
 
   const [form, setForm] = useState({
     doctor: "",
@@ -28,7 +30,6 @@ function AddAppointment() {
     reason: "",
   });
 
-  const [selectedDoctorSlots, setSelectedDoctorSlots] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -36,22 +37,6 @@ function AddAppointment() {
       navigate("/");
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    if (form.doctor && doctors.length > 0) {
-      const doc = doctors.find((d) => d._id === form.doctor);
-
-      if (doc && doc.availableSlots && doc.availableSlots.length > 0) {
-        setSelectedDoctorSlots(doc.availableSlots);
-
-        if (!form.time || !doc.availableSlots.includes(form.time)) {
-          setForm((prev) => ({ ...prev, time: doc.availableSlots[0] }));
-        }
-      } else {
-        setSelectedDoctorSlots([]);
-      }
-    }
-  }, [form.doctor, doctors, form.time]);
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -77,8 +62,69 @@ function AddAppointment() {
     fetchDoctor();
   }, []);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      if (!form.doctor || !form.date) {
+        setAvailabilitySlots([]);
+        setForm((prev) => ({ ...prev, time: "" }));
+        return;
+      }
+
+      try {
+        setSlotsLoading(true);
+
+        const res = await fetch(
+          apiConfig.getAppointmentAvailability(form.doctor, form.date),
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Could not load available times.");
+        }
+
+        const slots = Array.isArray(data.slots) ? data.slots : [];
+
+        setAvailabilitySlots(slots);
+
+        setForm((prev) => {
+          const selectedSlotStillAvailable = slots.some(
+            (slot) => slot.time === prev.time && slot.available,
+          );
+
+          return selectedSlotStillAvailable ? prev : { ...prev, time: "" };
+        });
+      } catch (error) {
+        console.error("FETCH_AVAILABILITY_ERROR:", error);
+        setAvailabilitySlots([]);
+        setForm((prev) => ({ ...prev, time: "" }));
+        toast.error(error.message || "Could not load available times.");
+      } finally {
+        setSlotsLoading(false);
+      }
+    };
+
+    fetchAvailability();
+  }, [form.doctor, form.date]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "doctor" || name === "date" ? { time: "" } : {}),
+    }));
+  };
+
+  const handleSlotClick = (slot) => {
+    if (!slot.available) return;
+
+    setForm((prev) => ({
+      ...prev,
+      time: slot.time,
+    }));
+  };
 
   const resendVerificationEmail = async () => {
     const token = localStorage.getItem("token");
@@ -139,6 +185,11 @@ function AddAppointment() {
 
     if (submitting) return;
 
+    if (!form.time) {
+      toast.error("Please choose an available time slot.");
+      return;
+    }
+
     setSubmitting(true);
 
     const token = localStorage.getItem("token");
@@ -165,6 +216,7 @@ function AddAppointment() {
         });
 
         setForm({ doctor: "", date: "", time: "", reason: "" });
+        setAvailabilitySlots([]);
         navigate("/my-appointments");
       } else if (res.status === 403) {
         const result = await Swal.fire({
@@ -200,6 +252,15 @@ function AddAppointment() {
     }
   };
 
+  const selectedDoctor = doctors.find((doctor) => doctor._id === form.doctor);
+
+  const availableCount = availabilitySlots.filter(
+    (slot) => slot.available,
+  ).length;
+  const bookedCount = availabilitySlots.filter(
+    (slot) => !slot.available,
+  ).length;
+
   if (!user) return <AuthRequired />;
 
   if (doctorsLoading) {
@@ -212,7 +273,7 @@ function AddAppointment() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
-      <div className="mx-auto mb-8 max-w-2xl text-center">
+      <div className="mx-auto mb-8 max-w-3xl text-center">
         <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
           Appointment Request
         </div>
@@ -222,16 +283,16 @@ function AddAppointment() {
         </h2>
 
         <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
-          Choose your doctor, preferred date and time, and tell us the reason
-          for your visit.
+          Choose your doctor and date, then select one available 30-minute time
+          slot.
         </p>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="mx-auto w-full max-w-md overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8"
+        className="mx-auto grid w-full max-w-5xl gap-6 overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8 lg:grid-cols-[0.9fr_1.1fr]"
       >
-        <div className="space-y-5">
+        <section className="space-y-5">
           <div>
             <label className="mb-1.5 block text-sm font-bold text-gray-700">
               Doctor
@@ -251,7 +312,7 @@ function AddAppointment() {
                 className="w-full appearance-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               >
                 <option value="">Select doctor</option>
-                {doctors?.map((doc) => (
+                {doctors.map((doc) => (
                   <option key={doc._id} value={doc._id}>
                     {doc?.name} - {doc?.specialty}
                   </option>
@@ -259,6 +320,22 @@ function AddAppointment() {
               </select>
             </div>
           </div>
+
+          {selectedDoctor && (
+            <div className="rounded-3xl border border-[#008e9b]/10 bg-[#f4fbfc] p-4">
+              <p className="text-sm font-black text-gray-900">
+                {selectedDoctor.name}
+              </p>
+
+              <p className="mt-1 text-sm font-semibold text-[#008e9b]">
+                {selectedDoctor.specialty}
+              </p>
+
+              <p className="mt-1 text-xs font-medium text-gray-500">
+                {selectedDoctor.experienceYears} years of experience
+              </p>
+            </div>
+          )}
 
           <div>
             <label className="mb-1.5 block text-sm font-bold text-gray-700">
@@ -285,44 +362,6 @@ function AddAppointment() {
 
           <div>
             <label className="mb-1.5 block text-sm font-bold text-gray-700">
-              Time
-            </label>
-
-            <div className="relative">
-              <Clock
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-              />
-
-              {selectedDoctorSlots.length > 0 ? (
-                <select
-                  name="time"
-                  value={form.time}
-                  onChange={handleChange}
-                  required
-                  className="w-full appearance-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
-                >
-                  {selectedDoctorSlots.map((slot, i) => (
-                    <option key={i} value={slot}>
-                      {slot}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type="time"
-                  name="time"
-                  value={form.time}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
-                />
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
               Reason
             </label>
 
@@ -337,17 +376,141 @@ function AddAppointment() {
                 value={form.reason}
                 onChange={handleChange}
                 required
-                className="h-32 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="h-36 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
                 placeholder="Describe your reason for the appointment..."
               />
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-4 sm:p-5">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b] shadow-sm">
+                <Clock size={14} />
+                30-minute slots
+              </div>
+
+              <h3 className="text-xl font-black text-gray-900">
+                Available Times
+              </h3>
+
+              <p className="mt-1 text-sm font-medium text-gray-500">
+                Teal slots are available. Gray slots are already booked.
+              </p>
+            </div>
+
+            {form.doctor && form.date && !slotsLoading && (
+              <div className="flex gap-2 text-xs font-black">
+                <span className="rounded-full bg-[#008e9b] px-3 py-1 text-white">
+                  {availableCount} available
+                </span>
+
+                <span className="rounded-full bg-gray-200 px-3 py-1 text-gray-500">
+                  {bookedCount} booked
+                </span>
+              </div>
+            )}
+          </div>
+
+          {!form.doctor || !form.date ? (
+            <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white p-6 text-center">
+              <p className="max-w-xs text-sm font-medium text-gray-500">
+                Select a doctor and date to see the available appointment times.
+              </p>
+            </div>
+          ) : slotsLoading ? (
+            <div className="flex min-h-[240px] items-center justify-center rounded-3xl bg-white">
+              <div className="text-center">
+                <Loader2
+                  size={30}
+                  className="mx-auto animate-spin text-[#008e9b]"
+                />
+                <p className="mt-3 text-sm font-semibold text-gray-500">
+                  Loading available times...
+                </p>
+              </div>
+            </div>
+          ) : availabilitySlots.length === 0 ? (
+            <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white p-6 text-center">
+              <p className="max-w-xs text-sm font-medium text-gray-500">
+                No slots are available for this doctor on this date.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {availabilitySlots.map((slot) => {
+                const isSelected = form.time === slot.time;
+
+                return (
+                  <button
+                    key={slot.time}
+                    type="button"
+                    disabled={!slot.available}
+                    onClick={() => handleSlotClick(slot)}
+                    className={`rounded-2xl border px-4 py-3 text-sm font-black transition-all ${
+                      slot.available
+                        ? isSelected
+                          ? "!bg-[#008e9b] text-white shadow-lg ring-2 ring-[#46daea]"
+                          : "!bg-white text-[#008e9b] border-[#008e9b]/20 hover:-translate-y-0.5 hover:!bg-[#e8fbfd] hover:shadow-md"
+                        : "cursor-not-allowed border-gray-200 !bg-gray-200 text-gray-400 opacity-70"
+                    }`}
+                    title={
+                      slot.available
+                        ? "Available"
+                        : "This time is already booked"
+                    }
+                  >
+                    {slot.time}
+
+                    <span className="mt-1 block text-[10px] font-black uppercase tracking-wide">
+                      {slot.available ? "Available" : "Booked"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-5 rounded-3xl border border-white bg-white p-4">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-gray-400">
+              Selected appointment
+            </p>
+
+            <div className="mt-3 space-y-1 text-sm font-semibold text-gray-600">
+              <p>
+                Doctor:{" "}
+                <span className="font-black text-gray-900">
+                  {selectedDoctor?.name || "Not selected"}
+                </span>
+              </p>
+
+              <p>
+                Date:{" "}
+                <span className="font-black text-gray-900">
+                  {form.date || "Not selected"}
+                </span>
+              </p>
+
+              <p>
+                Time:{" "}
+                <span className="font-black text-[#008e9b]">
+                  {form.time || "Not selected"}
+                </span>
+              </p>
+
+              <p>
+                Duration:{" "}
+                <span className="font-black text-gray-900">30 minutes</span>
+              </p>
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={submitting}
-            className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
-              submitting
+            disabled={submitting || !form.doctor || !form.date || !form.time}
+            className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
+              submitting || !form.doctor || !form.date || !form.time
                 ? "cursor-not-allowed !bg-gray-400 opacity-80"
                 : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
             }`}
@@ -361,7 +524,7 @@ function AddAppointment() {
               "Submit Request"
             )}
           </button>
-        </div>
+        </section>
       </form>
     </main>
   );

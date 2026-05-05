@@ -3,18 +3,40 @@ import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../components/LoadingSpinner";
+import {
+  CalendarDays,
+  Clock,
+  Loader2,
+  Mail,
+  RefreshCw,
+  UserRound,
+} from "lucide-react";
 
 function DoctorAppointments() {
   const { user } = useContext(AuthContext);
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [editingId, setEditingId] = useState(null);
-  const [updatingId, setUpdatingId] = useState(null); // Tracks button loading
-  const [rescheduleForm, setRescheduleForm] = useState({ date: "", time: "" });
   const navigate = useNavigate();
 
+  const today = new Date().toISOString().split("T")[0];
+
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [scheduleSlots, setScheduleSlots] = useState([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+
+  const [editingId, setEditingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
+  const [rescheduleForm, setRescheduleForm] = useState({
+    date: "",
+    time: "",
+  });
+
+  const [rescheduleSlots, setRescheduleSlots] = useState([]);
+  const [rescheduleSlotsLoading, setRescheduleSlotsLoading] = useState(false);
+
   useEffect(() => {
-    // Basic redirect guard for normal users navigating to the route directly
     if (user && user.role !== "doctor") {
       navigate("/");
     }
@@ -23,6 +45,7 @@ function DoctorAppointments() {
   const fetchAppointments = useCallback(async () => {
     try {
       setLoading(true);
+
       const token = localStorage.getItem("token");
       if (!token) return;
 
@@ -35,18 +58,23 @@ function DoctorAppointments() {
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data.message || "Failed to fetch appointments");
       }
 
       const apptArray = Array.isArray(data) ? data : data.appointments || [];
-      const onlyMyAppointments = apptArray.filter(
-        (appt) =>
-          appt?.doctorId === user?.id || appt?.doctorId?._id === user?.id,
-      );
-      const sorted = onlyMyAppointments.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      );
+
+      const sorted = apptArray.sort((a, b) => {
+        const dateA = new Date(
+          `${a.date?.split?.("T")?.[0] || a.date} ${a.time}`,
+        );
+        const dateB = new Date(
+          `${b.date?.split?.("T")?.[0] || b.date} ${b.time}`,
+        );
+        return dateB - dateA;
+      });
+
       setAppointments(sorted);
     } catch (error) {
       console.error("Error fetching doctor appointments:", error);
@@ -54,18 +82,95 @@ function DoctorAppointments() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, []);
+
+  const fetchDoctorSchedule = useCallback(async () => {
+    if (!selectedDate) return;
+
+    try {
+      setScheduleLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(apiConfig.getDoctorSchedule(selectedDate), {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to load schedule");
+      }
+
+      setScheduleSlots(Array.isArray(data.slots) ? data.slots : []);
+    } catch (error) {
+      console.error("FETCH_DOCTOR_SCHEDULE_ERROR:", error);
+      toast.error(error.message || "Could not load doctor schedule");
+      setScheduleSlots([]);
+    } finally {
+      setScheduleLoading(false);
+    }
+  }, [selectedDate]);
 
   useEffect(() => {
-    if (user?.role === "doctor") fetchAppointments();
+    if (user?.role === "doctor") {
+      fetchAppointments();
+    }
   }, [fetchAppointments, user?.role]);
+
+  useEffect(() => {
+    if (user?.role === "doctor") {
+      fetchDoctorSchedule();
+    }
+  }, [fetchDoctorSchedule, user?.role]);
+
+  const fetchRescheduleSlots = async (date) => {
+    if (!date) {
+      setRescheduleSlots([]);
+      return;
+    }
+
+    try {
+      setRescheduleSlotsLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(apiConfig.getDoctorSchedule(date), {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to load reschedule slots");
+      }
+
+      setRescheduleSlots(Array.isArray(data.slots) ? data.slots : []);
+    } catch (error) {
+      console.error("FETCH_RESCHEDULE_SLOTS_ERROR:", error);
+      toast.error(error.message || "Could not load reschedule slots");
+      setRescheduleSlots([]);
+    } finally {
+      setRescheduleSlotsLoading(false);
+    }
+  };
 
   const updateStatus = async (id, status) => {
     if (updatingId) return;
+
     setUpdatingId(id);
 
     try {
       const token = localStorage.getItem("token");
+
       const res = await fetch(apiConfig.updateAppointmentStatus(id), {
         method: "PUT",
         headers: {
@@ -76,6 +181,7 @@ function DoctorAppointments() {
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data.message || "Failed to update appointment");
       }
@@ -87,7 +193,9 @@ function DoctorAppointments() {
             : appointment,
         ),
       );
+
       toast.success(`Appointment ${status} successfully!`);
+      fetchDoctorSchedule();
     } catch (error) {
       console.error("Error updating appointment:", error);
       toast.error(error.message);
@@ -96,20 +204,31 @@ function DoctorAppointments() {
     }
   };
 
-  const startReschedule = (appointment) => {
-    setEditingId(appointment._id);
+  const startReschedule = async (appointment) => {
     const dateValue = appointment?.date
       ? new Date(appointment.date).toISOString().split("T")[0]
-      : "";
+      : today;
+
+    setEditingId(appointment._id);
     setRescheduleForm({
       date: dateValue,
-      time: appointment?.time || "",
+      time: "",
     });
+
+    await fetchRescheduleSlots(dateValue);
   };
 
   const submitReschedule = async (id) => {
+    if (!rescheduleForm.date || !rescheduleForm.time) {
+      toast.error("Please choose an available date and time.");
+      return;
+    }
+
     try {
+      setUpdatingId(id);
+
       const token = localStorage.getItem("token");
+
       const res = await fetch(apiConfig.updateAppointmentStatus(id), {
         method: "PUT",
         headers: {
@@ -123,6 +242,7 @@ function DoctorAppointments() {
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data.message || "Failed to reschedule appointment");
       }
@@ -132,175 +252,456 @@ function DoctorAppointments() {
           appointment._id === id ? data : appointment,
         ),
       );
+
       setEditingId(null);
-      toast.success("Appointment rescheduled successfully!");
+      setRescheduleForm({ date: "", time: "" });
+      setRescheduleSlots([]);
+
+      toast.success("Reschedule request sent to patient.");
+      fetchDoctorSchedule();
     } catch (error) {
       toast.error(error.message || "Failed to reschedule appointment");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
+  const handleRescheduleDateChange = async (date) => {
+    setRescheduleForm({ date, time: "" });
+    await fetchRescheduleSlots(date);
+  };
+
+  const getStatusBadge = (status) => {
+    if (status === "approved") return "bg-green-100 text-green-700";
+    if (status === "rejected") return "bg-red-100 text-red-700";
+    if (status === "cancelled") return "bg-gray-100 text-gray-500";
+    if (status === "completed") return "bg-purple-100 text-purple-700";
+    if (status === "reschedule_pending") return "bg-blue-100 text-blue-700";
+    return "bg-yellow-100 text-yellow-700";
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const activeScheduleCount = scheduleSlots.filter(
+    (slot) => !slot.available,
+  ).length;
+  const availableScheduleCount = scheduleSlots.filter(
+    (slot) => slot.available,
+  ).length;
+
   if (!user || user.role !== "doctor") {
-    return null; // Don't flash UI before navigate fires
+    return null;
   }
 
   if (loading) {
     return (
-      <div className="p-8 bg-gray-100 min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Loading appointments...</p>
-      </div>
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+        <LoadingSpinner text="Loading your doctor appointments..." fullScreen />
+      </main>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 py-8 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold text-center mb-8 text-[#008e9b]">
-        Doctor Appointments
-      </h2>
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+      <div className="mx-auto mb-8 max-w-4xl text-center">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+          Doctor Area
+        </div>
 
-      <div className="space-y-4 max-w-3xl mx-auto">
-        {appointments.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm p-10 text-center border border-gray-100">
-            <p className="text-gray-500 text-lg mb-4">
-              No appointments assigned to you.
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+          Doctor Schedule
+        </h2>
+
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+          View your daily schedule, patient bookings, and available 30-minute
+          slots.
+        </p>
+      </div>
+
+      <section className="mx-auto mb-8 max-w-6xl rounded-[2rem] border border-white bg-white/95 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-6">
+        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b]">
+              <CalendarDays size={14} />
+              Daily Calendar
+            </div>
+
+            <h3 className="text-2xl font-black text-gray-900">
+              {new Date(selectedDate).toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </h3>
+
+            <p className="mt-1 text-sm font-medium text-gray-500">
+              Teal = available. White card = booked patient appointment.
             </p>
           </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <input
+              type="date"
+              value={selectedDate}
+              min={today}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+            />
+
+            <button
+              type="button"
+              onClick={fetchDoctorSchedule}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl !bg-[#008e9b] px-5 py-3 text-sm font-black text-white shadow-md transition hover:-translate-y-0.5 hover:!bg-[#007a85]"
+            >
+              <RefreshCw size={16} />
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="rounded-3xl bg-[#e8fbfd] p-4 text-center">
+            <p className="text-2xl font-black text-[#008e9b]">
+              {availableScheduleCount}
+            </p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+              Available
+            </p>
+          </div>
+
+          <div className="rounded-3xl bg-gray-100 p-4 text-center">
+            <p className="text-2xl font-black text-gray-800">
+              {activeScheduleCount}
+            </p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+              Booked
+            </p>
+          </div>
+
+          <div className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm sm:col-span-1">
+            <p className="text-2xl font-black text-gray-900">30 min</p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+              Slot duration
+            </p>
+          </div>
+        </div>
+
+        {scheduleLoading ? (
+          <div className="flex min-h-[280px] items-center justify-center rounded-3xl bg-gray-50">
+            <div className="text-center">
+              <Loader2
+                size={34}
+                className="mx-auto animate-spin text-[#008e9b]"
+              />
+              <p className="mt-3 text-sm font-bold text-gray-500">
+                Loading schedule...
+              </p>
+            </div>
+          </div>
         ) : (
-          appointments.map((app) => {
-            const currentStatus = app.status || "pending";
-            return (
-              <div
-                key={app._id}
-                className="w-full mx-auto bg-white rounded-2xl shadow-md p-4 transition-all duration-300 border border-gray-50 hover:shadow-lg flex flex-col gap-4"
-              >
-                <div className="flex gap-4 w-full min-w-0">
-                  <div className="flex-shrink-0 w-12 h-12 bg-[#008e9b] text-white rounded-full flex items-center justify-center font-bold text-xl uppercase">
-                    {app.user?.name ? app.user.name.charAt(0) : "P"}
-                  </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {scheduleSlots.length === 0 ? (
+              <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                <p className="text-sm font-medium text-gray-500">
+                  No schedule slots found for this date.
+                </p>
+              </div>
+            ) : (
+              scheduleSlots.map((slot) => {
+                const appointment = slot.appointment;
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                      <div className="flex flex-col mb-1 gap-0.5 min-w-0">
-                        <h3 className="font-semibold text-gray-800 text-base sm:text-lg leading-tight">
-                          {app.user?.name || "Unknown Patient"}
-                        </h3>
+                return (
+                  <div
+                    key={slot.time}
+                    className={`rounded-3xl border p-4 transition-all ${
+                      slot.available
+                        ? "border-[#008e9b]/15 bg-[#e8fbfd]"
+                        : "border-gray-100 bg-white shadow-sm"
+                    }`}
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-gray-700 shadow-sm">
+                        <Clock size={14} />
+                        {slot.time}
                       </div>
 
-                      {/* Action Buttons */}
-                      {currentStatus === "pending" && (
-                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                          <button
-                            onClick={() => updateStatus(app._id, "approved")}
-                            disabled={updatingId === app._id}
-                            className={`w-full sm:w-auto text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm ${
-                              updatingId === app._id
-                                ? "bg-gray-400"
-                                : "bg-green-500 hover:bg-green-600"
-                            }`}
-                          >
-                            {updatingId === app._id ? "..." : "Approve"}
-                          </button>
-                          <button
-                            onClick={() => updateStatus(app._id, "rejected")}
-                            disabled={updatingId === app._id}
-                            className={`w-full sm:w-auto text-white text-xs px-3 py-1.5 rounded-lg font-bold transition shadow-sm ${
-                              updatingId === app._id
-                                ? "bg-gray-400"
-                                : "bg-red-500 hover:bg-red-600"
-                            }`}
-                          >
-                            {updatingId === app._id ? "..." : "Reject"}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                      <span className="font-bold">Reason:</span> {app.reason}
-                    </p>
-
-                    <div className="text-xs sm:text-sm text-gray-400 mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span>📅</span>
-                      {new Date(app.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                      <span className="mx-0.5">|</span>
-                      <span>🕒</span>
-                      {app.time || "N/A"}
-                    </div>
-
-                    {editingId === app._id ? (
-                      <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-3">
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <input
-                            type="date"
-                            value={rescheduleForm.date}
-                            min={new Date().toISOString().split("T")[0]}
-                            onChange={(e) =>
-                              setRescheduleForm((prev) => ({
-                                ...prev,
-                                date: e.target.value,
-                              }))
-                            }
-                            className="w-full sm:w-auto p-2 border border-gray-300 rounded-md text-sm"
-                          />
-                          <input
-                            type="text"
-                            value={rescheduleForm.time}
-                            placeholder="e.g. 10:30 AM"
-                            onChange={(e) =>
-                              setRescheduleForm((prev) => ({
-                                ...prev,
-                                time: e.target.value,
-                              }))
-                            }
-                            className="w-full sm:w-auto p-2 border border-gray-300 rounded-md text-sm"
-                          />
-                        </div>
-                        <div className="mt-2 flex gap-2">
-                          <button
-                            onClick={() => submitReschedule(app._id)}
-                            className="bg-[#008e9b] text-white px-3 py-1.5 rounded-md text-xs font-semibold"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md text-xs font-semibold"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => startReschedule(app)}
-                        className="mt-3 bg-white border border-[#008e9b] text-[#008e9b] px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-[#008e9b] hover:text-white transition"
+                      <span
+                        className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wide ${
+                          slot.available
+                            ? "bg-[#008e9b] text-white"
+                            : getStatusBadge(appointment?.status || "booked")
+                        }`}
                       >
-                        Reschedule
-                      </button>
-                    )}
+                        {slot.available ? "Available" : appointment?.status}
+                      </span>
+                    </div>
 
-                    <span
-                      className={`inline-block mt-2 text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
-                        currentStatus === "approved"
-                          ? "bg-green-100 text-green-700"
-                          : currentStatus === "rejected"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {currentStatus}
-                    </span>
+                    {slot.available ? (
+                      <p className="text-sm font-semibold text-[#008e9b]">
+                        This time is free.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-black text-gray-900">
+                          <UserRound size={16} className="text-[#008e9b]" />
+                          {appointment?.user?.name || "Unknown Patient"}
+                        </div>
+
+                        {appointment?.user?.email && (
+                          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                            <Mail size={14} />
+                            {appointment.user.email}
+                          </div>
+                        )}
+
+                        <p className="line-clamp-2 text-sm font-medium text-gray-500">
+                          <span className="font-black text-gray-700">
+                            Reason:
+                          </span>{" "}
+                          {appointment?.reason || "No reason provided"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="mx-auto max-w-4xl">
+        <div className="mb-5 text-center">
+          <h3 className="text-2xl font-black text-gray-900">
+            Appointment Requests
+          </h3>
+
+          <p className="mt-1 text-sm font-medium text-gray-500">
+            Approve, reject, or propose a new available time.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {appointments.length === 0 ? (
+            <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
+              <p className="text-base font-medium text-gray-500 sm:text-lg">
+                No appointments assigned to you.
+              </p>
+            </div>
+          ) : (
+            appointments.map((app) => {
+              const currentStatus = app.status || "pending";
+              const isUpdating = updatingId === app._id;
+
+              return (
+                <div
+                  key={app._id}
+                  className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
+                >
+                  <div className="p-4 sm:p-5">
+                    <div className="flex min-w-0 gap-4">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#008e9b] text-xl font-black uppercase text-white shadow-md">
+                        {app.user?.name ? app.user.name.charAt(0) : "P"}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <h3 className="text-base font-black leading-tight text-gray-900 sm:text-lg">
+                              {app.user?.name || "Unknown Patient"}
+                            </h3>
+
+                            <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500">
+                              <span className="font-black text-gray-700">
+                                Reason:
+                              </span>{" "}
+                              {app.reason || "No reason provided"}
+                            </p>
+                          </div>
+
+                          {currentStatus === "pending" && (
+                            <div className="grid w-full grid-cols-2 gap-2 sm:w-auto">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateStatus(app._id, "approved")
+                                }
+                                disabled={isUpdating}
+                                className={`rounded-xl px-4 py-2 text-xs font-black text-white shadow-sm transition ${
+                                  isUpdating
+                                    ? "cursor-not-allowed !bg-gray-400 opacity-70"
+                                    : "!bg-green-500 hover:!bg-green-600"
+                                }`}
+                              >
+                                {isUpdating ? "..." : "Approve"}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  updateStatus(app._id, "rejected")
+                                }
+                                disabled={isUpdating}
+                                className={`rounded-xl px-4 py-2 text-xs font-black text-white shadow-sm transition ${
+                                  isUpdating
+                                    ? "cursor-not-allowed !bg-gray-400 opacity-70"
+                                    : "!bg-red-500 hover:!bg-red-600"
+                                }`}
+                              >
+                                {isUpdating ? "..." : "Reject"}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-medium text-gray-400 sm:text-sm">
+                          <span>📅</span>
+                          <span>{formatDate(app.date)}</span>
+
+                          <span className="mx-0.5">|</span>
+
+                          <span>🕒</span>
+                          <span>{app.time || "N/A"}</span>
+                        </div>
+
+                        {editingId === app._id ? (
+                          <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                            <div className="mb-3">
+                              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-gray-500">
+                                New Date
+                              </label>
+
+                              <input
+                                type="date"
+                                value={rescheduleForm.date}
+                                min={today}
+                                onChange={(e) =>
+                                  handleRescheduleDateChange(e.target.value)
+                                }
+                                className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-[#008e9b]"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="mb-2 block text-xs font-black uppercase tracking-wide text-gray-500">
+                                Choose available time
+                              </label>
+
+                              {rescheduleSlotsLoading ? (
+                                <div className="flex items-center justify-center rounded-2xl bg-white p-5">
+                                  <Loader2
+                                    size={24}
+                                    className="animate-spin text-[#008e9b]"
+                                  />
+                                </div>
+                              ) : rescheduleSlots.length === 0 ? (
+                                <div className="rounded-2xl bg-white p-4 text-center text-sm font-medium text-gray-500">
+                                  No slots found for this date.
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                  {rescheduleSlots.map((slot) => {
+                                    const isSelected =
+                                      rescheduleForm.time === slot.time;
+
+                                    return (
+                                      <button
+                                        key={slot.time}
+                                        type="button"
+                                        disabled={!slot.available}
+                                        onClick={() =>
+                                          setRescheduleForm((prev) => ({
+                                            ...prev,
+                                            time: slot.time,
+                                          }))
+                                        }
+                                        className={`rounded-xl border px-3 py-2 text-xs font-black transition ${
+                                          slot.available
+                                            ? isSelected
+                                              ? "!bg-[#008e9b] text-white ring-2 ring-[#46daea]"
+                                              : "!bg-white text-[#008e9b] hover:!bg-[#e8fbfd]"
+                                            : "cursor-not-allowed !bg-gray-200 text-gray-400 opacity-70"
+                                        }`}
+                                      >
+                                        {slot.time}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => submitReschedule(app._id)}
+                                disabled={
+                                  isUpdating ||
+                                  !rescheduleForm.date ||
+                                  !rescheduleForm.time
+                                }
+                                className={`rounded-xl px-4 py-2 text-xs font-black text-white transition ${
+                                  isUpdating ||
+                                  !rescheduleForm.date ||
+                                  !rescheduleForm.time
+                                    ? "cursor-not-allowed !bg-gray-400 opacity-70"
+                                    : "!bg-[#008e9b] hover:!bg-[#007a85]"
+                                }`}
+                              >
+                                {isUpdating ? "Saving..." : "Send Request"}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingId(null);
+                                  setRescheduleForm({ date: "", time: "" });
+                                  setRescheduleSlots([]);
+                                }}
+                                className="rounded-xl border border-gray-200 !bg-white px-4 py-2 text-xs font-black text-gray-600 transition hover:!bg-gray-50"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => startReschedule(app)}
+                            className="mt-4 rounded-xl border border-[#008e9b]/25 !bg-white px-4 py-2 text-xs font-black text-[#008e9b] shadow-sm transition hover:!bg-[#e8fbfd]"
+                          >
+                            Reschedule
+                          </button>
+                        )}
+
+                        <div className="mt-3">
+                          <span
+                            className={`inline-block rounded-full px-3 py-1 text-xs font-bold capitalize ${getStatusBadge(
+                              currentStatus,
+                            )}`}
+                          >
+                            {currentStatus.replace("_", " ")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+    </main>
   );
 }
 

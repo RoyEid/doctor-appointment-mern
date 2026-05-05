@@ -35,10 +35,19 @@ export const apiConfig = {
     createAppointment: `${API_BASE_URL}/appointments/createAppointment`,
     getMyAppointments: `${API_BASE_URL}/appointments/myAppointments`,
     getDoctorAppointments: `${API_BASE_URL}/appointments/doctor`,
+
+    getAppointmentAvailability: (doctorId, date) =>
+        `${API_BASE_URL}/appointments/availability?doctorId=${doctorId}&date=${date}`,
+
+    getDoctorSchedule: (date) =>
+        `${API_BASE_URL}/appointments/doctor/schedule?date=${date}`,
+
     deleteAppointment: (id) =>
         `${API_BASE_URL}/appointments/deleteAppointment/${id}`,
+
     updateAppointmentStatus: (id) =>
         `${API_BASE_URL}/appointments/${id}/status`,
+
     respondToReschedule: (id) =>
         `${API_BASE_URL}/appointments/${id}/reschedule-response`,
 

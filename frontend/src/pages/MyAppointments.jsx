@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
-import { X } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  Clock,
+  Loader2,
+  Stethoscope,
+  X,
+} from "lucide-react";
 import { apiConfig } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import AuthRequired from "../components/AuthRequired";
@@ -17,10 +24,11 @@ function MyAppointments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [respondingApptId, setRespondingApptId] = useState(null);
+  const [cancelingId, setCancelingId] = useState(null);
 
   useEffect(() => {
     if (user && user.role === "admin") {
-      // Admins can see all, but they have their own page.
+      // Admins can see all appointments from their own admin page.
     }
   }, [user, navigate]);
 
@@ -52,9 +60,15 @@ function MyAppointments() {
 
         const apptArray = Array.isArray(data) ? data : data.appointments || [];
 
-        const sorted = apptArray.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-        );
+        const sorted = apptArray.sort((a, b) => {
+          const dateA = new Date(
+            `${a.date?.split?.("T")?.[0] || a.date} ${a.time}`,
+          );
+          const dateB = new Date(
+            `${b.date?.split?.("T")?.[0] || b.date} ${b.time}`,
+          );
+          return dateB - dateA;
+        });
 
         setAppointments(sorted);
       } catch (error) {
@@ -74,6 +88,8 @@ function MyAppointments() {
 
   const cancelAppointment = async (id) => {
     try {
+      setCancelingId(id);
+
       const token = localStorage.getItem("token");
 
       const res = await fetch(apiConfig.deleteAppointment(id), {
@@ -87,13 +103,15 @@ function MyAppointments() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Failed to delete appointment");
+        throw new Error(data.message || "Failed to cancel appointment");
       }
 
       setAppointments((prev) => prev.filter((a) => a._id !== id));
       toast.success("Appointment cancelled successfully!");
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setCancelingId(null);
     }
   };
 
@@ -119,14 +137,43 @@ function MyAppointments() {
     if (status === "approved") return "bg-green-100 text-green-700";
     if (status === "rejected") return "bg-red-100 text-red-700";
     if (status === "cancelled") return "bg-gray-100 text-gray-600";
+    if (status === "completed") return "bg-purple-100 text-purple-700";
     if (isReschedulePending) return "bg-blue-100 text-blue-700";
     return "bg-yellow-100 text-yellow-700";
   };
 
   const formatDisplayStatus = (status, isReschedulePending) => {
     if (isReschedulePending) return "Reschedule Request";
-    return status || "Pending";
+    return (status || "pending").replace("_", " ");
   };
+
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const formatLongDate = (date) => {
+    if (!date) return "N/A";
+
+    return new Date(date).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const activeAppointments = appointments.filter(
+    (app) =>
+      !["cancelled", "rejected", "completed"].includes(
+        (app.status || "pending").toLowerCase(),
+      ),
+  );
 
   if (!user) return <AuthRequired />;
 
@@ -139,7 +186,7 @@ function MyAppointments() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-3 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-3 py-8 sm:px-6">
       <div className="mx-auto mb-8 max-w-3xl text-center">
         <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
           Patient Area
@@ -155,6 +202,33 @@ function MyAppointments() {
         </p>
       </div>
 
+      <div className="mx-auto mb-6 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="rounded-3xl bg-white p-4 text-center shadow-sm">
+          <p className="text-2xl font-black text-[#008e9b]">
+            {appointments.length}
+          </p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+            Total
+          </p>
+        </div>
+
+        <div className="rounded-3xl bg-white p-4 text-center shadow-sm">
+          <p className="text-2xl font-black text-green-600">
+            {activeAppointments.length}
+          </p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+            Active
+          </p>
+        </div>
+
+        <div className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm sm:col-span-1">
+          <p className="text-2xl font-black text-gray-900">30 min</p>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+            Duration
+          </p>
+        </div>
+      </div>
+
       {error && (
         <div className="mx-auto mb-5 max-w-3xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700">
           {error}
@@ -164,13 +238,17 @@ function MyAppointments() {
       <div className="mx-auto max-w-3xl space-y-4">
         {appointments.length === 0 ? (
           <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b]">
+              <Stethoscope size={34} />
+            </div>
+
             <p className="mb-4 text-base font-medium text-gray-500 sm:text-lg">
               You have no appointments booked.
             </p>
 
             <Link
               to="/add-appointment"
-              className="inline-flex items-center justify-center rounded-2xl bg-[#008e9b] px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#007a85] hover:shadow-xl"
+              className="inline-flex items-center justify-center rounded-2xl !bg-[#008e9b] px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
             >
               Book your first appointment
             </Link>
@@ -182,6 +260,11 @@ function MyAppointments() {
             const isReschedulePending =
               normalizedStatus === "reschedule_pending";
             const isResponding = respondingApptId === app._id;
+            const isCanceling = cancelingId === app._id;
+
+            const canCancel = !["cancelled", "rejected", "completed"].includes(
+              normalizedStatus,
+            );
 
             return (
               <div
@@ -205,54 +288,161 @@ function MyAppointments() {
                           {app.doctor?.name || "Unknown Doctor"}
                         </h3>
 
+                        <p className="mt-1 text-sm font-bold text-[#008e9b]">
+                          {app.doctor?.specialty || "Doctor"}
+                        </p>
+
                         <p className="mt-1 line-clamp-2 break-words text-sm font-medium text-gray-500">
                           {app.reason || "No reason provided"}
                         </p>
                       </div>
                     </div>
 
-                    <button
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-red-100 !bg-red-500 text-white shadow-md transition hover:!bg-red-600 sm:h-11 sm:w-11"
-                      aria-label="Cancel appointment"
-                      title="Cancel appointment"
-                      onClick={async () => {
-                        const result = await Swal.fire({
-                          icon: "question",
-                          title: "Cancel appointment?",
-                          text: "Are you sure you want to cancel this appointment?",
-                          showCancelButton: true,
-                          confirmButtonText: "Yes, cancel it",
-                          cancelButtonText: "Keep appointment",
-                          confirmButtonColor: "#ef4444",
-                          cancelButtonColor: "#06b6d4",
-                        });
+                    {canCancel && (
+                      <button
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-red-100 text-white shadow-md transition sm:h-11 sm:w-11 ${
+                          isCanceling
+                            ? "cursor-not-allowed !bg-gray-400 opacity-70"
+                            : "!bg-red-500 hover:!bg-red-600"
+                        }`}
+                        aria-label="Cancel appointment"
+                        title="Cancel appointment"
+                        disabled={isCanceling}
+                        onClick={async () => {
+                          const result = await Swal.fire({
+                            icon: "question",
+                            title: "Cancel appointment?",
+                            text: "Are you sure you want to cancel this appointment?",
+                            showCancelButton: true,
+                            confirmButtonText: "Yes, cancel it",
+                            cancelButtonText: "Keep appointment",
+                            confirmButtonColor: "#ef4444",
+                            cancelButtonColor: "#06b6d4",
+                          });
 
-                        if (result.isConfirmed) {
-                          cancelAppointment(app._id);
-                        }
-                      }}
-                    >
-                      <X size={24} strokeWidth={3.5} />
-                    </button>
+                          if (result.isConfirmed) {
+                            cancelAppointment(app._id);
+                          }
+                        }}
+                      >
+                        {isCanceling ? (
+                          <Loader2 size={22} className="animate-spin" />
+                        ) : (
+                          <X size={24} strokeWidth={3.5} />
+                        )}
+                      </button>
+                    )}
                   </div>
 
-                  <div className="mt-3 sm:ml-[76px]">
-                    <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-500">
-                      <span>📅</span>
-                      <span>
-                        {new Date(app.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
+                  <div className="mt-4 sm:ml-[76px]">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl bg-[#f4fbfc] p-4">
+                        <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#008e9b]">
+                          <CalendarDays size={15} />
+                          Date
+                        </div>
 
-                      <span className="text-gray-300">|</span>
+                        <p className="text-sm font-black text-gray-900">
+                          {formatLongDate(app.date)}
+                        </p>
+                      </div>
 
-                      <span>🕒</span>
-                      <span>{app.time || "N/A"}</span>
+                      <div className="rounded-2xl bg-[#f4fbfc] p-4">
+                        <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-[#008e9b]">
+                          <Clock size={15} />
+                          Time
+                        </div>
+
+                        <p className="text-sm font-black text-gray-900">
+                          {app.time || "N/A"}
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold text-gray-500">
+                          30-minute appointment
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="mt-3">
+                    {isReschedulePending && (
+                      <div className="mt-4 rounded-3xl border border-blue-100 bg-blue-50 p-4">
+                        <p className="text-sm font-black text-blue-700">
+                          Doctor proposed a new appointment time
+                        </p>
+
+                        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div className="rounded-2xl bg-white p-3">
+                            <p className="text-xs font-black uppercase tracking-wide text-gray-400">
+                              Previous
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-gray-700">
+                              {formatDate(app.oldDate)} at{" "}
+                              {app.oldTime || "N/A"}
+                            </p>
+                          </div>
+
+                          <div className="rounded-2xl bg-white p-3">
+                            <p className="text-xs font-black uppercase tracking-wide text-gray-400">
+                              New
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-[#008e9b]">
+                              {formatDate(app.date)} at {app.time || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
+                          <button
+                            onClick={() =>
+                              handleRescheduleResponse(app._id, "accept")
+                            }
+                            disabled={isResponding}
+                            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-bold shadow-sm transition ${
+                              isResponding
+                                ? "cursor-not-allowed !bg-green-300 text-white opacity-70"
+                                : "!bg-green-500 text-white hover:!bg-green-600"
+                            }`}
+                          >
+                            {isResponding ? (
+                              <>
+                                <Loader2 size={17} className="animate-spin" />
+                                Updating...
+                              </>
+                            ) : (
+                              <>
+                                <Check size={17} />
+                                Accept New Time
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleRescheduleResponse(app._id, "reject")
+                            }
+                            disabled={isResponding}
+                            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold shadow-sm transition ${
+                              isResponding
+                                ? "cursor-not-allowed border-gray-300 !bg-gray-300 text-gray-600 opacity-70"
+                                : "border-red-200 !bg-white text-red-600 hover:!bg-red-50"
+                            }`}
+                          >
+                            {isResponding ? (
+                              <>
+                                <Loader2 size={17} className="animate-spin" />
+                                Updating...
+                              </>
+                            ) : (
+                              <>
+                                <X size={17} />
+                                Reject New Time
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-4">
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-xs font-bold capitalize ${getStatusStyle(
                           normalizedStatus,
@@ -265,38 +455,6 @@ function MyAppointments() {
                         )}
                       </span>
                     </div>
-
-                    {isReschedulePending && (
-                      <div className="mt-4 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
-                        <button
-                          onClick={() =>
-                            handleRescheduleResponse(app._id, "accept")
-                          }
-                          disabled={isResponding}
-                          className={`w-full rounded-xl px-4 py-2 text-sm font-bold shadow-sm transition ${
-                            isResponding
-                              ? "cursor-not-allowed !bg-green-300 text-white opacity-70"
-                              : "!bg-green-500 text-white hover:!bg-green-600"
-                          }`}
-                        >
-                          {isResponding ? "Updating..." : "Accept New Time"}
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            handleRescheduleResponse(app._id, "reject")
-                          }
-                          disabled={isResponding}
-                          className={`w-full rounded-xl border px-4 py-2 text-sm font-bold shadow-sm transition ${
-                            isResponding
-                              ? "cursor-not-allowed border-gray-300 !bg-gray-300 text-gray-600 opacity-70"
-                              : "border-red-200 !bg-white text-red-600 hover:!bg-red-50"
-                          }`}
-                        >
-                          {isResponding ? "Updating..." : "Reject New Time"}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -304,7 +462,7 @@ function MyAppointments() {
           })
         )}
       </div>
-    </div>
+    </main>
   );
 }
 
