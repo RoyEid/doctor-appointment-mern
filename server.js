@@ -74,6 +74,7 @@ app.get("/health", (req, res) => {
     return res.status(200).json({
         success: true,
         message: "Backend health check passed",
+        
         version: "cors-health-fix-2026-05-06",
         time: new Date().toISOString(),
     });
