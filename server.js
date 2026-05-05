@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
 import connectDB from "./config/db.js";
 
 import User from "./routes/user.js";
@@ -16,50 +15,33 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 
 /*
-  Manual CORS headers.
-  This must be before every route.
+  CORS middleware must be before express.json() and before all routes.
+  This handles browser preflight OPTIONS requests.
 */
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
         "Access-Control-Allow-Methods",
         "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     );
-    res.header(
+    res.setHeader(
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept, Authorization"
     );
 
     if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
+        return res.status(204).end();
     }
 
     next();
 });
-
-/*
-  Keep cors package too.
-*/
-app.use(
-    cors({
-        origin: "*",
-        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allowedHeaders: [
-            "Origin",
-            "X-Requested-With",
-            "Content-Type",
-            "Accept",
-            "Authorization",
-        ],
-    })
-);
 
 app.use(express.json());
 
 app.get("/", (req, res) => {
     res.json({
         success: true,
-        message: "MediCare backend is running",
+        message: "MediCare backend is running - CORS fixed version",
     });
 });
 
