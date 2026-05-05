@@ -6,12 +6,8 @@ import { GoogleLogin } from "@react-oauth/google";
 import Swal from "sweetalert2";
 import {
   ArrowRight,
-  CheckCircle2,
-  HeartPulse,
   Lock,
   Mail,
-  MailCheck,
-  ShieldCheck,
   Sparkles,
   Eye,
   EyeOff,
@@ -336,245 +332,173 @@ function Login() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1fr_0.88fr] xl:gap-10">
-        {/* Left panel */}
-        <section className="hidden lg:flex">
-          <div className="relative flex min-h-[560px] w-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#063b44] via-[#008e9b] to-[#42d5e3] p-8 text-white shadow-[0_30px_90px_rgba(0,142,155,0.28)] xl:p-10">
-            <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-black/10 blur-3xl" />
+      <section className="relative z-10 flex w-full max-w-md items-center">
+        <form
+          className="relative w-full overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8"
+          onSubmit={handleSubmit}
+        >
+          <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-[#008e9b] via-[#46daea] to-[#008e9b]" />
 
-            <div className="relative z-10 flex w-full flex-col justify-between">
-              <div>
-                <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-3xl bg-white/15 backdrop-blur-xl">
-                  <HeartPulse size={34} />
-                </div>
-
-                <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-white/75">
-                  Secure MediCare Login
-                </p>
-
-                <h1 className="max-w-xl text-4xl font-black leading-tight xl:text-5xl">
-                  Manage your healthcare with confidence.
-                </h1>
-
-                <p className="mt-6 max-w-lg text-base font-medium leading-relaxed text-white/85">
-                  Sign in to book appointments, track doctor responses, manage
-                  reschedules, and continue your care journey securely.
-                </p>
-              </div>
-
-              <div className="mt-8 grid gap-4">
-                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl xl:p-5">
-                  <ShieldCheck size={25} className="flex-shrink-0" />
-                  <div>
-                    <p className="font-black text-white">
-                      Protected account access
-                    </p>
-                    <p className="text-sm text-white/75">
-                      Secure login with patient, doctor, and admin roles.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl xl:p-5">
-                  <MailCheck size={25} className="flex-shrink-0" />
-                  <div>
-                    <p className="font-black text-white">
-                      Email verification support
-                    </p>
-                    <p className="text-sm text-white/75">
-                      Verify from your phone and continue from your laptop.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 rounded-3xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl xl:p-5">
-                  <CheckCircle2 size={25} className="flex-shrink-0" />
-                  <div>
-                    <p className="font-black text-white">
-                      Password recovery ready
-                    </p>
-                    <p className="text-sm text-white/75">
-                      Reset your password safely if you forget it.
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <div className="mb-7 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
+              <Lock size={28} />
             </div>
+
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+              <Sparkles size={14} />
+              Welcome Back
+            </div>
+
+            <h2 className="text-3xl font-black text-gray-900">
+              Login to MediCare
+            </h2>
+
+            <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500">
+              Access your dashboard and manage your appointments.
+            </p>
           </div>
-        </section>
 
-        {/* Login card */}
-        <section className="mx-auto flex w-full max-w-md items-center">
-          <form
-            className="relative w-full overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8"
-            onSubmit={handleSubmit}
-          >
-            <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-[#008e9b] via-[#46daea] to-[#008e9b]" />
+          {error && (
+            <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
+              {error}
+            </div>
+          )}
 
-            <div className="mb-7 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
-                <Lock size={28} />
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                Email Address
+              </label>
+
+              <div className="relative">
+                <Mail
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                />
+
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  required
+                />
               </div>
-
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
-                <Sparkles size={14} />
-                Welcome Back
-              </div>
-
-              <h2 className="text-3xl font-black text-gray-900">
-                Login to MediCare
-              </h2>
-
-              <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500">
-                Access your dashboard and manage your appointments.
-              </p>
             </div>
 
-            {error && (
-              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-gray-700">
-                  Email Address
+            <div>
+              <div className="mb-1.5 flex items-center justify-between gap-3">
+                <label className="block text-sm font-bold text-gray-700">
+                  Password
                 </label>
 
-                <div className="relative">
-                  <Mail
-                    size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-                  />
-
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="you@example.com"
-                    value={form.email}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
-                    required
-                  />
-                </div>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-black text-[#008e9b] transition-colors hover:text-[#007a85] hover:underline"
+                >
+                  Forgot password?
+                </Link>
               </div>
 
-              <div>
-                <div className="mb-1.5 flex items-center justify-between gap-3">
-                  <label className="block text-sm font-bold text-gray-700">
-                    Password
-                  </label>
-
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs font-black text-[#008e9b] transition-colors hover:text-[#007a85] hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <div className="relative">
-                  <Lock
-                    size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-                  />
-
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    placeholder="••••••••"
-                    value={form.password}
-                    onChange={handleChange}
-                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
-                    required
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <button
-              disabled={loading}
-              className={`group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
-                loading
-                  ? "cursor-not-allowed !bg-gray-400"
-                  : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
-              }`}
-            >
-              {loading ? "Logging in..." : "Login securely"}
-              {!loading && (
-                <ArrowRight
-                  size={19}
-                  className="transition-transform group-hover:translate-x-1"
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
                 />
-              )}
-            </button>
 
-            <div className="mt-5 rounded-2xl border border-[#008e9b]/10 bg-white px-4 py-3 text-center shadow-sm">
-              <p className="flex flex-col items-center justify-center gap-2 text-sm text-gray-600 sm:flex-row">
-                <span>Didn't receive the email?</span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  required
+                />
 
                 <button
                   type="button"
-                  onClick={handleResendVerificationEmail}
-                  className="inline-flex items-center justify-center gap-1.5 !border-none !bg-transparent !p-0 font-black text-[#008e9b] !shadow-none transition-colors hover:!bg-transparent hover:text-[#007a85] hover:underline"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  <RefreshCw size={15} />
-                  Resend verification
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                 </button>
-              </p>
-            </div>
-
-            <div className="relative my-7">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
-                  Or continue with
-                </span>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => setError("Google Login Failed")}
-                theme="filled_blue"
-                shape="pill"
-                width="100%"
+          <button
+            disabled={loading}
+            className={`group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
+              loading
+                ? "cursor-not-allowed !bg-gray-400"
+                : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+            }`}
+          >
+            {loading ? "Logging in..." : "Login securely"}
+            {!loading && (
+              <ArrowRight
+                size={19}
+                className="transition-transform group-hover:translate-x-1"
               />
+            )}
+          </button>
+
+          <div className="mt-5 rounded-2xl border border-[#008e9b]/10 bg-white px-4 py-3 text-center shadow-sm">
+            <p className="flex flex-col items-center justify-center gap-2 text-sm text-gray-600 sm:flex-row">
+              <span>Didn't receive the email?</span>
+
+              <button
+                type="button"
+                onClick={handleResendVerificationEmail}
+                className="inline-flex items-center justify-center gap-1.5 !border-none !bg-transparent !p-0 font-black text-[#008e9b] !shadow-none transition-colors hover:!bg-transparent hover:text-[#007a85] hover:underline"
+              >
+                <RefreshCw size={15} />
+                Resend verification
+              </button>
+            </p>
+          </div>
+
+          <div className="relative my-7">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
             </div>
 
-            <p className="mt-6 text-center text-sm font-medium text-gray-600">
-              Don't have an account?{" "}
-              <Link
-                to="/register"
-                className="font-black text-[#008e9b] hover:text-[#007a85] hover:underline"
-              >
-                Create account
-              </Link>
-            </p>
-          </form>
-        </section>
-      </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google Login Failed")}
+              theme="filled_blue"
+              shape="pill"
+              width="100%"
+            />
+          </div>
+
+          <p className="mt-6 text-center text-sm font-medium text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-black text-[#008e9b] hover:text-[#007a85] hover:underline"
+            >
+              Create account
+            </Link>
+          </p>
+        </form>
+      </section>
     </main>
   );
 }
