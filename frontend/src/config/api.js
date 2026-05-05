@@ -1,69 +1,76 @@
-// API Configuration - Uses environment variables for production
-const API_BASE_URL =
-    process.env.REACT_APP_API_URL || "https://doctor-backend-46g2.onrender.com";
+import axios from "axios";
 
-export const apiConfig = {
+const API_BASE_URL = process.env.REACT_APP_API_URL || "/";
+
+export const api = axios.create({
     baseURL: API_BASE_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
+    withCredentials: false,
+});
 
-    // Auth endpoints
-    login: `${API_BASE_URL}/user/signin`,
-    register: `${API_BASE_URL}/user/register`,
-    googleLogin: `${API_BASE_URL}/user/google`,
-    resendVerification: `${API_BASE_URL}/user/resend-verification`,
-    resendVerificationPublic: `${API_BASE_URL}/user/resend-verification-public`,
-    checkVerificationStatus: `${API_BASE_URL}/user/check-verification-status`,
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
 
-    // Forgot password endpoints
-    forgotPassword: `${API_BASE_URL}/user/forgot-password`,
-    resetPassword: (token) => `${API_BASE_URL}/user/reset-password/${token}`,
-    checkPasswordResetStatus: `${API_BASE_URL}/user/check-password-reset-status`,
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
 
-    // Doctor endpoints
-    getAllDoctors: `${API_BASE_URL}/doctors/allDoctors`,
-    getDoctorById: (id) => `${API_BASE_URL}/doctors/${id}`,
-    getDoctorsBySpecialty: (specialty) =>
-        `${API_BASE_URL}/doctors/doctors/bySpecialty/${specialty}`,
-    addDoctor: `${API_BASE_URL}/doctors/addDoctors`,
-    getDoctorsCount: `${API_BASE_URL}/doctors/count`,
-    deleteDoctor: (id) => `${API_BASE_URL}/doctors/${id}`,
-    updateDoctor: (id) => `${API_BASE_URL}/doctors/${id}`,
-    updateAvailability: `${API_BASE_URL}/doctors/availability`,
-    getMyProfile: `${API_BASE_URL}/api/doctors/me`,
-    updateDoctorProfile: `${API_BASE_URL}/api/doctors/update-profile`,
+    return config;
+});
 
-    // Appointment endpoints
-    createAppointment: `${API_BASE_URL}/appointments/createAppointment`,
-    getMyAppointments: `${API_BASE_URL}/appointments/myAppointments`,
-    getDoctorAppointments: `${API_BASE_URL}/appointments/doctor`,
+api.interceptors.response.use(
+    (res) => res,
+    (err) => {
+        return Promise.reject(err);
+    },
+);
+
+export const API_ENDPOINTS = {
+    // Doctors
+    getAllDoctors: "/doctors",
+    getDoctorById: (id) => `/doctors/${id}`,
+
+    // Doctor image helper
+    getDoctorImage: (image) => {
+        if (!image) return "/img/doctors/avatar.png";
+
+        if (image.startsWith("http")) return image;
+
+        return `${API_BASE_URL}${image.startsWith("/") ? image : `/${image}`}`;
+    },
+
+    // Auth / verification
+    resendVerification: "/auth/resend-verification",
+
+    // Appointments
+    createAppointment: "/appointments/createAppointment",
+    getMyAppointments: "/appointments/myAppointments",
+
+    // Your backend has both old POST delete and new DELETE.
+    // AddAppointment/MyAppointments old code may still use this.
+    deleteAppointmentLegacy: (id) => `/appointments/deleteAppointment/${id}`,
+
+    // New REST delete endpoint
+    deleteAppointment: (id) => `/appointments/${id}`,
 
     getAppointmentAvailability: (doctorId, date) =>
-        `${API_BASE_URL}/appointments/availability?doctorId=${doctorId}&date=${date}`,
+        `/appointments/availability?doctorId=${doctorId}&date=${date}`,
 
-    getDoctorSchedule: (date) =>
-        `${API_BASE_URL}/appointments/doctor/schedule?date=${date}`,
+    getAvailability: (doctorId, date) =>
+        `/appointments/availability?doctorId=${doctorId}&date=${date}`,
 
-    deleteAppointment: (id) =>
-        `${API_BASE_URL}/appointments/deleteAppointment/${id}`,
+    updateAppointmentStatus: (id) => `/appointments/${id}/status`,
 
-    updateAppointmentStatus: (id) =>
-        `${API_BASE_URL}/appointments/${id}/status`,
+    respondToReschedule: (id) => `/appointments/${id}/reschedule-response`,
 
-    respondToReschedule: (id) =>
-        `${API_BASE_URL}/appointments/${id}/reschedule-response`,
-
-    // Department endpoints
-    getAllDepartments: `${API_BASE_URL}/departments/allDepartments`,
-    addDepartment: `${API_BASE_URL}/departments/addDepartment`,
-    getDepartmentsCount: `${API_BASE_URL}/departments/count`,
-    deleteDepartment: (id) => `${API_BASE_URL}/departments/${id}`,
-
-    // Image upload helper
-    getDoctorImage: (image) => {
-        if (!image) return "/default-doctor.png";
-        if (image.startsWith("http")) return image;
-        if (image.startsWith("/")) return image;
-        return `${API_BASE_URL}/uploads/${image}`;
-    },
+    patientRescheduleAppointment: (id) =>
+        `/appointments/${id}/patient-reschedule`,
 };
 
-export default apiConfig;
+// Keep this because your current files use:
+// import { apiConfig } from "../config/api";
+export const apiConfig = API_ENDPOINTS;
+
+export default api;
