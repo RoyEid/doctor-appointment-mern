@@ -9,6 +9,7 @@ import sendEmail from "../utils/sendEmail.js";
 const router = express.Router();
 
 const ACTIVE_STATUSES = ["pending", "approved", "reschedule_pending"];
+
 const ALL_STATUSES = [
     "pending",
     "approved",
@@ -185,6 +186,38 @@ const hasDoctorConflict = async ({
     return Boolean(conflict);
 };
 
+/**
+ * Checks if the same patient already has an active appointment
+ * with the same doctor on the same day.
+ *
+ * This prevents:
+ * Same patient + same doctor + same date + different time.
+ *
+ * It still allows:
+ * Same patient + different doctor + same date.
+ */
+const hasPatientSameDoctorSameDayAppointment = async ({
+    appointmentId = null,
+    userId,
+    doctorId,
+    doctor,
+    date,
+}) => {
+    const dayRange = getDayRange(date);
+
+    if (!dayRange) return false;
+
+    const conflict = await Appointment.findOne({
+        _id: appointmentId ? { $ne: appointmentId } : { $exists: true },
+        user: userId,
+        $or: [{ doctorId }, { doctor }],
+        date: { $gte: dayRange.dayStart, $lte: dayRange.dayEnd },
+        status: { $in: ACTIVE_STATUSES },
+    });
+
+    return Boolean(conflict);
+};
+
 const sendAppointmentEmail = async ({
     patientEmail,
     patientName,
@@ -227,18 +260,6 @@ const sendAppointmentEmail = async ({
  *
  * Example:
  * GET /appointments/availability?doctorId=DOCTOR_PROFILE_ID&date=2026-05-06
- *
- * Returns:
- * {
- *   date,
- *   doctorId,
- *   slots: [
- *     { time: "09:00", available: true },
- *     { time: "09:30", available: false, status: "approved" }
- *   ],
- *   availableSlots: ["09:00"],
- *   bookedSlots: ["09:30"]
- * }
  */
 router.get("/availability", async (req, res) => {
     try {
@@ -476,6 +497,21 @@ async function createAppointmentHandler(req, res) {
             });
         }
 
+        const patientSameDoctorSameDayExists =
+            await hasPatientSameDoctorSameDayAppointment({
+                userId: req.user.id,
+                doctorId: docProfile.userId,
+                doctor: docProfile._id,
+                date: dayRange.dayStart,
+            });
+
+        if (patientSameDoctorSameDayExists) {
+            return res.status(400).json({
+                message:
+                    "You already have an active appointment with this doctor on this day. Please choose another day or book with another doctor.",
+            });
+        }
+
         const appointment = await Appointment.create({
             user: req.user.id,
             doctorId: docProfile.userId,
@@ -658,6 +694,8 @@ router.delete("/:id", auth(), async (req, res) => {
 
 /**
  * Update appointment status or propose reschedule
+ *
+ * Doctor/admin route.
  */
 router.put("/:id/status", auth(), async (req, res) => {
     try {
@@ -899,6 +937,163 @@ router.put("/doctor/appointments/:id/reject", auth("doctor"), async (req, res) =
     req.body = { ...req.body, status: "rejected" };
     req.url = `/${req.params.id}/status`;
     return router.handle(req, res);
+});
+
+/**
+ * Patient requests appointment reschedule
+ *
+ * PUT /appointments/:id/patient-reschedule
+ *
+ * Body:
+ * {
+ *   "date": "2026-05-10",
+ *   "time": "10:30"
+ * }
+ */
+router.put("/:id/patient-reschedule", auth(), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { date, time } = req.body;
+
+        if (!date || !time) {
+            return res.status(400).json({
+                message: "Date and time are required.",
+            });
+        }
+
+        const appointment = await Appointment.findById(id);
+
+        if (!appointment) {
+            return res.status(404).json({
+                message: "Appointment not found.",
+            });
+        }
+
+        if (appointment.user?.toString() !== req.user.id) {
+            return res.status(403).json({
+                message: "Access denied.",
+            });
+        }
+
+        if (!["pending", "approved", "reschedule_pending"].includes(appointment.status)) {
+            return res.status(400).json({
+                message: "Only active appointments can be rescheduled.",
+            });
+        }
+
+        const nextDayRange = getDayRange(date);
+
+        if (!nextDayRange) {
+            return res.status(400).json({
+                message: "Invalid appointment date.",
+            });
+        }
+
+        if (isPastDate(date)) {
+            return res.status(400).json({
+                message: "Cannot reschedule appointments to a past date.",
+            });
+        }
+
+        const doctorProfile = await Doctor.findById(appointment.doctor);
+
+        if (!doctorProfile) {
+            return res.status(404).json({
+                message: "Doctor profile not found.",
+            });
+        }
+
+        const allowedSlots = getDoctorSlots(doctorProfile);
+
+        if (!allowedSlots.includes(time)) {
+            return res.status(400).json({
+                message: `Doctor is only available at: ${allowedSlots.join(", ")}`,
+            });
+        }
+
+        const doctorConflictExists = await hasDoctorConflict({
+            appointmentId: id,
+            doctorId: appointment.doctorId,
+            doctor: appointment.doctor,
+            date: nextDayRange.dayStart,
+            time,
+        });
+
+        if (doctorConflictExists) {
+            return res.status(400).json({
+                message:
+                    "This time is already booked for this doctor. Please choose another time.",
+            });
+        }
+
+        const patientSameDoctorSameDayExists =
+            await hasPatientSameDoctorSameDayAppointment({
+                appointmentId: id,
+                userId: req.user.id,
+                doctorId: appointment.doctorId,
+                doctor: appointment.doctor,
+                date: nextDayRange.dayStart,
+            });
+
+        if (patientSameDoctorSameDayExists) {
+            return res.status(400).json({
+                message:
+                    "You already have another active appointment with this doctor on this day. Please choose another day or book with another doctor.",
+            });
+        }
+
+        const oldDate = appointment.date;
+        const oldTime = appointment.time;
+
+        appointment.oldDate = oldDate;
+        appointment.oldTime = oldTime;
+        appointment.date = nextDayRange.dayStart;
+        appointment.time = time;
+
+        // Patient-side reschedule goes back to pending.
+        // Doctor must approve again.
+        appointment.status = "pending";
+
+        const saved = await appointment.save();
+
+        const populated = await Appointment.findById(saved._id)
+            .populate("doctor")
+            .populate("user", "name email");
+
+        const patientEmail = populated.user?.email;
+        const patientName = populated.user?.name || "Patient";
+        const formattedDocName = formatDoctorName(populated.doctor?.name);
+        const appDateFormatted = formatDate(populated.date);
+        const appTimeFormatted = formatTime(populated.time);
+
+        await sendAppointmentEmail({
+            patientEmail,
+            patientName,
+            doctorName: formattedDocName,
+            date: appDateFormatted,
+            time: appTimeFormatted,
+            subject: `Appointment Reschedule Requested - ${formattedDocName} - ${appDateFormatted}`,
+            title: "Appointment Reschedule Requested",
+            message:
+                "Your reschedule request has been submitted and is pending doctor approval.",
+            oldSchedule: `${formatDate(oldDate)} at ${formatTime(oldTime)}`,
+        });
+
+        return res.json(populated);
+    } catch (error) {
+        if (error?.code === 11000) {
+            return res.status(400).json({
+                message:
+                    "This time is already booked for this doctor. Please choose another time.",
+            });
+        }
+
+        console.error("PATIENT_RESCHEDULE_ERROR:", error);
+
+        return res.status(500).json({
+            message: "Could not request appointment reschedule.",
+        });
+    }
 });
 
 /**
