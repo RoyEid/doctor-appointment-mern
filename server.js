@@ -40,14 +40,22 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.json({
+    return res.status(200).json({
         success: true,
         message: "MediCare backend is running - CORS fixed version",
     });
 });
 
+app.get("/health", (req, res) => {
+    return res.status(200).json({
+        success: true,
+        message: "Backend health check passed",
+        time: new Date().toISOString(),
+    });
+});
+
 app.get("/debug-version-roy", (req, res) => {
-    res.json({
+    return res.status(200).json({
         success: true,
         message: "This is Roy's updated backend server.js",
         version: "cors-debug-2026-05-06",
@@ -56,7 +64,7 @@ app.get("/debug-version-roy", (req, res) => {
 });
 
 app.get("/test-email-verification-route", (req, res) => {
-    res.json({
+    return res.status(200).json({
         success: true,
         message: "Email verification backend route is live",
     });
@@ -82,6 +90,14 @@ app.use("/api/departments", Departments);
 
 // Static uploads
 app.use("/uploads", express.static("uploads"));
+
+app.use((req, res) => {
+    return res.status(404).json({
+        success: false,
+        message: "Route not found",
+        path: req.originalUrl,
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
