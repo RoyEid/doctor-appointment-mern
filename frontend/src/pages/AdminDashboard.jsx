@@ -10,7 +10,15 @@ function AdminDashboard() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
+
   const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  });
+
+  const [displayStats, setDisplayStats] = useState({
     total: 0,
     pending: 0,
     approved: 0,
@@ -65,6 +73,42 @@ function AdminDashboard() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const duration = 1200;
+    const frameRate = 20;
+    const totalFrames = duration / frameRate;
+    let frame = 0;
+
+    const counter = setInterval(() => {
+      frame += 1;
+
+      const progress = Math.min(frame / totalFrames, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      setDisplayStats({
+        total: Math.floor(stats.total * easedProgress),
+        pending: Math.floor(stats.pending * easedProgress),
+        approved: Math.floor(stats.approved * easedProgress),
+        rejected: Math.floor(stats.rejected * easedProgress),
+      });
+
+      if (progress === 1) {
+        clearInterval(counter);
+
+        setDisplayStats({
+          total: stats.total,
+          pending: stats.pending,
+          approved: stats.approved,
+          rejected: stats.rejected,
+        });
+      }
+    }, frameRate);
+
+    return () => clearInterval(counter);
+  }, [loading, stats]);
+
   if (!user || user.role !== "admin") return null;
 
   if (loading) {
@@ -78,25 +122,25 @@ function AdminDashboard() {
   const cards = [
     {
       label: "Total Appointments",
-      value: stats.total,
+      value: displayStats.total,
       color: "text-[#008e9b]",
       bg: "bg-[#e8fbfd]",
     },
     {
       label: "Pending",
-      value: stats.pending,
+      value: displayStats.pending,
       color: "text-yellow-600",
       bg: "bg-yellow-50",
     },
     {
       label: "Approved",
-      value: stats.approved,
+      value: displayStats.approved,
       color: "text-green-600",
       bg: "bg-green-50",
     },
     {
       label: "Rejected",
-      value: stats.rejected,
+      value: displayStats.rejected,
       color: "text-red-600",
       bg: "bg-red-50",
     },

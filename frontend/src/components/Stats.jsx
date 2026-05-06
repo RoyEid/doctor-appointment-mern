@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiConfig } from "../config/api";
 import {
   Stethoscope,
@@ -9,9 +9,18 @@ import {
 } from "lucide-react";
 
 function Stats() {
+  const sectionRef = useRef(null);
+
   const [doctorsCount, setDoctorsCount] = useState(0);
   const [departmentsCount, setDepartmentsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const [displayCounts, setDisplayCounts] = useState({
+    doctors: 0,
+    departments: 0,
+    labs: 0,
+    awards: 0,
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -38,35 +47,105 @@ function Stats() {
     fetchStats();
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+        }
+      },
+      {
+        threshold: 0.35,
+      },
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, [loading, hasAnimated]);
+
+  useEffect(() => {
+    if (!hasAnimated) return;
+
+    const duration = 1400;
+    const frameRate = 20;
+    const totalFrames = duration / frameRate;
+    let frame = 0;
+
+    const targets = {
+      doctors: doctorsCount,
+      departments: departmentsCount,
+      labs: 8,
+      awards: 150,
+    };
+
+    const counter = setInterval(() => {
+      frame += 1;
+
+      const progress = Math.min(frame / totalFrames, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      setDisplayCounts({
+        doctors: Math.floor(targets.doctors * easedProgress),
+        departments: Math.floor(targets.departments * easedProgress),
+        labs: Math.floor(targets.labs * easedProgress),
+        awards: Math.floor(targets.awards * easedProgress),
+      });
+
+      if (progress === 1) {
+        clearInterval(counter);
+
+        setDisplayCounts({
+          doctors: targets.doctors,
+          departments: targets.departments,
+          labs: targets.labs,
+          awards: targets.awards,
+        });
+      }
+    }, frameRate);
+
+    return () => clearInterval(counter);
+  }, [hasAnimated, doctorsCount, departmentsCount]);
+
   const stats = [
     {
       icon: <Stethoscope size={40} />,
-      count: doctorsCount,
+      count: displayCounts.doctors,
       label: "Doctors",
       isDynamic: true,
     },
     {
       icon: <Hospital size={40} />,
-      count: departmentsCount,
+      count: displayCounts.departments,
       label: "Departments",
       isDynamic: true,
     },
     {
       icon: <FlaskConical size={40} />,
-      count: 8,
+      count: displayCounts.labs,
       label: "Research Labs",
       isDynamic: false,
     },
     {
       icon: <Award size={40} />,
-      count: 150,
+      count: displayCounts.awards,
       label: "Awards",
       isDynamic: false,
     },
   ];
 
   return (
-    <section className="bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16 border-y border-gray-100">
+    <section
+      ref={sectionRef}
+      className="border-y border-gray-100 bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16"
+    >
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="mb-12 text-center">
           <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
