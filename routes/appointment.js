@@ -142,6 +142,27 @@ const isPastDate = (dateValue) => {
     return dayRange.dayStart < today;
 };
 
+const getAppointmentDateTime = (dateValue, timeValue) => {
+    const dayRange = getDayRange(dateValue);
+
+    if (!dayRange || !timeValue) return null;
+
+    const [hours, minutes] = timeValue.split(":");
+
+    const appointmentDateTime = new Date(dayRange.dayStart);
+    appointmentDateTime.setHours(Number(hours), Number(minutes), 0, 0);
+
+    return appointmentDateTime;
+};
+
+const isPastAppointmentDateTime = (dateValue, timeValue) => {
+    const appointmentDateTime = getAppointmentDateTime(dateValue, timeValue);
+
+    if (!appointmentDateTime) return true;
+
+    return appointmentDateTime <= new Date();
+};
+
 const getDoctorSlots = (doctorProfile) => {
     if (
         doctorProfile &&
@@ -186,16 +207,6 @@ const hasDoctorConflict = async ({
     return Boolean(conflict);
 };
 
-/**
- * Checks if the same patient already has an active appointment
- * with the same doctor on the same day.
- *
- * This prevents:
- * Same patient + same doctor + same date + different time.
- *
- * It still allows:
- * Same patient + different doctor + same date.
- */
 const hasPatientSameDoctorSameDayAppointment = async ({
     appointmentId = null,
     userId,
@@ -256,10 +267,6 @@ const sendAppointmentEmail = async ({
 
 /**
  * Availability endpoint
- * Patient uses this to see available 30-minute slots.
- *
- * Example:
- * GET /appointments/availability?doctorId=DOCTOR_PROFILE_ID&date=2026-05-06
  */
 router.get("/availability", async (req, res) => {
     try {
@@ -305,14 +312,13 @@ router.get("/availability", async (req, res) => {
 
         const slots = allSlots.map((slot) => {
             const appointment = bookedMap.get(slot);
+            const isPastSlot = isPastAppointmentDateTime(dayRange.dayStart, slot);
 
             return {
                 time: slot,
-                available: !appointment,
-                status: appointment?.status || null,
-
-                // Patient UI should NOT show these.
-                // Doctor UI may use them if needed.
+                available: !appointment && !isPastSlot,
+                status: appointment?.status || (isPastSlot ? "past" : null),
+                isPast: isPastSlot,
                 patient:
                     req.user?.role === "doctor" || req.user?.role === "admin"
                         ? appointment?.user || null
@@ -334,7 +340,7 @@ router.get("/availability", async (req, res) => {
                 .filter((slot) => slot.available)
                 .map((slot) => slot.time),
             bookedSlots: slots
-                .filter((slot) => !slot.available)
+                .filter((slot) => !slot.available && slot.status !== "past")
                 .map((slot) => slot.time),
         });
     } catch (error) {
@@ -348,9 +354,6 @@ router.get("/availability", async (req, res) => {
 
 /**
  * Doctor schedule endpoint
- * Doctor sees only their own schedule with patient info.
- *
- * GET /appointments/doctor/schedule?date=2026-05-06
  */
 router.get("/doctor/schedule", auth("doctor"), async (req, res) => {
     try {
@@ -466,6 +469,12 @@ async function createAppointmentHandler(req, res) {
         if (isPastDate(date)) {
             return res.status(400).json({
                 message: "Cannot book appointments in the past.",
+            });
+        }
+
+        if (isPastAppointmentDateTime(dayRange.dayStart, time)) {
+            return res.status(400).json({
+                message: "Cannot book an appointment for a time that has already passed.",
             });
         }
 
@@ -694,8 +703,6 @@ router.delete("/:id", auth(), async (req, res) => {
 
 /**
  * Update appointment status or propose reschedule
- *
- * Doctor/admin route.
  */
 router.put("/:id/status", auth(), async (req, res) => {
     try {
@@ -764,6 +771,12 @@ router.put("/:id/status", auth(), async (req, res) => {
         if (isPastDate(nextDate)) {
             return res.status(400).json({
                 message: "Cannot reschedule appointments to a past date.",
+            });
+        }
+
+        if (nextTime && isPastAppointmentDateTime(nextDayRange.dayStart, nextTime)) {
+            return res.status(400).json({
+                message: "Cannot reschedule appointments to a time that has already passed.",
             });
         }
 
@@ -844,7 +857,7 @@ router.put("/:id/status", auth(), async (req, res) => {
                 mailSubject = `Appointment Approved - ${formattedDocName} - ${appDateFormatted}`;
                 mailTitle = "Appointment Approved";
                 mailMessage =
-                    "Your appointment has been approved. You will receive a reminder email 24 hours before your appointment.";
+                    "Your appointment has been approved. You will receive a reminder email before your appointment.";
             } else {
                 mailSubject = `Appointment Rejected - ${formattedDocName} - ${appDateFormatted}`;
                 mailTitle = "Appointment Rejected";
@@ -947,14 +960,6 @@ router.put("/doctor/appointments/:id/reject", auth("doctor"), async (req, res) =
 
 /**
  * Patient requests appointment reschedule
- *
- * PUT /appointments/:id/patient-reschedule
- *
- * Body:
- * {
- *   "date": "2026-05-10",
- *   "time": "10:30"
- * }
  */
 router.put("/:id/patient-reschedule", auth(), async (req, res) => {
     try {
@@ -998,6 +1003,12 @@ router.put("/:id/patient-reschedule", auth(), async (req, res) => {
         if (isPastDate(date)) {
             return res.status(400).json({
                 message: "Cannot reschedule appointments to a past date.",
+            });
+        }
+
+        if (isPastAppointmentDateTime(nextDayRange.dayStart, time)) {
+            return res.status(400).json({
+                message: "Cannot reschedule appointments to a time that has already passed.",
             });
         }
 
@@ -1057,9 +1068,6 @@ router.put("/:id/patient-reschedule", auth(), async (req, res) => {
         appointment.time = time;
         appointment.reminderSent = false;
         appointment.reminderSentAt = null;
-
-        // Patient-side reschedule goes back to pending.
-        // Doctor must approve again.
         appointment.status = "pending";
 
         const saved = await appointment.save();
@@ -1139,6 +1147,13 @@ router.put("/:id/reschedule-response", auth(), async (req, res) => {
         }
 
         if (response === "accept") {
+            if (isPastAppointmentDateTime(appointment.date, appointment.time)) {
+                return res.status(400).json({
+                    message:
+                        "Cannot accept this reschedule because the appointment time has already passed.",
+                });
+            }
+
             appointment.status = "approved";
             appointment.oldDate = null;
             appointment.oldTime = null;
@@ -1184,7 +1199,7 @@ router.put("/:id/reschedule-response", auth(), async (req, res) => {
                 }`,
             message:
                 response === "accept"
-                    ? "Your new appointment time is confirmed."
+                    ? "Your new appointment time is confirmed. You will receive a reminder email before your appointment."
                     : "Your appointment is pending again. The doctor can propose another time if needed.",
         });
 
