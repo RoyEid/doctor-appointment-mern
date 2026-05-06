@@ -66,6 +66,19 @@ const AppointmentSchema = new mongoose.Schema(
             ],
             default: "pending",
         },
+
+        // Email reminder system
+        // This becomes true after the system sends the 24-hour reminder email.
+        reminderSent: {
+            type: Boolean,
+            default: false,
+        },
+
+        // Stores when the reminder email was sent.
+        reminderSentAt: {
+            type: Date,
+            default: null,
+        },
     },
     { timestamps: true }
 );

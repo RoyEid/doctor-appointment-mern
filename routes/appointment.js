@@ -799,6 +799,11 @@ router.put("/:id/status", auth(), async (req, res) => {
             appointment.time = time;
         }
 
+        if (isRescheduling || status === "approved") {
+            appointment.reminderSent = false;
+            appointment.reminderSentAt = null;
+        }
+
         if (isRescheduling && !status) {
             appointment.status = "reschedule_pending";
             appointment.oldDate = oldDate;
@@ -838,7 +843,8 @@ router.put("/:id/status", auth(), async (req, res) => {
             } else if (isApproved) {
                 mailSubject = `Appointment Approved - ${formattedDocName} - ${appDateFormatted}`;
                 mailTitle = "Appointment Approved";
-                mailMessage = "Your appointment has been approved.";
+                mailMessage =
+                    "Your appointment has been approved. You will receive a reminder email 24 hours before your appointment.";
             } else {
                 mailSubject = `Appointment Rejected - ${formattedDocName} - ${appDateFormatted}`;
                 mailTitle = "Appointment Rejected";
@@ -1049,6 +1055,8 @@ router.put("/:id/patient-reschedule", auth(), async (req, res) => {
         appointment.oldTime = oldTime;
         appointment.date = nextDayRange.dayStart;
         appointment.time = time;
+        appointment.reminderSent = false;
+        appointment.reminderSentAt = null;
 
         // Patient-side reschedule goes back to pending.
         // Doctor must approve again.
@@ -1134,6 +1142,8 @@ router.put("/:id/reschedule-response", auth(), async (req, res) => {
             appointment.status = "approved";
             appointment.oldDate = null;
             appointment.oldTime = null;
+            appointment.reminderSent = false;
+            appointment.reminderSentAt = null;
         }
 
         if (response === "reject") {

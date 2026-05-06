@@ -6,6 +6,7 @@ import User from "./routes/user.js";
 import Departments from "./routes/Departments.js";
 import Doctor from "./routes/doctor.js";
 import Appointment from "./routes/appointment.js";
+import { startAppointmentReminderJob } from "./utils/appointmentReminderJob.js";
 
 dotenv.config();
 
@@ -15,9 +16,18 @@ const PORT = process.env.PORT || 3000;
 console.log("====================================");
 console.log("SERVER VERSION WITH HEALTH ROUTE IS RUNNING");
 console.log("CORS + HEALTH FIX VERSION 2026-05-06");
+console.log("APPOINTMENT REMINDER JOB VERSION");
 console.log("====================================");
 
 connectDB();
+
+/*
+  Start automatic appointment reminders.
+
+  The job checks every 30 minutes for approved appointments
+  happening within the next 24 hours and sends one reminder email.
+*/
+startAppointmentReminderJob();
 
 /*
   Request logger.
@@ -74,8 +84,7 @@ app.get("/health", (req, res) => {
     return res.status(200).json({
         success: true,
         message: "Backend health check passed",
-        
-        version: "cors-health-fix-2026-05-06",
+        version: "cors-health-fix-2026-05-06-reminders",
         time: new Date().toISOString(),
     });
 });
@@ -84,7 +93,7 @@ app.get("/debug-version-roy", (req, res) => {
     return res.status(200).json({
         success: true,
         message: "This is Roy's updated backend server.js",
-        version: "cors-health-fix-2026-05-06",
+        version: "cors-health-fix-2026-05-06-reminders",
         time: new Date().toISOString(),
     });
 });
