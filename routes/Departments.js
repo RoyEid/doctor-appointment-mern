@@ -1,464 +1,204 @@
-import { useEffect, useState, useContext } from "react";
-import { Link } from "react-router-dom";
-import { apiConfig } from "../config/api";
-import { AuthContext } from "../context/AuthContext";
-import { toast } from "react-toastify";
-import {
-  Trash2,
-  Info,
-  PlusCircle,
-  Edit,
-  X,
-  Save,
-  Building2,
-  FileText,
-  Loader2,
-} from "lucide-react";
-import Swal from "sweetalert2";
-import LoadingSpinner from "./LoadingSpinner";
+import express from "express";
+import Departments from "../models/Departments.js";
+import auth from "../auth/Middleware.js";
 
-function Departments() {
-  const { user } = useContext(AuthContext);
+const router = express.Router();
 
-  const [departments, setDepartments] = useState([]);
-  const [activeTab, setActiveTab] = useState(null);
-  const [loading, setLoading] = useState(true);
+const escapeRegExp = (value) => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
 
-  const [editingDepartment, setEditingDepartment] = useState(null);
-  const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [savingEdit, setSavingEdit] = useState(false);
+const getAllDepartmentsHandler = async (req, res) => {
+  try {
+    const departments = await Departments.find().sort({ createdAt: -1 });
+    return res.json(departments);
+  } catch (error) {
+    console.error("Error fetching departments:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching departments",
+    });
+  }
+};
 
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        setLoading(true);
+const createDepartmentHandler = async (req, res) => {
+  try {
+    const { name, description } = req.body;
 
-        const res = await fetch(apiConfig.getAllDepartments);
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to fetch departments");
-        }
-
-        const normalized = Array.isArray(data) ? data : [];
-
-        setDepartments(normalized);
-
-        if (normalized.length > 0) {
-          setActiveTab(normalized[0]._id);
-        }
-      } catch (err) {
-        console.error("Failed to fetch departments", err);
-        toast.error("Could not load departments");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDepartments();
-  }, []);
-
-  const handleTabClick = (id) => {
-    setActiveTab(id);
-  };
-
-  const openEditModal = (department) => {
-    setEditingDepartment(department);
-    setEditName(department?.name || "");
-    setEditDescription(department?.description || "");
-  };
-
-  const closeEditModal = () => {
-    if (savingEdit) return;
-
-    setEditingDepartment(null);
-    setEditName("");
-    setEditDescription("");
-  };
-
-  const handleUpdateDepartment = async (e) => {
-    e.preventDefault();
-
-    if (!editingDepartment || savingEdit) return;
-
-    const cleanName = editName.trim();
-    const cleanDescription = editDescription.trim();
-
-    if (!cleanName || !cleanDescription) {
-      toast.error("Department name and description are required");
-      return;
-    }
-
-    try {
-      setSavingEdit(true);
-
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        toast.error("Session expired. Please login again.");
-        return;
-      }
-
-      const res = await fetch(apiConfig.updateDepartment(editingDepartment._id), {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: cleanName,
-          description: cleanDescription,
-        }),
+    if (!name || !description) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and description are required",
       });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to update department");
-      }
-
-      const updatedDepartment = data.department;
-
-      setDepartments((prevDepartments) =>
-        prevDepartments.map((department) =>
-          department._id === updatedDepartment._id
-            ? updatedDepartment
-            : department,
-        ),
-      );
-
-      setActiveTab(updatedDepartment._id);
-      toast.success(data.message || "Department updated successfully");
-      closeEditModal();
-    } catch (error) {
-      console.error("Error updating department:", error);
-      toast.error(error.message || "Network error updating department");
-    } finally {
-      setSavingEdit(false);
     }
-  };
 
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      icon: "question",
-      title: "Delete department?",
-      text: "Are you sure you want to delete this department? This action cannot be undone.",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete it",
-      cancelButtonText: "Cancel",
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#06b6d4",
+    const cleanName = name.trim();
+    const cleanDescription = description.trim();
+
+    const existingDepartment = await Departments.findOne({
+      name: {
+        $regex: new RegExp(`^${escapeRegExp(cleanName)}$`, "i"),
+      },
     });
 
-    if (!result.isConfirmed) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(apiConfig.deleteDepartment(id), {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+    if (existingDepartment) {
+      return res.status(400).json({
+        success: false,
+        message: "A department with this name already exists",
       });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success(data.message || "Department deleted successfully");
-
-        const updatedDeps = departments.filter((d) => d._id !== id);
-        setDepartments(updatedDeps);
-
-        if (activeTab === id) {
-          setActiveTab(updatedDeps.length > 0 ? updatedDeps[0]._id : null);
-        }
-      } else {
-        toast.error(data.message || "Failed to delete department");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Network error deleting department");
     }
-  };
 
-  if (loading) {
-    return (
-      <section
-        id="services"
-        className="bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20"
-      >
-        <LoadingSpinner text="Loading departments..." compact />
-      </section>
-    );
+    const department = await Departments.create({
+      name: cleanName,
+      description: cleanDescription,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Department added successfully",
+      department,
+    });
+  } catch (error) {
+    console.error("Error adding department:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
+};
 
-  return (
-    <section
-      id="services"
-      className="bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20"
-    >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-16 text-center">
-          <div className="mb-4 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
-            Services
-          </div>
+// Add Department
+router.post("/", auth("admin"), createDepartmentHandler);
+router.post("/addDepartment", auth("admin"), createDepartmentHandler);
 
-          <h2 className="mb-4 text-3xl font-black tracking-tight text-gray-900 md:text-5xl">
-            Our <span className="text-[#008e9b]">Departments</span>
-          </h2>
+// Get all departments
+router.get("/", getAllDepartmentsHandler);
+router.get("/allDepartments", getAllDepartmentsHandler);
 
-          <div className="mx-auto mb-6 h-1.5 w-24 rounded-full bg-[#008e9b]" />
+// Get departments count
+router.get("/count", async (req, res) => {
+  try {
+    const count = await Departments.countDocuments();
 
-          <p className="mx-auto max-w-2xl text-lg font-medium text-gray-500 md:text-xl">
-            Explore our specialized medical departments staffed with expert
-            doctors dedicated to your health and well-being.
-          </p>
-        </div>
+    return res.json({ count });
+  } catch (error) {
+    console.error("Error fetching departments count:", error);
 
-        {user?.role === "admin" && (
-          <div className="mb-10 flex justify-center">
-            <Link
-              to="/add-department"
-              className="inline-flex items-center gap-2 rounded-full !bg-[#008e9b] px-8 py-3.5 font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
-            >
-              <PlusCircle size={20} />
-              <span>Add Department</span>
-            </Link>
-          </div>
-        )}
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching departments count",
+    });
+  }
+});
 
-        {departments.length === 0 ? (
-          <div className="rounded-[2rem] border border-gray-100 bg-white p-12 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-            <Info className="mx-auto mb-4 text-gray-300" size={48} />
+// Get one department by id
+router.get("/:id", async (req, res) => {
+  try {
+    const department = await Departments.findById(req.params.id);
 
-            <p className="text-lg font-medium text-gray-500">
-              No departments available at the moment.
-            </p>
+    if (!department) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
 
-            {user?.role === "admin" && (
-              <p className="mt-2 text-sm font-bold text-[#008e9b]">
-                Please add departments via the Admin Dashboard.
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="flex min-h-[400px] flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.10)] md:flex-row">
-            <div className="flex-shrink-0 border-b border-gray-100 bg-gray-50/70 md:w-72 md:border-b-0 md:border-r">
-              <ul className="hide-scrollbar flex gap-2.5 overflow-x-auto p-3 md:flex-col md:p-6">
-                {departments.map((dep) => (
-                  <li key={dep._id} className="flex-shrink-0">
-                    <button
-                      onClick={() => handleTabClick(dep._id)}
-                      className={`w-full whitespace-nowrap rounded-2xl px-6 py-4 text-left font-black transition-all duration-300 ${activeTab === dep._id
-                          ? "!bg-[#008e9b] text-white shadow-lg"
-                          : "!bg-transparent text-gray-500 hover:!bg-white hover:text-[#008e9b] hover:shadow-md"
-                        }`}
-                    >
-                      {dep?.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+    return res.json(department);
+  } catch (error) {
+    console.error("Error fetching department:", error);
 
-            <div className="relative flex-1 bg-white p-8 md:p-12">
-              {departments.map((dep) =>
-                dep._id === activeTab ? (
-                  <div key={dep._id} className="animate-fadeIn">
-                    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <h3 className="text-3xl font-black text-gray-900 md:text-4xl">
-                        {dep?.name}
-                      </h3>
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
 
-                      {user?.role === "admin" && (
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            onClick={() => openEditModal(dep)}
-                            className="group inline-flex items-center justify-center gap-2 rounded-2xl !bg-blue-50 px-4 py-2 font-black text-blue-500 shadow-sm transition-all hover:!bg-blue-500 hover:text-white"
-                            title="Edit Department"
-                          >
-                            <Edit
-                              size={18}
-                              className="transition-transform group-hover:scale-110"
-                            />
-                            <span className="hidden sm:inline">Edit</span>
-                          </button>
+// Update Department
+router.put("/:id", auth("admin"), async (req, res) => {
+  try {
+    const { name, description } = req.body;
 
-                          <button
-                            onClick={() => handleDelete(dep._id)}
-                            className="group inline-flex items-center justify-center gap-2 rounded-2xl !bg-red-50 px-4 py-2 font-black text-red-500 shadow-sm transition-all hover:!bg-red-500 hover:text-white"
-                            title="Delete Department"
-                          >
-                            <Trash2
-                              size={18}
-                              className="transition-transform group-hover:scale-110"
-                            />
-                            <span className="hidden sm:inline">Delete</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
+    if (!name || !description) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and description are required",
+      });
+    }
 
-                    <div className="prose prose-lg max-w-none text-gray-600">
-                      <p className="whitespace-pre-line text-lg leading-relaxed">
-                        {dep?.description}
-                      </p>
-                    </div>
+    const cleanName = name.trim();
+    const cleanDescription = description.trim();
 
-                    <div className="mt-12 flex items-center gap-4 border-t border-gray-100 pt-8 text-[#008e9b]">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#008e9b]/10">
-                        <PlusCircle size={20} />
-                      </div>
+    const existingDepartment = await Departments.findOne({
+      _id: { $ne: req.params.id },
+      name: {
+        $regex: new RegExp(`^${escapeRegExp(cleanName)}$`, "i"),
+      },
+    });
 
-                      <span className="font-black">
-                        Fully equipped for specialized care
-                      </span>
-                    </div>
-                  </div>
-                ) : null,
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+    if (existingDepartment) {
+      return res.status(400).json({
+        success: false,
+        message: "A department with this name already exists",
+      });
+    }
 
-      {editingDepartment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white bg-white p-6 shadow-[0_30px_90px_rgba(15,23,42,0.22)] sm:p-8">
-            <div className="mb-6 flex items-start justify-between gap-4">
-              <div>
-                <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
-                  Admin Edit
-                </div>
+    const updatedDepartment = await Departments.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: cleanName,
+        description: cleanDescription,
+      },
+      { new: true }
+    );
 
-                <h3 className="text-2xl font-black text-gray-900">
-                  Edit Department
-                </h3>
+    if (!updatedDepartment) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
 
-                <p className="mt-1 text-sm font-medium text-gray-500">
-                  Update the department name and description.
-                </p>
-              </div>
+    return res.json({
+      success: true,
+      message: "Department updated successfully",
+      department: updatedDepartment,
+    });
+  } catch (error) {
+    console.error("Error updating department:", error);
 
-              <button
-                type="button"
-                onClick={closeEditModal}
-                disabled={savingEdit}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl !bg-gray-50 text-gray-500 transition-all hover:!bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <X size={20} />
-              </button>
-            </div>
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
 
-            <form onSubmit={handleUpdateDepartment} className="space-y-5">
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-gray-700">
-                  Department Name
-                </label>
+// Delete Department
+router.delete("/:id", auth("admin"), async (req, res) => {
+  try {
+    const deletedDepartment = await Departments.findByIdAndDelete(req.params.id);
 
-                <div className="relative">
-                  <Building2
-                    size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-                  />
+    if (!deletedDepartment) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
 
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all disabled:cursor-not-allowed disabled:opacity-70 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
-                    disabled={savingEdit}
-                    required
-                  />
-                </div>
-              </div>
+    return res.json({
+      success: true,
+      message: "Department deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting department:", error);
 
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-gray-700">
-                  Description
-                </label>
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
 
-                <div className="relative">
-                  <FileText
-                    size={18}
-                    className="absolute left-4 top-4 text-[#008e9b]"
-                  />
-
-                  <textarea
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    rows={5}
-                    className="w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all disabled:cursor-not-allowed disabled:opacity-70 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
-                    disabled={savingEdit}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-[0.8fr_1.2fr]">
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  disabled={savingEdit}
-                  className="inline-flex items-center justify-center rounded-2xl border border-gray-200 !bg-white px-5 py-4 text-sm font-black text-gray-600 !shadow-none transition-all hover:!bg-gray-50 hover:text-[#008e9b] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={savingEdit}
-                  className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-4 text-sm font-black text-white shadow-lg transition-all duration-300 ${savingEdit
-                      ? "cursor-not-allowed !bg-gray-400 opacity-80"
-                      : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
-                    }`}
-                >
-                  {savingEdit ? (
-                    <>
-                      <Loader2 className="animate-spin" size={20} />
-                      Saving changes...
-                    </>
-                  ) : (
-                    <>
-                      <Save size={18} />
-                      Save Changes
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        .animate-fadeIn {
-          animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-    </section>
-  );
-}
-
-export default Departments;
+export default router;
