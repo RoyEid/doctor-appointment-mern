@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { apiConfig } from "../config/api";
@@ -13,6 +13,10 @@ import {
   UserRound,
   FileText,
   BriefcaseMedical,
+  Eye,
+  EyeOff,
+  Check,
+  Circle,
 } from "lucide-react";
 
 function AddDoctor() {
@@ -24,6 +28,7 @@ function AddDoctor() {
   const [error, setError] = useState(null);
   const [createdCredentials, setCreatedCredentials] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -40,15 +45,63 @@ function AddDoctor() {
     }
   }, [user, navigate]);
 
-  const validatePassword = (password) => {
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+  const passwordRules = useMemo(() => {
+    const p = form.password;
 
-    return passwordRegex.test(password);
+    return {
+      length: p.length >= 8,
+      uppercase: /[A-Z]/.test(p),
+      lowercase: /[a-z]/.test(p),
+      number: /\d/.test(p),
+    };
+  }, [form.password]);
+
+  const strengthCount = Object.values(passwordRules).filter(Boolean).length;
+
+  const getStrengthLabel = () => {
+    if (form.password === "") return "";
+    if (strengthCount <= 1) return "Weak";
+    if (strengthCount === 2) return "Fair";
+    if (strengthCount === 3) return "Good";
+    return "Strong";
   };
+
+  const getStrengthColor = () => {
+    if (strengthCount === 1) return "bg-red-500";
+    if (strengthCount === 2) return "bg-yellow-500";
+    if (strengthCount === 3) return "bg-[#008e9b]";
+    if (strengthCount === 4) return "bg-green-500";
+    return "bg-gray-200";
+  };
+
+  const isPasswordValid = strengthCount === 4;
+
+  const isFormValid =
+    form.name.trim() !== "" &&
+    form.email.trim() !== "" &&
+    form.specialty.trim() !== "" &&
+    form.experienceYears !== "" &&
+    form.description.trim() !== "" &&
+    isPasswordValid;
+
+  const RuleItem = ({ valid, text }) => (
+    <div
+      className={`flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black transition-all duration-300 ${
+        valid ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-500"
+      }`}
+    >
+      {valid ? (
+        <Check size={14} className="stroke-[3px]" />
+      ) : (
+        <Circle size={14} className="fill-gray-300 stroke-none" />
+      )}
+      <span>{text}</span>
+    </div>
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setForm({ ...form, [name]: value });
 
     if (name === "password") {
@@ -73,9 +126,9 @@ function AddDoctor() {
     setError(null);
     setCreatedCredentials(null);
 
-    if (!validatePassword(form.password)) {
+    if (!isFormValid) {
       const message =
-        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+        "Please complete all fields and make sure the password meets the requirements.";
 
       setError(message);
       toast.error(message);
@@ -128,6 +181,7 @@ function AddDoctor() {
 
       setPreview("/img/doctors/avatar.png");
       setImage(null);
+      setShowPassword(false);
     } catch (error) {
       console.error("Error submitting form", error);
       setError(error.message);
@@ -136,9 +190,6 @@ function AddDoctor() {
       setSubmitting(false);
     }
   };
-
-  const passwordIsValid =
-    form.password.length === 0 || validatePassword(form.password);
 
   if (!user || user.role !== "admin") {
     return (
@@ -253,6 +304,7 @@ function AddDoctor() {
                 type="text"
                 name="name"
                 required
+                placeholder="Dr. John Doe"
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
@@ -275,6 +327,7 @@ function AddDoctor() {
                 type="email"
                 name="email"
                 required
+                placeholder="doctor@example.com"
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
@@ -294,26 +347,70 @@ function AddDoctor() {
               <input
                 value={form.password}
                 onChange={handleChange}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 required
-                minLength={8}
-                className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 ${
-                  passwordIsValid
-                    ? "border-gray-200 focus:ring-[#008e9b]"
-                    : "border-red-300 focus:ring-red-400"
-                }`}
+                placeholder="••••••••"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+              </button>
             </div>
 
-            <p
-              className={`mt-2 text-xs font-semibold ${
-                passwordIsValid ? "text-gray-500" : "text-red-500"
-              }`}
-            >
-              Password must be at least 8 characters and include uppercase,
-              lowercase, number, and special character.
+            <p className="mt-2 text-xs font-medium leading-relaxed text-gray-500">
+              Use at least 8 characters with uppercase, lowercase, and a number.
             </p>
+
+            {form.password && (
+              <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                    Security Check
+                  </span>
+
+                  <span
+                    className={`text-xs font-black uppercase ${
+                      strengthCount <= 1
+                        ? "text-red-500"
+                        : strengthCount === 2
+                          ? "text-yellow-600"
+                          : strengthCount === 3
+                            ? "text-[#008e9b]"
+                            : "text-green-600"
+                    }`}
+                  >
+                    Strength: {getStrengthLabel()}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[1, 2, 3, 4].map((index) => (
+                    <div
+                      key={index}
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        index <= strengthCount
+                          ? getStrengthColor()
+                          : "bg-gray-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <RuleItem valid={passwordRules.length} text="8+ Characters" />
+                  <RuleItem valid={passwordRules.uppercase} text="Uppercase" />
+                  <RuleItem valid={passwordRules.lowercase} text="Lowercase" />
+                  <RuleItem valid={passwordRules.number} text="Number" />
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -333,6 +430,7 @@ function AddDoctor() {
                 type="text"
                 name="specialty"
                 required
+                placeholder="Cardiology"
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
@@ -356,6 +454,7 @@ function AddDoctor() {
                 name="experienceYears"
                 required
                 min="0"
+                placeholder="5"
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
@@ -378,6 +477,7 @@ function AddDoctor() {
                 name="description"
                 required
                 rows={4}
+                placeholder="Write a short professional description for this doctor."
                 className="w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
@@ -385,11 +485,11 @@ function AddDoctor() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={!isFormValid || submitting}
             className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
-              submitting
-                ? "cursor-not-allowed !bg-gray-400 opacity-80"
-                : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+              isFormValid && !submitting
+                ? "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+                : "cursor-not-allowed !bg-gray-400 opacity-70"
             }`}
           >
             {submitting ? (
