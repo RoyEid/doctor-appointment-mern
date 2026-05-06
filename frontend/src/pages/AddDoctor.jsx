@@ -40,9 +40,21 @@ function AddDoctor() {
     }
   }, [user, navigate]);
 
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
+    return passwordRegex.test(password);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+
+    if (name === "password") {
+      setCreatedCredentials(null);
+      setError(null);
+    }
   };
 
   const handleImageChange = (e) => {
@@ -60,6 +72,16 @@ function AddDoctor() {
 
     setError(null);
     setCreatedCredentials(null);
+
+    if (!validatePassword(form.password)) {
+      const message =
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -114,6 +136,9 @@ function AddDoctor() {
       setSubmitting(false);
     }
   };
+
+  const passwordIsValid =
+    form.password.length === 0 || validatePassword(form.password);
 
   if (!user || user.role !== "admin") {
     return (
@@ -272,9 +297,23 @@ function AddDoctor() {
                 type="password"
                 name="password"
                 required
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                minLength={8}
+                className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 ${
+                  passwordIsValid
+                    ? "border-gray-200 focus:ring-[#008e9b]"
+                    : "border-red-300 focus:ring-red-400"
+                }`}
               />
             </div>
+
+            <p
+              className={`mt-2 text-xs font-semibold ${
+                passwordIsValid ? "text-gray-500" : "text-red-500"
+              }`}
+            >
+              Password must be at least 8 characters and include uppercase,
+              lowercase, number, and special character.
+            </p>
           </div>
 
           <div>
@@ -316,6 +355,7 @@ function AddDoctor() {
                 type="number"
                 name="experienceYears"
                 required
+                min="0"
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>

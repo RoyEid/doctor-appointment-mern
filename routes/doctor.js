@@ -12,6 +12,12 @@ const router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
+const passwordMessage =
+    "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+
 const getAllDoctorsHandler = async (req, res) => {
     try {
         const doctors = await Doctor.find();
@@ -86,12 +92,9 @@ router.put("/update-profile", auth("doctor"), upload.single("image"), async (req
         }
 
         if (password) {
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
             if (!passwordRegex.test(password)) {
                 return res.status(400).json({
-                    message:
-                        "Password must be at least 8 characters and include uppercase, lowercase, and a number.",
+                    message: passwordMessage,
                 });
             }
 
@@ -156,6 +159,12 @@ async function createDoctorHandler(req, res) {
         if (!name || !specialty || !normalizedEmail || !password) {
             return res.status(400).json({
                 message: "name, email, password and specialty are required",
+            });
+        }
+
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                message: passwordMessage,
             });
         }
 
