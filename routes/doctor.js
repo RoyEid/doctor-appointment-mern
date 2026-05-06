@@ -12,11 +12,10 @@ const router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 const passwordMessage =
-    "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.";
+    "Password must be at least 8 characters and include uppercase, lowercase, and a number.";
 
 const getAllDoctorsHandler = async (req, res) => {
     try {
