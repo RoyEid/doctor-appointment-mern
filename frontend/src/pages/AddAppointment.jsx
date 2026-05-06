@@ -14,6 +14,8 @@ import {
   Stethoscope,
 } from "lucide-react";
 
+const CLINIC_TIME_ZONE = "Asia/Beirut";
+
 function AddAppointment() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -31,6 +33,58 @@ function AddAppointment() {
   });
 
   const [submitting, setSubmitting] = useState(false);
+
+  const getLebanonDateParts = () => {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: CLINIC_TIME_ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(new Date());
+
+    const values = {};
+
+    parts.forEach((part) => {
+      values[part.type] = part.value;
+    });
+
+    return {
+      date: `${values.year}-${values.month}-${values.day}`,
+      minutes: Number(values.hour) * 60 + Number(values.minute),
+    };
+  };
+
+  const getTodayInLebanon = () => {
+    return getLebanonDateParts().date;
+  };
+
+  const isTodayInLebanon = (dateValue) => {
+    return dateValue === getTodayInLebanon();
+  };
+
+  const getSlotMinutes = (timeValue) => {
+    if (!timeValue) return null;
+
+    const [hours, minutes] = timeValue.split(":");
+
+    return Number(hours) * 60 + Number(minutes);
+  };
+
+  const isPastSlotInLebanon = (dateValue, timeValue) => {
+    if (!dateValue || !timeValue) return false;
+
+    if (!isTodayInLebanon(dateValue)) return false;
+
+    const currentLebanonMinutes = getLebanonDateParts().minutes;
+    const slotMinutes = getSlotMinutes(timeValue);
+
+    if (slotMinutes === null) return true;
+
+    return slotMinutes <= currentLebanonMinutes;
+  };
 
   useEffect(() => {
     if (user && user.role !== "user") {
@@ -85,10 +139,22 @@ function AddAppointment() {
 
         const slots = Array.isArray(data.slots) ? data.slots : [];
 
-        setAvailabilitySlots(slots);
+        const normalizedSlots = slots.map((slot) => {
+          const isPast =
+            Boolean(slot.isPast) || isPastSlotInLebanon(form.date, slot.time);
+
+          return {
+            ...slot,
+            isPast,
+            available: Boolean(slot.available) && !isPast,
+            status: isPast ? "past" : slot.status,
+          };
+        });
+
+        setAvailabilitySlots(normalizedSlots);
 
         setForm((prev) => {
-          const selectedSlotStillAvailable = slots.some(
+          const selectedSlotStillAvailable = normalizedSlots.some(
             (slot) => slot.time === prev.time && slot.available,
           );
 
@@ -105,6 +171,7 @@ function AddAppointment() {
     };
 
     fetchAvailability();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.doctor, form.date]);
 
   const handleChange = (e) => {
@@ -122,7 +189,7 @@ function AddAppointment() {
 
     setForm((prev) => ({
       ...prev,
-      time: slot.time,
+      time: prev.time === slot.time ? "" : slot.time,
     }));
   };
 
@@ -227,6 +294,12 @@ function AddAppointment() {
       return;
     }
 
+    if (isPastSlotInLebanon(form.date, form.time)) {
+      toast.error("This time has already passed. Please choose another slot.");
+      setForm((prev) => ({ ...prev, time: "" }));
+      return;
+    }
+
     setSubmitting(true);
 
     const token = localStorage.getItem("token");
@@ -302,8 +375,17 @@ function AddAppointment() {
   ).length;
 
   const bookedCount = availabilitySlots.filter(
-    (slot) => !slot.available,
+    (slot) => !slot.available && !slot.isPast,
   ).length;
+
+  const pastCount = availabilitySlots.filter((slot) => slot.isPast).length;
+
+  const hasOnlyPastOrBookedSlots =
+    form.doctor &&
+    form.date &&
+    !slotsLoading &&
+    availabilitySlots.length > 0 &&
+    availableCount === 0;
 
   if (!user) return <AuthRequired />;
 
@@ -397,11 +479,15 @@ function AddAppointment() {
                 name="date"
                 value={form.date}
                 onChange={handleChange}
-                min={new Date().toISOString().split("T")[0]}
+                min={getTodayInLebanon()}
                 required
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
+
+            <p className="mt-2 text-xs font-semibold text-gray-500">
+              Appointment times follow Lebanon time.
+            </p>
           </div>
 
           <div>
@@ -440,12 +526,12 @@ function AddAppointment() {
               </h3>
 
               <p className="mt-1 text-sm font-medium text-gray-500">
-                Teal slots are available. Gray slots are already booked.
+                Teal slots are available. Gray slots are unavailable.
               </p>
             </div>
 
             {form.doctor && form.date && !slotsLoading && (
-              <div className="flex gap-2 text-xs font-black">
+              <div className="flex flex-wrap gap-2 text-xs font-black">
                 <span className="rounded-full bg-[#008e9b] px-3 py-1 text-white">
                   {availableCount} available
                 </span>
@@ -453,6 +539,12 @@ function AddAppointment() {
                 <span className="rounded-full bg-gray-200 px-3 py-1 text-gray-500">
                   {bookedCount} booked
                 </span>
+
+                {pastCount > 0 && (
+                  <span className="rounded-full bg-red-50 px-3 py-1 text-red-500">
+                    {pastCount} passed
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -482,38 +574,61 @@ function AddAppointment() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {availabilitySlots.map((slot) => {
-                const isSelected = form.time === slot.time;
+            <>
+              {hasOnlyPastOrBookedSlots && (
+                <div className="mb-4 rounded-3xl border border-yellow-100 bg-yellow-50 p-4 text-sm font-semibold text-yellow-700">
+                  No available slots remain for this date. Please choose
+                  tomorrow or another future date.
+                </div>
+              )}
 
-                return (
-                  <button
-                    key={slot.time}
-                    type="button"
-                    disabled={!slot.available}
-                    onClick={() => handleSlotClick(slot)}
-                    className={`rounded-2xl border px-4 py-3 text-sm font-black transition-all ${
-                      slot.available
-                        ? isSelected
-                          ? "!bg-[#008e9b] text-white shadow-lg ring-2 ring-[#46daea]"
-                          : "!bg-white text-[#008e9b] border-[#008e9b]/20 hover:-translate-y-0.5 hover:!bg-[#e8fbfd] hover:shadow-md"
-                        : "cursor-not-allowed border-gray-200 !bg-gray-200 text-gray-400 opacity-70"
-                    }`}
-                    title={
-                      slot.available
-                        ? "Available"
-                        : "This time is already booked"
-                    }
-                  >
-                    {slot.time}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {availabilitySlots.map((slot) => {
+                  const isSelected = form.time === slot.time;
+                  const isPast = Boolean(slot.isPast);
+                  const slotLabel = isPast
+                    ? "Passed"
+                    : slot.available
+                      ? isSelected
+                        ? "Selected"
+                        : "Available"
+                      : "Booked";
 
-                    <span className="mt-1 block text-[10px] font-black uppercase tracking-wide">
-                      {slot.available ? "Available" : "Booked"}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                  return (
+                    <button
+                      key={slot.time}
+                      type="button"
+                      disabled={!slot.available}
+                      onClick={() => handleSlotClick(slot)}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-black transition-all ${
+                        slot.available
+                          ? isSelected
+                            ? "!bg-[#008e9b] text-white shadow-lg ring-2 ring-[#46daea]"
+                            : "!bg-white text-[#008e9b] border-[#008e9b]/20 hover:-translate-y-0.5 hover:!bg-[#e8fbfd] hover:shadow-md"
+                          : isPast
+                            ? "cursor-not-allowed border-red-100 !bg-red-50 text-red-300 opacity-80"
+                            : "cursor-not-allowed border-gray-200 !bg-gray-200 text-gray-400 opacity-70"
+                      }`}
+                      title={
+                        slot.available
+                          ? isSelected
+                            ? "Click again to unselect"
+                            : "Available"
+                          : isPast
+                            ? "This time has already passed"
+                            : "This time is already booked"
+                      }
+                    >
+                      {slot.time}
+
+                      <span className="mt-1 block text-[10px] font-black uppercase tracking-wide">
+                        {slotLabel}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           <div className="mt-5 rounded-3xl border border-white bg-white p-4">
