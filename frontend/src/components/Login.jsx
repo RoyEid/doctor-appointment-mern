@@ -33,7 +33,17 @@ function Login() {
       Swal.fire({
         icon: "success",
         title: "Email verified",
-        text: "Your email has been verified successfully. You can now return to the login page and continue.",
+        html: `
+          <div style="text-align: center; line-height: 1.7;">
+            <p style="margin: 0; color: #475569; font-size: 15px;">
+              Your email is verified successfully.
+            </p>
+            <p style="margin: 10px 0 0; color: #008e9b; font-weight: 800; font-size: 15px;">
+              You can now login and continue.
+            </p>
+          </div>
+        `,
+        confirmButtonText: "Continue",
         confirmButtonColor: "#008e9b",
       });
     }
@@ -42,7 +52,16 @@ function Login() {
       Swal.fire({
         icon: "error",
         title: "Verification failed",
-        text: "This verification link is invalid or expired. Please request a new verification email.",
+        html: `
+          <div style="text-align: center; line-height: 1.7;">
+            <p style="margin: 0; color: #475569; font-size: 15px;">
+              This verification link is invalid or expired.
+            </p>
+            <p style="margin: 10px 0 0; color: #64748b; font-size: 14px;">
+              Please request a new verification email and try again.
+            </p>
+          </div>
+        `,
         confirmButtonColor: "#008e9b",
       });
     }
@@ -114,28 +133,74 @@ function Login() {
     const maxChecks = 40;
 
     Swal.fire({
-      title: "Waiting for email verification",
+      title: "Waiting for verification",
       html: `
-        <div style="text-align: left; line-height: 1.6;">
-          <p style="margin-bottom: 10px;">
-            Open your email inbox and press <strong>Verify Email</strong>.
+        <div style="text-align: center; line-height: 1.7; padding: 2px 4px;">
+          <div style="
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(0,142,155,0.16), rgba(70,218,234,0.18));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #46daea;
+            font-size: 28px;
+            font-weight: 900;
+            box-shadow: 0 16px 35px rgba(0,142,155,0.18);
+          ">
+            ✉
+          </div>
+
+          <p style="
+            margin: 0 auto 12px;
+            max-width: 420px;
+            color: #e5f9fb;
+            font-size: 18px;
+            font-weight: 800;
+          ">
+            Check your inbox and tap <span style="color: #46daea;">Verify Email</span>.
           </p>
-          <p style="margin-bottom: 10px;">
-            Keep this page open. We will check automatically.
+
+          <p style="
+            margin: 0 auto 10px;
+            max-width: 420px;
+            color: #cbd5e1;
+            font-size: 15px;
+          ">
+            Keep this page open — we’ll check automatically.
           </p>
-          <p style="font-size: 13px; color: #6b7280;">
-            If you already verified your email, return here and press Login again.
+
+          <p style="
+            margin: 14px auto 0;
+            max-width: 420px;
+            color: #94a3b8;
+            font-size: 13px;
+          ">
+            Already verified? Return here and press <strong style="color:#e5f9fb;">Login</strong> again.
           </p>
         </div>
       `,
+      background: "#0f2428",
+      color: "#ffffff",
+      showClass: {
+        popup: "swal2-show",
+      },
+      hideClass: {
+        popup: "swal2-hide",
+      },
       allowOutsideClick: false,
       allowEscapeKey: false,
       showConfirmButton: false,
       showCancelButton: true,
       cancelButtonText: "Cancel",
-      cancelButtonColor: "#6b7280",
+      cancelButtonColor: "#64748b",
       didOpen: () => {
         Swal.showLoading();
+      },
+      customClass: {
+        popup: "rounded-[2rem]",
       },
     });
 
@@ -151,12 +216,16 @@ function Login() {
 
           Swal.fire({
             icon: "success",
-            title: "Email verified",
+            title: "You’re verified",
             html: `
-              <p>Your email is verified now.</p>
-              <p style="margin-top: 10px; color: #6b7280;">
-                Press Login again to continue.
-              </p>
+              <div style="text-align: center; line-height: 1.7;">
+                <p style="margin: 0; color: #475569; font-size: 15px;">
+                  Your email is verified successfully.
+                </p>
+                <p style="margin: 10px 0 0; color: #008e9b; font-size: 15px; font-weight: 800;">
+                  Press Login again to continue.
+                </p>
+              </div>
             `,
             confirmButtonText: "Continue",
             confirmButtonColor: "#008e9b",
@@ -173,10 +242,14 @@ function Login() {
             icon: "info",
             title: "Still waiting",
             html: `
-              <p>We could not detect verification yet.</p>
-              <p style="margin-top: 10px; color: #6b7280;">
-                If you already clicked the verification link, return here and press Login again.
-              </p>
+              <div style="text-align: center; line-height: 1.7;">
+                <p style="margin: 0; color: #475569; font-size: 15px;">
+                  We could not detect verification yet.
+                </p>
+                <p style="margin: 10px 0 0; color: #64748b; font-size: 14px;">
+                  If you already clicked the verification link, return here and press Login again.
+                </p>
+              </div>
             `,
             confirmButtonColor: "#008e9b",
           });
@@ -222,10 +295,14 @@ function Login() {
           icon: "success",
           title: "Verification email sent",
           html: `
-            <p>${resendData.message || "A new verification email was sent."}</p>
-            <p style="margin-top: 10px; color: #6b7280;">
-              Open your email inbox, press Verify Email, then return here.
-            </p>
+            <div style="text-align: center; line-height: 1.7;">
+              <p style="margin: 0; color: #475569; font-size: 15px;">
+                ${resendData.message || "A new verification email was sent."}
+              </p>
+              <p style="margin: 10px 0 0; color: #008e9b; font-size: 15px; font-weight: 800;">
+                Open your inbox, press Verify Email, then return here.
+              </p>
+            </div>
           `,
           confirmButtonText: "Wait here",
           confirmButtonColor: "#008e9b",
@@ -255,23 +332,58 @@ function Login() {
   const showEmailVerificationPopup = async () => {
     const result = await Swal.fire({
       icon: "warning",
-      title: "Email verification required",
+      title: "Verify your email",
       html: `
-        <div style="text-align: left; line-height: 1.6;">
-          <p style="margin-bottom: 10px;">
-            Your account exists, but your email is not verified yet.
+        <div style="text-align: center; line-height: 1.7; padding: 0 4px;">
+          <p style="
+            margin: 0 auto 12px;
+            max-width: 430px;
+            color: #e5f9fb;
+            font-size: 17px;
+            font-weight: 800;
+          ">
+            Your account is ready, but your email still needs confirmation.
           </p>
-          <p style="margin-bottom: 10px;">
-            Open your email inbox and press <strong>Verify Email</strong>.
+
+          <div style="
+            margin: 18px auto;
+            max-width: 430px;
+            padding: 16px 18px;
+            border-radius: 20px;
+            background: rgba(70, 218, 234, 0.08);
+            border: 1px solid rgba(70, 218, 234, 0.18);
+          ">
+            <p style="
+              margin: 0;
+              color: #cbd5e1;
+              font-size: 15px;
+            ">
+              Open your inbox and press
+              <strong style="color:#46daea;">Verify Email</strong>.
+            </p>
+          </div>
+
+          <p style="
+            margin: 0 auto 8px;
+            max-width: 430px;
+            color: #94a3b8;
+            font-size: 13px;
+          ">
+            Keep this page open and we can detect the verification automatically.
           </p>
-          <p style="margin-bottom: 10px; font-size: 13px; color: #6b7280;">
-            Keep this page open. We can detect when your email becomes verified.
-          </p>
-          <p style="font-size: 13px; color: #6b7280;">
-            If you already verified your email, return here and press Login again.
+
+          <p style="
+            margin: 0 auto;
+            max-width: 430px;
+            color: #94a3b8;
+            font-size: 13px;
+          ">
+            Already verified? Return here and press <strong style="color:#e5f9fb;">Login</strong> again.
           </p>
         </div>
       `,
+      background: "#0f2428",
+      color: "#ffffff",
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: "Wait here",
@@ -279,7 +391,10 @@ function Login() {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#008e9b",
       denyButtonColor: "#0ea5e9",
-      cancelButtonColor: "#6b7280",
+      cancelButtonColor: "#64748b",
+      customClass: {
+        popup: "rounded-[2rem]",
+      },
     });
 
     if (result.isConfirmed) {
@@ -336,7 +451,7 @@ function Login() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
@@ -390,7 +505,7 @@ function Login() {
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500"
                   required
                 />
               </div>
