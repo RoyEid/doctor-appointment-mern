@@ -64,24 +64,24 @@ function AdminAppointments() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading all appointments..." fullScreen />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
       <div className="mx-auto mb-8 max-w-3xl text-center">
-        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Admin Area
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
           All Appointments
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
           Review appointment activity across the platform. Approval actions are
           handled by the assigned doctors.
         </p>
@@ -89,8 +89,8 @@ function AdminAppointments() {
 
       <div className="mx-auto max-w-3xl space-y-4">
         {appointments.length === 0 ? (
-          <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
-            <p className="text-base font-medium text-gray-500 sm:text-lg">
+          <div className="rounded-[2rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
+            <p className="text-base font-medium text-gray-500 sm:text-lg dark:text-slate-400">
               No appointments found across the platform.
             </p>
           </div>
@@ -101,7 +101,7 @@ function AdminAppointments() {
             return (
               <div
                 key={app._id}
-                className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
+                className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
               >
                 <div className="p-4 sm:p-5">
                   <div className="flex min-w-0 gap-3">
@@ -127,7 +127,7 @@ function AdminAppointments() {
                         )}
                       </div>
 
-                      <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500">
+                      <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-400">
                         {app.reason || "No reason provided"}
                       </p>
 
@@ -160,7 +160,7 @@ function AdminAppointments() {
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-xs font-medium text-gray-500">
+                  <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-xs font-medium text-gray-500 dark:text-slate-400">
                     Review only. Approval actions are handled by assigned
                     doctors.
                   </div>

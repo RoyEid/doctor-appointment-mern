@@ -113,7 +113,7 @@ function AdminDashboard() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading admin dashboard..." fullScreen />
       </main>
     );
@@ -147,17 +147,17 @@ function AdminDashboard() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
       <div className="mx-auto mb-8 max-w-4xl text-center">
-        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Admin Area
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
           Admin Dashboard
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
           Monitor appointment activity and track platform status at a glance.
         </p>
       </div>
@@ -166,7 +166,7 @@ function AdminDashboard() {
         {cards.map((card) => (
           <div
             key={card.label}
-            className="rounded-[1.5rem] border border-gray-100 bg-white p-6 text-center shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
+            className="rounded-[1.5rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-6 text-center shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
           >
             <div
               className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${card.bg}`}

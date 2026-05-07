@@ -22,10 +22,13 @@ import RoleBasedRoute from "./components/RoleBasedRoute.jsx";
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTheme } from "./context/ThemeContext";
 
 function App() {
+  const { theme } = useTheme();
+
   return (
-    <>
+    <div className="min-h-screen bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
       <Navbar />
 
       <Routes>
@@ -131,9 +134,9 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="colored"
+        theme={theme === "dark" ? "dark" : "colored"}
       />
-    </>
+    </div>
   );
 }
 

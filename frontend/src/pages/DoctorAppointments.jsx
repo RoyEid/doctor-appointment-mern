@@ -303,38 +303,38 @@ function DoctorAppointments() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading your doctor appointments..." fullScreen />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
       <div className="mx-auto mb-8 max-w-4xl text-center">
-        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Doctor Area
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
           Doctor Schedule
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
           View your daily schedule, patient bookings, and available 30-minute
           slots.
         </p>
       </div>
 
-      <section className="mx-auto mb-8 max-w-6xl rounded-[2rem] border border-white bg-white/95 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-6">
+      <section className="mx-auto mb-8 max-w-6xl rounded-[2rem] border border-white bg-white/95 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#1f3a40] dark:bg-[#0f2428]/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.4)] sm:p-6">
         <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b]">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
               <CalendarDays size={14} />
               Daily Calendar
             </div>
 
-            <h3 className="text-2xl font-black text-gray-900">
+            <h3 className="text-2xl font-black text-gray-900 dark:text-white">
               {new Date(selectedDate).toLocaleDateString("en-US", {
                 weekday: "long",
                 month: "long",
@@ -343,7 +343,7 @@ function DoctorAppointments() {
               })}
             </h3>
 
-            <p className="mt-1 text-sm font-medium text-gray-500">
+            <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-400">
               Teal = available. White card = booked patient appointment.
             </p>
           </div>
@@ -354,7 +354,7 @@ function DoctorAppointments() {
               value={selectedDate}
               min={today}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-700 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-200 focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:focus:bg-[#071416]"
             />
 
             <button
@@ -369,34 +369,34 @@ function DoctorAppointments() {
         </div>
 
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-3xl bg-[#e8fbfd] p-4 text-center">
+          <div className="rounded-3xl bg-[#e8fbfd] p-4 text-center dark:bg-[#46daea]/15">
             <p className="text-2xl font-black text-[#008e9b]">
               {availableScheduleCount}
             </p>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
               Available
             </p>
           </div>
 
-          <div className="rounded-3xl bg-gray-100 p-4 text-center">
-            <p className="text-2xl font-black text-gray-800">
+          <div className="rounded-3xl bg-gray-100 p-4 text-center dark:bg-[#1f3a40]">
+            <p className="text-2xl font-black text-gray-800 dark:text-white">
               {activeScheduleCount}
             </p>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
               Booked
             </p>
           </div>
 
-          <div className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm sm:col-span-1">
-            <p className="text-2xl font-black text-gray-900">30 min</p>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">
+          <div className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm dark:bg-[#0f2428] sm:col-span-1">
+            <p className="text-2xl font-black text-gray-900 dark:text-white">30 min</p>
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
               Slot duration
             </p>
           </div>
         </div>
 
         {scheduleLoading ? (
-          <div className="flex min-h-[280px] items-center justify-center rounded-3xl bg-gray-50">
+          <div className="flex min-h-[280px] items-center justify-center rounded-3xl bg-gray-50 dark:bg-[#071416]">
             <div className="text-center">
               <Loader2
                 size={34}
@@ -410,8 +410,8 @@ function DoctorAppointments() {
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {scheduleSlots.length === 0 ? (
-              <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <p className="text-sm font-medium text-gray-500">
+              <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-gray-50 dark:border-[#1f3a40] dark:bg-[#071416] p-8 text-center">
+                <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
                   No schedule slots found for this date.
                 </p>
               </div>
@@ -451,7 +451,7 @@ function DoctorAppointments() {
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-black text-gray-900">
+                        <div className="flex items-center gap-2 text-sm font-black text-gray-900 dark:text-white">
                           <UserRound size={16} className="text-[#008e9b]" />
                           {appointment?.user?.name || "Unknown Patient"}
                         </div>
@@ -463,8 +463,8 @@ function DoctorAppointments() {
                           </div>
                         )}
 
-                        <p className="line-clamp-2 text-sm font-medium text-gray-500">
-                          <span className="font-black text-gray-700">
+                        <p className="line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-400">
+                          <span className="font-black text-gray-700 dark:text-slate-200">
                             Reason:
                           </span>{" "}
                           {appointment?.reason || "No reason provided"}
@@ -481,19 +481,19 @@ function DoctorAppointments() {
 
       <section className="mx-auto max-w-4xl">
         <div className="mb-5 text-center">
-          <h3 className="text-2xl font-black text-gray-900">
+          <h3 className="text-2xl font-black text-gray-900 dark:text-white">
             Appointment Requests
           </h3>
 
-          <p className="mt-1 text-sm font-medium text-gray-500">
+          <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-400">
             Approve, reject, or propose a new available time.
           </p>
         </div>
 
         <div className="space-y-4">
           {appointments.length === 0 ? (
-            <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
-              <p className="text-base font-medium text-gray-500 sm:text-lg">
+            <div className="rounded-[2rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
+              <p className="text-base font-medium text-gray-500 sm:text-lg dark:text-slate-400">
                 No appointments assigned to you.
               </p>
             </div>
@@ -505,7 +505,7 @@ function DoctorAppointments() {
               return (
                 <div
                   key={app._id}
-                  className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
+                  className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
                 >
                   <div className="p-4 sm:p-5">
                     <div className="flex min-w-0 gap-4">
@@ -516,12 +516,12 @@ function DoctorAppointments() {
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
-                            <h3 className="text-base font-black leading-tight text-gray-900 sm:text-lg">
+                            <h3 className="text-base font-black leading-tight text-gray-900 sm:text-lg dark:text-white">
                               {app.user?.name || "Unknown Patient"}
                             </h3>
 
-                            <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500">
-                              <span className="font-black text-gray-700">
+                            <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-400">
+                              <span className="font-black text-gray-700 dark:text-slate-200">
                                 Reason:
                               </span>{" "}
                               {app.reason || "No reason provided"}
@@ -574,7 +574,7 @@ function DoctorAppointments() {
                         </div>
 
                         {editingId === app._id ? (
-                          <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                          <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-[#1f3a40] dark:bg-[#071416]/70">
                             <div className="mb-3">
                               <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-gray-500">
                                 New Date
@@ -587,7 +587,7 @@ function DoctorAppointments() {
                                 onChange={(e) =>
                                   handleRescheduleDateChange(e.target.value)
                                 }
-                                className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-[#008e9b]"
+                                className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-200"
                               />
                             </div>
 
@@ -597,14 +597,14 @@ function DoctorAppointments() {
                               </label>
 
                               {rescheduleSlotsLoading ? (
-                                <div className="flex items-center justify-center rounded-2xl bg-white p-5">
+                                <div className="flex items-center justify-center rounded-2xl bg-white p-5 dark:bg-[#0f2428]">
                                   <Loader2
                                     size={24}
                                     className="animate-spin text-[#008e9b]"
                                   />
                                 </div>
                               ) : rescheduleSlots.length === 0 ? (
-                                <div className="rounded-2xl bg-white p-4 text-center text-sm font-medium text-gray-500">
+                                <div className="rounded-2xl bg-white p-4 text-center text-sm font-medium text-gray-500 dark:text-slate-400">
                                   No slots found for this date.
                                 </div>
                               ) : (

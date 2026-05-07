@@ -3,29 +3,29 @@ import { LockKeyhole, ArrowRight } from "lucide-react";
 
 function AuthRequired() {
   return (
-    <main className="flex min-h-[75vh] items-center justify-center bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-10">
-      <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white bg-white/95 p-8 text-center shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+    <main className="flex min-h-[75vh] items-center justify-center bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-10 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
+      <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white bg-white/95 p-8 text-center shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#1f3a40] dark:bg-[#0f2428]/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.4)]">
         <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-[#008e9b] via-[#46daea] to-[#008e9b]" />
 
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm dark:bg-[#46daea]/15 dark:text-[#46daea]">
           <LockKeyhole size={32} />
         </div>
 
-        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Authentication Required
         </div>
 
-        <h2 className="text-2xl font-black text-gray-900">
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white">
           Please log in first
         </h2>
 
-        <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-relaxed text-gray-500">
+        <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-relaxed text-gray-500 dark:text-slate-400">
           You need to be logged in before you can continue to this page.
         </p>
 
         <Link
           to="/login"
-          className="group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl !bg-[#008e9b] px-6 py-4 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+          className="group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl !bg-[#008e9b] px-6 py-4 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl dark:!bg-[#46daea] dark:text-[#071416] dark:hover:!bg-[#7ee9f2]"
         >
           Go to Login
           <ArrowRight

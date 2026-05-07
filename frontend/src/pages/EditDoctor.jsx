@@ -132,17 +132,17 @@ function EditDoctor() {
 
   if (!user || user.role !== "admin") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4">
-        <div className="w-full max-w-md rounded-[2rem] border border-red-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4">
+        <div className="w-full max-w-md rounded-[2rem] border border-red-100 bg-white p-8 dark:border-red-900/30 dark:bg-[#0f2428] text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
             <AlertTriangle size={34} />
           </div>
 
-          <h2 className="mb-2 text-2xl font-black text-gray-900">
+          <h2 className="mb-2 text-2xl font-black text-gray-900 dark:text-white">
             Access Denied
           </h2>
 
-          <p className="font-medium text-gray-500">
+          <p className="font-medium text-gray-500 dark:text-slate-400">
             Only administrators can edit doctor profiles securely.
           </p>
         </div>
@@ -152,24 +152,24 @@ function EditDoctor() {
 
   if (pageLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading doctor profile..." fullScreen />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
       <div className="mx-auto mb-8 max-w-4xl text-center">
-        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Admin Area
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
           Edit Doctor
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
           Update the doctor profile, specialty, experience, description, and
           profile image.
         </p>
@@ -177,10 +177,10 @@ function EditDoctor() {
 
       <form
         onSubmit={handleSubmit}
-        className="mx-auto grid w-full max-w-5xl gap-8 overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl md:grid-cols-[0.8fr_1.4fr] md:p-8"
+        className="mx-auto grid w-full max-w-5xl gap-8 overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#1f3a40] dark:bg-[#0f2428]/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.4)] md:grid-cols-[0.8fr_1.4fr] md:p-8"
         encType="multipart/form-data"
       >
-        <section className="flex flex-col items-center justify-center rounded-[1.5rem] border border-gray-100 bg-gray-50 p-6 text-center">
+        <section className="flex flex-col items-center justify-center rounded-[1.5rem] border border-gray-100 bg-gray-50 p-6 dark:border-[#1f3a40] dark:bg-[#071416]/70 text-center">
           <div className="mb-5 h-36 w-36 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
             <img
               src={preview || "/img/doctors/avatar.png"}
@@ -209,7 +209,7 @@ function EditDoctor() {
             className="hidden"
           />
 
-          <p className="mt-4 text-sm font-medium text-gray-500">
+          <p className="mt-4 text-sm font-medium text-gray-500 dark:text-slate-400">
             Upload a new image only if you want to replace the current one.
           </p>
         </section>
@@ -222,7 +222,7 @@ function EditDoctor() {
           )}
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Name
             </label>
 
@@ -238,13 +238,13 @@ function EditDoctor() {
                 type="text"
                 name="name"
                 required
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Specialty
             </label>
 
@@ -260,13 +260,13 @@ function EditDoctor() {
                 type="text"
                 name="specialty"
                 required
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Experience Years
             </label>
 
@@ -282,13 +282,13 @@ function EditDoctor() {
                 type="number"
                 name="experienceYears"
                 required
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Description
             </label>
 
@@ -304,7 +304,7 @@ function EditDoctor() {
                 name="description"
                 required
                 rows={4}
-                className="w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
           </div>

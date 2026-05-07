@@ -5,13 +5,16 @@ import App from './App';
  import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ThemeProvider } from './context/ThemeContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   </GoogleOAuthProvider>

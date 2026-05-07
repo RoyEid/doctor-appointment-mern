@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --app-bg: #f7fcfd;
+  --app-text: #111827;
+  --app-card: #ffffff;
+  --app-border: #f3f4f6;
+}
+
+.dark {
+  --app-bg: #071416;
+  --app-text: #f1f5f9;
+  --app-card: #0f2428;
+  --app-border: #1f3a40;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -16,8 +30,9 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: "Roboto", "Outfit", Arial, sans-serif;
-  background: #f7fcfd;
-  color: #111827;
+  background: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Do NOT style all buttons globally.
@@ -38,7 +53,12 @@ input[type="password"]::-ms-clear {
   color: #111827;
 }
 
-/* Better scrollbar */
+.dark ::selection {
+  background: rgba(70, 218, 234, 0.25);
+  color: #f1f5f9;
+}
+
+/* Better scrollbar - Light mode */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -55,4 +75,28 @@ input[type="password"]::-ms-clear {
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #00b9c7, #006b77);
+}
+
+/* Better scrollbar - Dark mode */
+.dark ::-webkit-scrollbar-track {
+  background: #0b1d20;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #46daea, #008e9b);
+  border: 2px solid #0b1d20;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7ee9f2, #46daea);
+}
+
+/* SweetAlert2 Dark Mode */
+.dark .swal2-popup {
+  background: var(--app-card) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border) !important;
+}
+.dark .swal2-title, .dark .swal2-html-container {
+  color: var(--app-text) !important;
 }

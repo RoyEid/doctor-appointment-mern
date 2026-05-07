@@ -39,7 +39,7 @@ function RoleBasedRoute({ element, requiredRole }) {
             You do not have permission
           </h2>
 
-          <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-relaxed text-gray-500">
+          <p className="mx-auto mt-3 max-w-sm text-sm font-medium leading-relaxed text-gray-500 dark:text-slate-400">
             This page is only available for{" "}
             <span className="font-black text-gray-700">{roles.join(", ")}</span>{" "}
             accounts.

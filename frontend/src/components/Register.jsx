@@ -166,32 +166,32 @@ function Register() {
   );
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
       <section className="relative z-10 flex w-full max-w-md items-center">
         <form
           onSubmit={handleSubmit}
-          className="relative w-full overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8"
+          className="relative w-full overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#1f3a40] dark:bg-[#0f2428]/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.4)] sm:p-8"
         >
           <div className="absolute left-8 right-8 top-0 h-1 rounded-b-full bg-gradient-to-r from-[#008e9b] via-[#46daea] to-[#008e9b]" />
 
           <div className="mb-7 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-[#e8fbfd] text-[#008e9b] shadow-sm dark:bg-[#46daea]/15 dark:text-[#46daea]">
               <User size={28} />
             </div>
 
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
               <Sparkles size={14} />
               Join MediCare
             </div>
 
-            <h2 className="text-3xl font-black text-gray-900">
+            <h2 className="text-3xl font-black text-gray-900 dark:text-white">
               Create Account
             </h2>
 
-            <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500">
+            <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500 dark:text-slate-400">
               Create your account to book and manage healthcare appointments.
             </p>
           </div>
@@ -210,7 +210,7 @@ function Register() {
 
           <div className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
                 Full Name
               </label>
 
@@ -226,14 +226,14 @@ function Register() {
                   placeholder="John Doe"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
                 Email Address
               </label>
 
@@ -249,14 +249,14 @@ function Register() {
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
                 Password
               </label>
 
@@ -272,7 +272,7 @@ function Register() {
                   placeholder="••••••••"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416]"
                   required
                 />
 
@@ -292,7 +292,7 @@ function Register() {
               </p>
 
               {form.password && (
-                <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="mt-4 rounded-3xl border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-4 shadow-sm">
                   <div className="mb-3 flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
                       Security Check
@@ -346,7 +346,7 @@ function Register() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-bold text-gray-700">
+              <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
                 Confirm Password
               </label>
 
@@ -362,7 +362,7 @@ function Register() {
                   placeholder="••••••••"
                   value={form.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 ${
+                  className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416] ${
                     form.confirmPassword === ""
                       ? "border-gray-200 focus:ring-[#008e9b]"
                       : passwordsMatch
@@ -429,17 +429,17 @@ function Register() {
 
           <div className="relative my-7">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-gray-200 dark:border-[#1f3a40]" />
             </div>
 
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+              <span className="bg-white px-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 dark:bg-[#0f2428] dark:text-slate-500">
                 Or join with
               </span>
             </div>
           </div>
 
-          <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3">
+          <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-[#1f3a40] dark:bg-[#071416]/70">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => setError("Google Registration Failed")}
@@ -449,7 +449,7 @@ function Register() {
             />
           </div>
 
-          <p className="mt-6 text-center text-sm font-medium text-gray-600">
+          <p className="mt-6 text-center text-sm font-medium text-gray-600 dark:text-slate-400">
             Already have an account?{" "}
             <Link
               to="/login"

@@ -209,35 +209,35 @@ function DoctorProfile() {
 
   if (pageLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading your doctor profile..." fullScreen />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
       <div className="mx-auto mb-8 max-w-2xl text-center">
-        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Doctor Area
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
           Doctor Profile
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
           Update your profile information, profile image, and account security.
         </p>
       </div>
 
-      <div className="mx-auto max-w-2xl overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8">
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#1f3a40] dark:bg-[#0f2428]/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.4)] sm:p-8">
         <form
           className="space-y-5"
           onSubmit={handleSubmit}
           encType="multipart/form-data"
         >
-          <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5">
+          <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5 dark:border-[#1f3a40] dark:bg-[#071416]/70">
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
               <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
                 <img
@@ -253,7 +253,7 @@ function DoctorProfile() {
                   Profile Image
                 </div>
 
-                <p className="mb-3 text-sm font-medium text-gray-500">
+                <p className="mb-3 text-sm font-medium text-gray-500 dark:text-slate-400">
                   Upload a clear professional image for your doctor profile.
                 </p>
 
@@ -268,7 +268,7 @@ function DoctorProfile() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Name
             </label>
 
@@ -283,14 +283,14 @@ function DoctorProfile() {
                 value={form.name}
                 onChange={handleChange}
                 type="text"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Email
             </label>
 
@@ -305,19 +305,19 @@ function DoctorProfile() {
                 value={form.email}
                 onChange={handleChange}
                 type="email"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
                 required
               />
             </div>
           </div>
 
-          <div className="mt-7 border-t border-gray-100 pt-7">
+          <div className="mt-7 border-t border-gray-100 dark:border-[#1f3a40] pt-7">
             <div className="mb-5">
-              <h3 className="text-xl font-black text-gray-900">
+              <h3 className="text-xl font-black text-gray-900 dark:text-white">
                 Account Security
               </h3>
 
-              <p className="mt-1 text-sm font-medium text-gray-500">
+              <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-400">
                 Leave the password fields empty if you do not want to change
                 your password.
               </p>
@@ -325,7 +325,7 @@ function DoctorProfile() {
 
             <div className="space-y-5">
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
                   New Password
                 </label>
 
@@ -357,7 +357,7 @@ function DoctorProfile() {
                 </div>
 
                 {form.password && (
-                  <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+                  <div className="mt-4 rounded-3xl border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-4 shadow-sm">
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
                         Security Check
@@ -411,7 +411,7 @@ function DoctorProfile() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-gray-700">
+                <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
                   Confirm New Password
                 </label>
 

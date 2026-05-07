@@ -391,24 +391,24 @@ function AddAppointment() {
 
   if (doctorsLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Preparing appointment form..." fullScreen />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
       <div className="mx-auto mb-8 max-w-3xl text-center">
-        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+        <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Appointment Request
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
           Book an Appointment
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
           Choose your doctor and date, then select one available 30-minute time
           slot.
         </p>
@@ -416,11 +416,11 @@ function AddAppointment() {
 
       <form
         onSubmit={handleSubmit}
-        className="mx-auto grid w-full max-w-5xl gap-6 overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8 lg:grid-cols-[0.9fr_1.1fr]"
+        className="mx-auto grid w-full max-w-5xl gap-6 overflow-hidden rounded-[2rem] border border-white bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#1f3a40] dark:bg-[#0f2428]/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.4)] sm:p-8 lg:grid-cols-[0.9fr_1.1fr]"
       >
         <section className="space-y-5">
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Doctor
             </label>
 
@@ -435,7 +435,7 @@ function AddAppointment() {
                 value={form.doctor}
                 onChange={handleChange}
                 required
-                className="w-full appearance-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full appearance-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               >
                 <option value="">Select doctor</option>
                 {doctors.map((doc) => (
@@ -448,8 +448,8 @@ function AddAppointment() {
           </div>
 
           {selectedDoctor && (
-            <div className="rounded-3xl border border-[#008e9b]/10 bg-[#f4fbfc] p-4">
-              <p className="text-sm font-black text-gray-900">
+            <div className="rounded-3xl border border-[#008e9b]/10 bg-[#f4fbfc] p-4 dark:bg-[#46daea]/10">
+              <p className="text-sm font-black text-gray-900 dark:text-white">
                 {selectedDoctor.name}
               </p>
 
@@ -457,14 +457,14 @@ function AddAppointment() {
                 {selectedDoctor.specialty}
               </p>
 
-              <p className="mt-1 text-xs font-medium text-gray-500">
+              <p className="mt-1 text-xs font-medium text-gray-500 dark:text-slate-400">
                 {selectedDoctor.experienceYears} years of experience
               </p>
             </div>
           )}
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Date
             </label>
 
@@ -481,7 +481,7 @@ function AddAppointment() {
                 onChange={handleChange}
                 min={getTodayInLebanon()}
                 required
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
             </div>
 
@@ -491,7 +491,7 @@ function AddAppointment() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700">
+            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
               Reason
             </label>
 
@@ -506,14 +506,14 @@ function AddAppointment() {
                 value={form.reason}
                 onChange={handleChange}
                 required
-                className="h-36 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="h-36 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
                 placeholder="Describe your reason for the appointment..."
               />
             </div>
           </div>
         </section>
 
-        <section className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-4 sm:p-5">
+        <section className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-4 dark:border-[#1f3a40] dark:bg-[#071416]/70 sm:p-5">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b] shadow-sm">
@@ -521,27 +521,27 @@ function AddAppointment() {
                 30-minute slots
               </div>
 
-              <h3 className="text-xl font-black text-gray-900">
+              <h3 className="text-xl font-black text-gray-900 dark:text-white">
                 Available Times
               </h3>
 
-              <p className="mt-1 text-sm font-medium text-gray-500">
+              <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-400">
                 Teal slots are available. Gray slots are unavailable.
               </p>
             </div>
 
             {form.doctor && form.date && !slotsLoading && (
               <div className="flex flex-wrap gap-2 text-xs font-black">
-                <span className="rounded-full bg-[#008e9b] px-3 py-1 text-white">
+                <span className="rounded-full bg-[#008e9b] px-3 py-1 text-white dark:bg-[#46daea]/20 dark:text-[#46daea]">
                   {availableCount} available
                 </span>
 
-                <span className="rounded-full bg-gray-200 px-3 py-1 text-gray-500">
+                <span className="rounded-full bg-gray-200 px-3 py-1 text-gray-500 dark:bg-[#1f3a40] dark:text-slate-400">
                   {bookedCount} booked
                 </span>
 
                 {pastCount > 0 && (
-                  <span className="rounded-full bg-red-50 px-3 py-1 text-red-500">
+                  <span className="rounded-full bg-red-50 px-3 py-1 text-red-500 dark:bg-red-500/10 dark:text-red-400">
                     {pastCount} passed
                   </span>
                 )}
@@ -550,8 +550,8 @@ function AddAppointment() {
           </div>
 
           {!form.doctor || !form.date ? (
-            <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white p-6 text-center">
-              <p className="max-w-xs text-sm font-medium text-gray-500">
+            <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-6 text-center">
+              <p className="max-w-xs text-sm font-medium text-gray-500 dark:text-slate-400">
                 Select a doctor and date to see the available appointment times.
               </p>
             </div>
@@ -568,8 +568,8 @@ function AddAppointment() {
               </div>
             </div>
           ) : availabilitySlots.length === 0 ? (
-            <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white p-6 text-center">
-              <p className="max-w-xs text-sm font-medium text-gray-500">
+            <div className="flex min-h-[240px] items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-6 text-center">
+              <p className="max-w-xs text-sm font-medium text-gray-500 dark:text-slate-400">
                 No slots are available for this doctor on this date.
               </p>
             </div>
@@ -603,11 +603,11 @@ function AddAppointment() {
                       className={`rounded-2xl border px-4 py-3 text-sm font-black transition-all ${
                         slot.available
                           ? isSelected
-                            ? "!bg-[#008e9b] text-white shadow-lg ring-2 ring-[#46daea]"
-                            : "!bg-white text-[#008e9b] border-[#008e9b]/20 hover:-translate-y-0.5 hover:!bg-[#e8fbfd] hover:shadow-md"
+                            ? "!bg-[#008e9b] text-white shadow-lg ring-2 ring-[#46daea] dark:!bg-[#46daea] dark:text-[#071416]"
+                            : "!bg-white text-[#008e9b] border-[#008e9b]/20 hover:-translate-y-0.5 hover:!bg-[#e8fbfd] hover:shadow-md dark:!bg-[#0f2428] dark:text-[#46daea] dark:border-[#46daea]/20 dark:hover:!bg-[#46daea]/10"
                           : isPast
-                            ? "cursor-not-allowed border-red-100 !bg-red-50 text-red-300 opacity-80"
-                            : "cursor-not-allowed border-gray-200 !bg-gray-200 text-gray-400 opacity-70"
+                            ? "cursor-not-allowed border-red-100 !bg-red-50 text-red-300 opacity-80 dark:border-red-900/30 dark:!bg-red-500/10 dark:text-red-400"
+                            : "cursor-not-allowed border-gray-200 !bg-gray-200 text-gray-400 opacity-70 dark:border-[#1f3a40] dark:!bg-[#1f3a40] dark:text-slate-500"
                       }`}
                       title={
                         slot.available
@@ -631,7 +631,7 @@ function AddAppointment() {
             </>
           )}
 
-          <div className="mt-5 rounded-3xl border border-white bg-white p-4">
+          <div className="mt-5 rounded-3xl border border-white bg-white p-4 dark:border-[#1f3a40] dark:bg-[#0f2428]">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-gray-400">
               Selected appointment
             </p>
@@ -639,14 +639,14 @@ function AddAppointment() {
             <div className="mt-3 space-y-1 text-sm font-semibold text-gray-600">
               <p>
                 Doctor:{" "}
-                <span className="font-black text-gray-900">
+                <span className="font-black text-gray-900 dark:text-white">
                   {selectedDoctor?.name || "Not selected"}
                 </span>
               </p>
 
               <p>
                 Date:{" "}
-                <span className="font-black text-gray-900">
+                <span className="font-black text-gray-900 dark:text-white">
                   {form.date || "Not selected"}
                 </span>
               </p>
@@ -660,7 +660,7 @@ function AddAppointment() {
 
               <p>
                 Duration:{" "}
-                <span className="font-black text-gray-900">30 minutes</span>
+                <span className="font-black text-gray-900 dark:text-white">30 minutes</span>
               </p>
             </div>
           </div>

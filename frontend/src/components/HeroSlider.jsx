@@ -56,7 +56,7 @@ function HeroSlider() {
             className="h-full w-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/55 to-[#008e9b]/35" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/55 to-[#008e9b]/35 dark:from-black/85 dark:via-black/70 dark:to-[#008e9b]/25" />
 
           <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl text-center text-white">
@@ -128,7 +128,7 @@ function HeroSlider() {
       </div>
 
       {/* Bottom fade */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 h-28 bg-gradient-to-t from-[#f4fbfc] to-transparent" />
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 h-28 bg-gradient-to-t from-[#f4fbfc] to-transparent dark:from-[#071416]" />
     </section>
   );
 }

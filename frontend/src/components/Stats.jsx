@@ -144,19 +144,19 @@ function Stats() {
   return (
     <section
       ref={sectionRef}
-      className="border-y border-gray-100 bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16"
+      className="border-y border-gray-100 bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16 dark:border-[#1f3a40] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
     >
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b]">
+          <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
             Our Impact
           </div>
 
-          <h2 className="text-3xl font-black text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
             Trusted Healthcare Numbers
           </h2>
 
-          <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500">
+          <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
             A quick look at our medical team, departments, and healthcare
             achievements.
           </p>
@@ -165,26 +165,26 @@ function Stats() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((item, index) => (
             <div
-              className="group flex cursor-pointer flex-col items-center justify-center space-y-4 rounded-[1.5rem] border border-gray-100 bg-white p-8 text-center shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#008e9b] hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]"
+              className="group flex cursor-pointer flex-col items-center justify-center space-y-4 rounded-[1.5rem] border border-gray-100 bg-white p-8 text-center shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#008e9b] hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)] dark:border-[#1f3a40] dark:bg-[#0f2428] dark:shadow-[0_14px_35px_rgba(0,0,0,0.25)] dark:hover:bg-[#008e9b] dark:hover:shadow-[0_24px_60px_rgba(0,0,0,0.4)]"
               key={index}
             >
-              <div className="inline-block rounded-full bg-[#e8fbfd] p-4 text-[#008e9b] shadow-sm transition-colors duration-300 group-hover:bg-white/15 group-hover:text-white">
+              <div className="inline-block rounded-full bg-[#e8fbfd] p-4 text-[#008e9b] shadow-sm transition-colors duration-300 group-hover:bg-white/15 group-hover:text-white dark:bg-[#46daea]/15 dark:text-[#46daea] dark:group-hover:bg-white/15 dark:group-hover:text-white">
                 {item.icon}
               </div>
 
               <div>
-                <span className="flex min-h-[48px] items-center justify-center text-4xl font-black text-gray-900 transition-colors duration-300 group-hover:text-white">
+                <span className="flex min-h-[48px] items-center justify-center text-4xl font-black text-gray-900 transition-colors duration-300 group-hover:text-white dark:text-white">
                   {loading && item.isDynamic ? (
                     <Loader2
                       size={32}
-                      className="animate-spin text-[#008e9b] group-hover:text-white"
+                      className="animate-spin text-[#008e9b] group-hover:text-white dark:text-[#46daea]"
                     />
                   ) : (
                     item.count
                   )}
                 </span>
 
-                <p className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-gray-500 transition-colors duration-300 group-hover:text-blue-100">
+                <p className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-gray-500 transition-colors duration-300 group-hover:text-blue-100 dark:text-slate-400">
                   {item.label}
                 </p>
               </div>
