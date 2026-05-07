@@ -264,6 +264,10 @@ const sendAppointmentEmail = async ({
         }
     });
 };
+
+/**
+ * Appointments count endpoint
+ */
 router.get("/count", async (req, res) => {
     try {
         const count = await Appointment.countDocuments();
@@ -278,6 +282,126 @@ router.get("/count", async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Could not count appointments.",
+        });
+    }
+});
+
+/**
+ * Admin analytics endpoint
+ */
+router.get("/admin/analytics", auth("admin"), async (req, res) => {
+    try {
+        const appointments = await Appointment.find()
+            .populate("doctor", "name specialty image")
+            .populate("user", "name email")
+            .sort({ createdAt: -1 });
+
+        const totalAppointments = appointments.length;
+
+        const statusCounts = {
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            cancelled: 0,
+            completed: 0,
+            reschedule_pending: 0,
+        };
+
+        appointments.forEach((appointment) => {
+            if (statusCounts[appointment.status] !== undefined) {
+                statusCounts[appointment.status] += 1;
+            }
+        });
+
+        const appointmentsByStatus = Object.entries(statusCounts).map(
+            ([status, count]) => ({
+                name:
+                    status === "reschedule_pending"
+                        ? "Reschedule"
+                        : status.charAt(0).toUpperCase() + status.slice(1),
+                value: count,
+                status,
+            })
+        );
+
+        const monthMap = {};
+
+        appointments.forEach((appointment) => {
+            const date = new Date(appointment.date || appointment.createdAt);
+
+            const month = date.toLocaleString("en-US", {
+                month: "short",
+                year: "numeric",
+            });
+
+            if (!monthMap[month]) {
+                monthMap[month] = 0;
+            }
+
+            monthMap[month] += 1;
+        });
+
+        const appointmentsByMonth = Object.entries(monthMap)
+            .map(([month, count]) => ({
+                month,
+                appointments: count,
+            }))
+            .slice(-6);
+
+        const doctorMap = {};
+
+        appointments.forEach((appointment) => {
+            const doctorName = appointment.doctor?.name || "Unknown Doctor";
+
+            if (!doctorMap[doctorName]) {
+                doctorMap[doctorName] = {
+                    name: doctorName,
+                    specialty: appointment.doctor?.specialty || "N/A",
+                    appointments: 0,
+                };
+            }
+
+            doctorMap[doctorName].appointments += 1;
+        });
+
+        const topDoctors = Object.values(doctorMap)
+            .sort((a, b) => b.appointments - a.appointments)
+            .slice(0, 5);
+
+        const recentAppointments = appointments.slice(0, 6).map((appointment) => ({
+            id: appointment._id,
+            patientName: appointment.user?.name || "Unknown Patient",
+            patientEmail: appointment.user?.email || "N/A",
+            doctorName: appointment.doctor?.name || "Unknown Doctor",
+            specialty: appointment.doctor?.specialty || "N/A",
+            date: appointment.date,
+            time: appointment.time,
+            status: appointment.status,
+            createdAt: appointment.createdAt,
+        }));
+
+        return res.json({
+            success: true,
+            summary: {
+                totalAppointments,
+                pending: statusCounts.pending,
+                approved: statusCounts.approved,
+                rejected: statusCounts.rejected,
+                cancelled: statusCounts.cancelled,
+                completed: statusCounts.completed,
+                reschedulePending: statusCounts.reschedule_pending,
+            },
+            appointmentsByStatus,
+            appointmentsByMonth,
+            topDoctors,
+            recentAppointments,
+        });
+    } catch (error) {
+        console.error("ADMIN_ANALYTICS_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not load admin analytics.",
         });
     }
 });

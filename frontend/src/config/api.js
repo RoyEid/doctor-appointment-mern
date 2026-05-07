@@ -107,6 +107,7 @@ export const API_ENDPOINTS = {
 
   // Admin
   adminDashboard: "/admin/dashboard",
+  adminAnalytics: "/appointments/admin/analytics",
 };
 
 export const apiConfig = {
@@ -201,6 +202,7 @@ export const apiConfig = {
 
   // Admin
   adminDashboard: fullUrl("/admin/dashboard"),
+  adminAnalytics: fullUrl("/appointments/admin/analytics"),
 
   // Images
   getDoctorImage: (image) => {
