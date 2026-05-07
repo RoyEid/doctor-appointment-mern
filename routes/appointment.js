@@ -289,12 +289,19 @@ router.get("/count", async (req, res) => {
 /**
  * Admin analytics endpoint
  */
+/**
+ * Admin analytics endpoint
+ */
 router.get("/admin/analytics", auth("admin"), async (req, res) => {
     try {
         const appointments = await Appointment.find()
             .populate("doctor", "name specialty image")
             .populate("user", "name email")
             .sort({ createdAt: -1 });
+
+        const doctors = await Doctor.find()
+            .select("name specialty image")
+            .sort({ name: 1 });
 
         const totalAppointments = appointments.length;
 
@@ -324,51 +331,73 @@ router.get("/admin/analytics", auth("admin"), async (req, res) => {
             })
         );
 
+        const monthKeys = [];
         const monthMap = {};
 
-        appointments.forEach((appointment) => {
-            const date = new Date(appointment.date || appointment.createdAt);
+        const now = new Date();
 
-            const month = date.toLocaleString("en-US", {
+        for (let i = 5; i >= 0; i -= 1) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+            const key = `${date.getFullYear()}-${String(
+                date.getMonth() + 1
+            ).padStart(2, "0")}`;
+
+            const label = date.toLocaleString("en-US", {
                 month: "short",
                 year: "numeric",
             });
 
-            if (!monthMap[month]) {
-                monthMap[month] = 0;
-            }
-
-            monthMap[month] += 1;
-        });
-
-        const appointmentsByMonth = Object.entries(monthMap)
-            .map(([month, count]) => ({
-                month,
-                appointments: count,
-            }))
-            .slice(-6);
-
-        const doctorMap = {};
+            monthKeys.push({ key, label });
+            monthMap[key] = 0;
+        }
 
         appointments.forEach((appointment) => {
-            const doctorName = appointment.doctor?.name || "Unknown Doctor";
+            const date = new Date(appointment.date || appointment.createdAt);
 
-            if (!doctorMap[doctorName]) {
-                doctorMap[doctorName] = {
-                    name: doctorName,
-                    specialty: appointment.doctor?.specialty || "N/A",
-                    appointments: 0,
-                };
+            if (Number.isNaN(date.getTime())) return;
+
+            const key = `${date.getFullYear()}-${String(
+                date.getMonth() + 1
+            ).padStart(2, "0")}`;
+
+            if (monthMap[key] !== undefined) {
+                monthMap[key] += 1;
             }
-
-            doctorMap[doctorName].appointments += 1;
         });
 
-        const topDoctors = Object.values(doctorMap)
-            .sort((a, b) => b.appointments - a.appointments)
-            .slice(0, 5);
+        const appointmentsByMonth = monthKeys.map((item) => ({
+            month: item.label,
+            appointments: monthMap[item.key] || 0,
+        }));
 
-        const recentAppointments = appointments.slice(0, 6).map((appointment) => ({
+        const appointmentCountByDoctorId = {};
+
+        appointments.forEach((appointment) => {
+            const doctorId = appointment.doctor?._id?.toString();
+
+            if (!doctorId) return;
+
+            if (!appointmentCountByDoctorId[doctorId]) {
+                appointmentCountByDoctorId[doctorId] = 0;
+            }
+
+            appointmentCountByDoctorId[doctorId] += 1;
+        });
+
+        const topDoctors = doctors
+            .map((doctor) => ({
+                id: doctor._id,
+                name: doctor.name || "Unknown Doctor",
+                specialty: doctor.specialty || "N/A",
+                image: doctor.image || null,
+                appointments:
+                    appointmentCountByDoctorId[doctor._id.toString()] || 0,
+            }))
+            .sort((a, b) => b.appointments - a.appointments)
+            .slice(0, 8);
+
+        const recentAppointments = appointments.slice(0, 8).map((appointment) => ({
             id: appointment._id,
             patientName: appointment.user?.name || "Unknown Patient",
             patientEmail: appointment.user?.email || "N/A",
@@ -390,6 +419,7 @@ router.get("/admin/analytics", auth("admin"), async (req, res) => {
                 cancelled: statusCounts.cancelled,
                 completed: statusCounts.completed,
                 reschedulePending: statusCounts.reschedule_pending,
+                totalDoctors: doctors.length,
             },
             appointmentsByStatus,
             appointmentsByMonth,
