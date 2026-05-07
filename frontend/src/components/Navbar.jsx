@@ -115,7 +115,9 @@ function Navbar() {
       type="button"
       onClick={toggleTheme}
       className="inline-flex h-10 w-10 items-center justify-center rounded-2xl !border-none !bg-gray-50 text-gray-500 !shadow-none transition-all duration-300 hover:!bg-[#e8fbfd] hover:text-[#008e9b] dark:!bg-[#1f3a40] dark:text-[#46daea] dark:hover:!bg-[#46daea]/20 dark:hover:text-[#7ee9f2]"
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={
+        theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+      }
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
       {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
@@ -132,8 +134,8 @@ function Navbar() {
         >
           <img
             alt="MediCare Logo"
-            className="h-16 w-auto object-contain md:h-20"
-            src="/frontend/src/img/logo.png"
+            className="h-12 w-auto rounded-xl object-contain sm:h-14 md:h-16"
+            src="/logo.png"
           />
         </Link>
 
