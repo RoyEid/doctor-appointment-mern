@@ -133,7 +133,7 @@ function Navbar() {
           <img
             alt="MediCare Logo"
             className="h-16 w-auto object-contain md:h-20"
-            src="/logo.png"
+            src="/frontend/src/img/logo.png"
           />
         </Link>
 
