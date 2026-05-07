@@ -33,7 +33,7 @@ function Login() {
       Swal.fire({
         icon: "success",
         title: "Email verified",
-        text: "Your email has been verified successfully. Go back to the browser where you were logging in and continue.",
+        text: "Your email has been verified successfully. You can now return to the login page and continue.",
         confirmButtonColor: "#008e9b",
       });
     }
@@ -118,13 +118,13 @@ function Login() {
       html: `
         <div style="text-align: left; line-height: 1.6;">
           <p style="margin-bottom: 10px;">
-            Open Gmail on your phone and press <strong>Verify Email</strong>.
+            Open your email inbox and press <strong>Verify Email</strong>.
           </p>
           <p style="margin-bottom: 10px;">
-            Keep this laptop page open. We will detect the verification automatically.
+            Keep this page open. We will check automatically.
           </p>
           <p style="font-size: 13px; color: #6b7280;">
-            After it is verified, you can continue from this laptop.
+            If you already verified your email, return here and press Login again.
           </p>
         </div>
       `,
@@ -155,7 +155,7 @@ function Login() {
             html: `
               <p>Your email is verified now.</p>
               <p style="margin-top: 10px; color: #6b7280;">
-                Click the login button again to continue from this laptop.
+                Press Login again to continue.
               </p>
             `,
             confirmButtonText: "Continue",
@@ -175,7 +175,7 @@ function Login() {
             html: `
               <p>We could not detect verification yet.</p>
               <p style="margin-top: 10px; color: #6b7280;">
-                If you already clicked the email link, press Login again.
+                If you already clicked the verification link, return here and press Login again.
               </p>
             `,
             confirmButtonColor: "#008e9b",
@@ -224,10 +224,10 @@ function Login() {
           html: `
             <p>${resendData.message || "A new verification email was sent."}</p>
             <p style="margin-top: 10px; color: #6b7280;">
-              Open Gmail on your phone, press Verify Email, then return to this laptop.
+              Open your email inbox, press Verify Email, then return here.
             </p>
           `,
-          confirmButtonText: "Wait on this laptop",
+          confirmButtonText: "Wait here",
           confirmButtonColor: "#008e9b",
         }).then(() => {
           startWaitingForVerification();
@@ -262,10 +262,13 @@ function Login() {
             Your account exists, but your email is not verified yet.
           </p>
           <p style="margin-bottom: 10px;">
-            You can open Gmail on your phone and press <strong>Verify Email</strong>.
+            Open your email inbox and press <strong>Verify Email</strong>.
+          </p>
+          <p style="margin-bottom: 10px; font-size: 13px; color: #6b7280;">
+            Keep this page open. We can detect when your email becomes verified.
           </p>
           <p style="font-size: 13px; color: #6b7280;">
-            Keep this laptop page open. We can wait here and detect when your email becomes verified.
+            If you already verified your email, return here and press Login again.
           </p>
         </div>
       `,
