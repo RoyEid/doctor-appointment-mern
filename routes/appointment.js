@@ -264,6 +264,23 @@ const sendAppointmentEmail = async ({
         }
     });
 };
+router.get("/count", async (req, res) => {
+    try {
+        const count = await Appointment.countDocuments();
+
+        return res.json({
+            success: true,
+            count,
+        });
+    } catch (error) {
+        console.error("APPOINTMENTS_COUNT_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not count appointments.",
+        });
+    }
+});
 
 /**
  * Availability endpoint

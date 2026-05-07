@@ -47,6 +47,8 @@ export const API_ENDPOINTS = {
   // Users
   getProfile: "/user/profile",
   updateProfile: "/user/profile",
+  getPatientsCount: "/user/patients/count",
+  patientsCount: "/user/patients/count",
 
   // Doctors
   getAllDoctors: "/doctors/allDoctors",
@@ -78,6 +80,8 @@ export const API_ENDPOINTS = {
   getMyAppointments: "/appointments/myAppointments",
   getDoctorAppointments: "/appointments/doctor/appointments",
   getDoctorSchedule: (date) => `/appointments/doctor/schedule?date=${date}`,
+  getAppointmentsCount: "/appointments/count",
+  appointmentsCount: "/appointments/count",
 
   deleteAppointmentLegacy: (id) => `/appointments/deleteAppointment/${id}`,
   deleteAppointment: (id) => `/appointments/${id}`,
@@ -125,6 +129,8 @@ export const apiConfig = {
   // Users
   getProfile: fullUrl("/user/profile"),
   updateProfile: fullUrl("/user/profile"),
+  getPatientsCount: fullUrl("/user/patients/count"),
+  patientsCount: fullUrl("/user/patients/count"),
 
   // Doctors
   getAllDoctors: fullUrl("/doctors/allDoctors"),
@@ -164,6 +170,9 @@ export const apiConfig = {
   getDoctorAppointments: fullUrl("/appointments/doctor/appointments"),
   getDoctorSchedule: (date) =>
     fullUrl(`/appointments/doctor/schedule?date=${date}`),
+
+  getAppointmentsCount: fullUrl("/appointments/count"),
+  appointmentsCount: fullUrl("/appointments/count"),
 
   deleteAppointmentLegacy: (id) =>
     fullUrl(`/appointments/deleteAppointment/${id}`),

@@ -145,6 +145,27 @@ const sendPasswordResetEmail = async (user) => {
 };
 
 /**
+ * Patients count endpoint
+ */
+router.get("/patients/count", async (req, res) => {
+    try {
+        const count = await User.countDocuments({ role: "user" });
+
+        return res.json({
+            success: true,
+            count,
+        });
+    } catch (error) {
+        console.error("PATIENTS_COUNT_ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Could not count patients.",
+        });
+    }
+});
+
+/**
  * Google login/register
  */
 router.post("/google", async (req, res) => {
