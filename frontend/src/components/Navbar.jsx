@@ -114,13 +114,39 @@ function Navbar() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="inline-flex h-10 w-10 items-center justify-center rounded-2xl !border-none !bg-gray-50 text-gray-500 !shadow-none transition-all duration-300 hover:!bg-[#e8fbfd] hover:text-[#008e9b] dark:!bg-[#1f3a40] dark:text-[#46daea] dark:hover:!bg-[#46daea]/20 dark:hover:text-[#7ee9f2]"
+      className={`relative inline-flex h-11 w-[78px] items-center rounded-full !border !p-1 !shadow-none transition-all duration-500 ${
+        theme === "dark"
+          ? "!border-[#46daea]/25 !bg-[#071416] shadow-[0_0_20px_rgba(70,218,234,0.16)]"
+          : "!border-yellow-200 !bg-gradient-to-r !from-yellow-100 !to-cyan-100"
+      }`}
       aria-label={
         theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
       }
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+      <span className="absolute left-3 text-yellow-500 transition-opacity duration-300">
+        <Sun
+          size={15}
+          className={theme === "dark" ? "opacity-40" : "opacity-100"}
+        />
+      </span>
+
+      <span className="absolute right-3 text-[#46daea] transition-opacity duration-300">
+        <Moon
+          size={15}
+          className={theme === "dark" ? "opacity-100" : "opacity-40"}
+        />
+      </span>
+
+      <span
+        className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-500 ${
+          theme === "dark"
+            ? "translate-x-[34px] bg-[#0f2428] text-[#46daea] shadow-[0_0_18px_rgba(70,218,234,0.45)]"
+            : "translate-x-0 bg-white text-yellow-500 shadow-[0_8px_20px_rgba(15,23,42,0.16)]"
+        }`}
+      >
+        {theme === "dark" ? <Moon size={17} /> : <Sun size={17} />}
+      </span>
     </button>
   );
 
