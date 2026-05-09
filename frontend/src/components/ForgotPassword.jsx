@@ -139,7 +139,7 @@ function ForgotPassword() {
       setWatchEmail(cleanEmail);
       setMessage(
         data.message ||
-          "Password reset email sent. Open it on your phone and create a new password. This laptop will detect it automatically.",
+          "Password reset email sent. Open the link on any device, create a new password, and this page will detect it automatically.",
       );
 
       startWaitingForPasswordReset({
@@ -164,7 +164,7 @@ function ForgotPassword() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
@@ -190,8 +190,8 @@ function ForgotPassword() {
             </h2>
 
             <p className="mt-2 text-sm font-medium leading-relaxed text-gray-500 dark:text-slate-400">
-              Enter your email. Open the reset link on your phone, and this
-              laptop will detect when the password is changed.
+              Enter your email. Open the reset link on any device, create a new
+              password, and keep this page open.
             </p>
           </div>
 
@@ -209,7 +209,7 @@ function ForgotPassword() {
 
           {waiting && (
             <div className="mb-5 rounded-2xl border border-[#008e9b]/15 bg-[#eefbfc] px-4 py-4 text-center dark:border-[#46daea]/15 dark:bg-[#46daea]/10">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#008e9b] shadow-sm">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#008e9b] shadow-sm dark:bg-[#071416] dark:text-[#46daea]">
                 <Loader2 className="animate-spin" size={24} />
               </div>
 
@@ -217,13 +217,13 @@ function ForgotPassword() {
                 Waiting for password reset
               </p>
 
-              <p className="mt-1 text-xs font-medium leading-relaxed text-gray-500">
-                Open Gmail on your phone, reset the password, and keep this
-                laptop page open.
+              <p className="mt-1 text-xs font-medium leading-relaxed text-gray-500 dark:text-slate-400">
+                Open the reset link on your phone or any device, reset the
+                password, and keep this page open.
               </p>
 
               {watchEmail && (
-                <p className="mt-2 text-xs font-bold text-[#008e9b]">
+                <p className="mt-2 text-xs font-bold text-[#008e9b] dark:text-[#46daea]">
                   Watching: {watchEmail}
                 </p>
               )}
@@ -238,7 +238,7 @@ function ForgotPassword() {
             <div className="relative">
               <Mail
                 size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] dark:text-[#46daea]"
               />
 
               <input
@@ -247,7 +247,7 @@ function ForgotPassword() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={waiting}
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all disabled:cursor-not-allowed disabled:opacity-70 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all disabled:cursor-not-allowed disabled:opacity-70 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416]"
                 required
               />
             </div>
@@ -258,7 +258,7 @@ function ForgotPassword() {
             className={`group mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
               loading || waiting
                 ? "cursor-not-allowed !bg-gray-400"
-                : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+                : "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl dark:!bg-[#46daea] dark:text-[#071416] dark:hover:!bg-[#7ee9f2]"
             }`}
           >
             {loading
@@ -278,28 +278,28 @@ function ForgotPassword() {
             <button
               type="button"
               onClick={stopWaiting}
-              className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-gray-200 !bg-white dark:border-[#1f3a40] dark:!bg-[#071416] dark:text-slate-300 px-5 py-3 text-sm font-black text-gray-600 !shadow-none transition-all hover:!bg-gray-50 hover:text-[#008e9b]"
+              className="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-gray-200 !bg-white px-5 py-3 text-sm font-black text-gray-600 !shadow-none transition-all hover:!bg-gray-50 hover:text-[#008e9b] dark:border-[#1f3a40] dark:!bg-[#071416] dark:text-slate-300 dark:hover:!bg-[#0f2428] dark:hover:text-[#46daea]"
             >
               Stop waiting
             </button>
           )}
 
-          <div className="mt-5 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
+          <div className="mt-5 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-[#1f3a40] dark:bg-[#071416]">
             <div className="flex items-start gap-3">
               <CheckCircle2
                 size={18}
-                className="mt-0.5 flex-shrink-0 text-[#008e9b]"
+                className="mt-0.5 flex-shrink-0 text-[#008e9b] dark:text-[#46daea]"
               />
-              <p className="text-xs font-medium leading-relaxed text-gray-500">
-                After password reset is detected, this laptop will automatically
-                send you back to the login page.
+              <p className="text-xs font-medium leading-relaxed text-gray-500 dark:text-slate-400">
+                After your password reset is detected, this page will
+                automatically send you back to the login page.
               </p>
             </div>
           </div>
 
           <Link
             to="/login"
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-black text-gray-600 transition-all hover:bg-gray-50 hover:text-[#008e9b]"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-black text-gray-600 transition-all hover:bg-gray-50 hover:text-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-300 dark:hover:bg-[#0f2428] dark:hover:text-[#46daea]"
           >
             <ArrowLeft size={18} />
             Back to Login
