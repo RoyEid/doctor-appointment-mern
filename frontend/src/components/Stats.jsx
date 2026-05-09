@@ -152,9 +152,12 @@ function Stats() {
   return (
     <section
       ref={sectionRef}
-      className="border-y border-gray-100 bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16 dark:border-[#1f3a40] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
+      className="relative overflow-hidden border-y border-gray-100 bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16 dark:border-[#1f3a40] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
     >
-      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+      <div className="pointer-events-none absolute left-[-160px] top-[-160px] h-80 w-80 rounded-full bg-[#46daea]/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-180px] right-[-160px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
+
+      <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
         <div className="mb-12 text-center">
           <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
             Our Impact
@@ -173,28 +176,32 @@ function Stats() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((item) => (
             <div
-              className="group flex flex-col items-center justify-center space-y-4 rounded-[1.5rem] border border-gray-100 bg-white p-8 text-center shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#008e9b] hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)] dark:border-[#1f3a40] dark:bg-[#0f2428] dark:shadow-[0_14px_35px_rgba(0,0,0,0.25)] dark:hover:bg-[#008e9b] dark:hover:shadow-[0_24px_60px_rgba(0,0,0,0.4)]"
+              className="group relative flex overflow-hidden rounded-[1.5rem] p-[1px] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(0,142,155,0.22)] dark:hover:shadow-[0_24px_60px_rgba(70,218,234,0.18)]"
               key={item.label}
             >
-              <div className="inline-block rounded-full bg-[#e8fbfd] p-4 text-[#008e9b] shadow-sm transition-colors duration-300 group-hover:bg-white/15 group-hover:text-white dark:bg-[#46daea]/15 dark:text-[#46daea] dark:group-hover:bg-white/15 dark:group-hover:text-white">
-                {item.icon}
-              </div>
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,#46daea,transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:animate-[statBorderMove_1.8s_linear_infinite]" />
 
-              <div>
-                <span className="flex min-h-[48px] items-center justify-center text-4xl font-black text-gray-900 transition-colors duration-300 group-hover:text-white dark:text-white">
-                  {loading ? (
-                    <Loader2
-                      size={32}
-                      className="animate-spin text-[#008e9b] group-hover:text-white dark:text-[#46daea]"
-                    />
-                  ) : (
-                    item.count
-                  )}
-                </span>
+              <div className="relative flex w-full flex-col items-center justify-center space-y-4 rounded-[1.45rem] border border-gray-100 bg-white p-8 text-center shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition-all duration-300 group-hover:bg-[#008e9b] dark:border-[#1f3a40] dark:bg-[#0f2428] dark:shadow-[0_14px_35px_rgba(0,0,0,0.25)] dark:group-hover:bg-[#008e9b]">
+                <div className="inline-block rounded-full bg-[#e8fbfd] p-4 text-[#008e9b] shadow-sm transition-colors duration-300 group-hover:bg-white/15 group-hover:text-white dark:bg-[#46daea]/15 dark:text-[#46daea] dark:group-hover:bg-white/15 dark:group-hover:text-white">
+                  {item.icon}
+                </div>
 
-                <p className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-gray-500 transition-colors duration-300 group-hover:text-blue-100 dark:text-slate-400">
-                  {item.label}
-                </p>
+                <div>
+                  <span className="flex min-h-[48px] items-center justify-center text-4xl font-black text-gray-900 transition-colors duration-300 group-hover:text-white dark:text-white">
+                    {loading ? (
+                      <Loader2
+                        size={32}
+                        className="animate-spin text-[#008e9b] group-hover:text-white dark:text-[#46daea]"
+                      />
+                    ) : (
+                      item.count
+                    )}
+                  </span>
+
+                  <p className="mt-1 text-sm font-black uppercase tracking-[0.14em] text-gray-500 transition-colors duration-300 group-hover:text-blue-100 dark:text-slate-400">
+                    {item.label}
+                  </p>
+                </div>
               </div>
             </div>
           ))}

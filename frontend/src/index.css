@@ -32,7 +32,9 @@ body {
   font-family: "Roboto", "Outfit", Arial, sans-serif;
   background: var(--app-bg);
   color: var(--app-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* Do NOT style all buttons globally.
@@ -97,6 +99,19 @@ input[type="password"]::-ms-clear {
   color: var(--app-text) !important;
   border: 1px solid var(--app-border) !important;
 }
-.dark .swal2-title, .dark .swal2-html-container {
+
+.dark .swal2-title,
+.dark .swal2-html-container {
   color: var(--app-text) !important;
+}
+
+/* Stats card moving border animation */
+@keyframes statBorderMove {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
