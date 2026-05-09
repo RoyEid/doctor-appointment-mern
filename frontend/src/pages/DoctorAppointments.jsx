@@ -272,12 +272,27 @@ function DoctorAppointments() {
   };
 
   const getStatusBadge = (status) => {
-    if (status === "approved") return "bg-green-100 text-green-700";
-    if (status === "rejected") return "bg-red-100 text-red-700";
-    if (status === "cancelled") return "bg-gray-100 text-gray-500";
-    if (status === "completed") return "bg-purple-100 text-purple-700";
-    if (status === "reschedule_pending") return "bg-blue-100 text-blue-700";
-    return "bg-yellow-100 text-yellow-700";
+    if (status === "approved") {
+      return "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-300";
+    }
+
+    if (status === "rejected") {
+      return "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-300";
+    }
+
+    if (status === "cancelled") {
+      return "bg-gray-100 text-gray-500 dark:bg-slate-500/10 dark:text-slate-300";
+    }
+
+    if (status === "completed") {
+      return "bg-[#e8fbfd] text-[#008e9b] dark:bg-[#46daea]/10 dark:text-[#46daea]";
+    }
+
+    if (status === "reschedule_pending") {
+      return "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300";
+    }
+
+    return "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-300";
   };
 
   const formatDate = (date) => {
@@ -303,20 +318,20 @@ function DoctorAppointments() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading your doctor appointments..." fullScreen />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6">
       <div className="mx-auto mb-8 max-w-4xl text-center">
         <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Doctor Area
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
+        <h2 className="text-3xl font-black text-gray-900 dark:text-white sm:text-4xl">
           Doctor Schedule
         </h2>
 
@@ -344,7 +359,8 @@ function DoctorAppointments() {
             </h3>
 
             <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-400">
-              Teal = available. White card = booked patient appointment.
+              Cyan card = available slot. Dark card = booked patient
+              appointment.
             </p>
           </div>
 
@@ -354,13 +370,13 @@ function DoctorAppointments() {
               value={selectedDate}
               min={today}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-700 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-200 focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:focus:bg-[#071416]"
+              className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-700 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-200 dark:focus:bg-[#071416] dark:focus:ring-[#46daea]"
             />
 
             <button
               type="button"
               onClick={fetchDoctorSchedule}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl !bg-[#008e9b] px-5 py-3 text-sm font-black text-white shadow-md transition hover:-translate-y-0.5 hover:!bg-[#007a85]"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl !bg-[#008e9b] px-5 py-3 text-sm font-black text-white shadow-md transition hover:-translate-y-0.5 hover:!bg-[#007a85] dark:!bg-[#46daea] dark:text-[#071416] dark:hover:!bg-[#7ee9f2]"
             >
               <RefreshCw size={16} />
               Refresh
@@ -370,7 +386,7 @@ function DoctorAppointments() {
 
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-3xl bg-[#e8fbfd] p-4 text-center dark:bg-[#46daea]/15">
-            <p className="text-2xl font-black text-[#008e9b]">
+            <p className="text-2xl font-black text-[#008e9b] dark:text-[#46daea]">
               {availableScheduleCount}
             </p>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
@@ -387,8 +403,10 @@ function DoctorAppointments() {
             </p>
           </div>
 
-          <div className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm dark:bg-[#0f2428] sm:col-span-1">
-            <p className="text-2xl font-black text-gray-900 dark:text-white">30 min</p>
+          <div className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm dark:bg-[#071416] sm:col-span-1">
+            <p className="text-2xl font-black text-gray-900 dark:text-white">
+              30 min
+            </p>
             <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
               Slot duration
             </p>
@@ -400,9 +418,9 @@ function DoctorAppointments() {
             <div className="text-center">
               <Loader2
                 size={34}
-                className="mx-auto animate-spin text-[#008e9b]"
+                className="mx-auto animate-spin text-[#008e9b] dark:text-[#46daea]"
               />
-              <p className="mt-3 text-sm font-bold text-gray-500">
+              <p className="mt-3 text-sm font-bold text-gray-500 dark:text-slate-400">
                 Loading schedule...
               </p>
             </div>
@@ -410,7 +428,7 @@ function DoctorAppointments() {
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {scheduleSlots.length === 0 ? (
-              <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-gray-50 dark:border-[#1f3a40] dark:bg-[#071416] p-8 text-center">
+              <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center dark:border-[#1f3a40] dark:bg-[#071416]">
                 <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
                   No schedule slots found for this date.
                 </p>
@@ -422,22 +440,35 @@ function DoctorAppointments() {
                 return (
                   <div
                     key={slot.time}
-                    className={`rounded-3xl border p-4 transition-all ${
+                    className={`rounded-3xl border p-4 transition-all hover:-translate-y-0.5 ${
                       slot.available
-                        ? "border-[#008e9b]/15 bg-[#e8fbfd]"
-                        : "border-gray-100 bg-white shadow-sm"
+                        ? "border-[#008e9b]/15 bg-[#e8fbfd] shadow-sm hover:shadow-[0_16px_40px_rgba(0,142,155,0.12)] dark:border-[#46daea]/20 dark:bg-[#071416] dark:hover:border-[#46daea]/35 dark:hover:shadow-[0_16px_40px_rgba(70,218,234,0.10)]"
+                        : "border-gray-100 bg-white shadow-sm hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] dark:border-[#1f3a40] dark:bg-[#0b1d20] dark:hover:border-[#46daea]/20 dark:hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)]"
                     }`}
                   >
-                    <div className="mb-3 flex items-center justify-between">
-                      <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black text-gray-700 shadow-sm">
-                        <Clock size={14} />
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black shadow-sm ${
+                          slot.available
+                            ? "bg-white text-gray-700 dark:bg-[#0f2428] dark:text-slate-200"
+                            : "bg-gray-50 text-gray-700 dark:bg-[#071416] dark:text-slate-200"
+                        }`}
+                      >
+                        <Clock
+                          size={14}
+                          className={
+                            slot.available
+                              ? "text-[#008e9b] dark:text-[#46daea]"
+                              : "text-gray-500 dark:text-slate-400"
+                          }
+                        />
                         {slot.time}
                       </div>
 
                       <span
                         className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wide ${
                           slot.available
-                            ? "bg-[#008e9b] text-white"
+                            ? "bg-[#008e9b] text-white dark:bg-[#46daea] dark:text-[#071416]"
                             : getStatusBadge(appointment?.status || "booked")
                         }`}
                       >
@@ -446,18 +477,21 @@ function DoctorAppointments() {
                     </div>
 
                     {slot.available ? (
-                      <p className="text-sm font-semibold text-[#008e9b]">
+                      <p className="text-sm font-semibold text-[#008e9b] dark:text-[#46daea]">
                         This time is free.
                       </p>
                     ) : (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm font-black text-gray-900 dark:text-white">
-                          <UserRound size={16} className="text-[#008e9b]" />
+                          <UserRound
+                            size={16}
+                            className="text-[#008e9b] dark:text-[#46daea]"
+                          />
                           {appointment?.user?.name || "Unknown Patient"}
                         </div>
 
                         {appointment?.user?.email && (
-                          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
                             <Mail size={14} />
                             {appointment.user.email}
                           </div>
@@ -492,8 +526,8 @@ function DoctorAppointments() {
 
         <div className="space-y-4">
           {appointments.length === 0 ? (
-            <div className="rounded-[2rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
-              <p className="text-base font-medium text-gray-500 sm:text-lg dark:text-slate-400">
+            <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:border-[#1f3a40] dark:bg-[#0f2428] sm:p-10">
+              <p className="text-base font-medium text-gray-500 dark:text-slate-400 sm:text-lg">
                 No appointments assigned to you.
               </p>
             </div>
@@ -505,18 +539,18 @@ function DoctorAppointments() {
               return (
                 <div
                   key={app._id}
-                  className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]"
+                  className="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 bg-white shadow-[0_14px_35px_rgba(15,23,42,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)] dark:border-[#1f3a40] dark:bg-[#0f2428] dark:shadow-[0_14px_35px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_22px_50px_rgba(0,0,0,0.35)]"
                 >
                   <div className="p-4 sm:p-5">
                     <div className="flex min-w-0 gap-4">
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#008e9b] text-xl font-black uppercase text-white shadow-md">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#008e9b] text-xl font-black uppercase text-white shadow-md dark:bg-[#46daea] dark:text-[#071416]">
                         {app.user?.name ? app.user.name.charAt(0) : "P"}
                       </div>
 
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
-                            <h3 className="text-base font-black leading-tight text-gray-900 sm:text-lg dark:text-white">
+                            <h3 className="text-base font-black leading-tight text-gray-900 dark:text-white sm:text-lg">
                               {app.user?.name || "Unknown Patient"}
                             </h3>
 
@@ -563,7 +597,7 @@ function DoctorAppointments() {
                           )}
                         </div>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-medium text-gray-400 sm:text-sm">
+                        <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-medium text-gray-400 dark:text-slate-500 sm:text-sm">
                           <span>📅</span>
                           <span>{formatDate(app.date)}</span>
 
@@ -576,7 +610,7 @@ function DoctorAppointments() {
                         {editingId === app._id ? (
                           <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-[#1f3a40] dark:bg-[#071416]/70">
                             <div className="mb-3">
-                              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-gray-500">
+                              <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-gray-500 dark:text-slate-400">
                                 New Date
                               </label>
 
@@ -587,12 +621,12 @@ function DoctorAppointments() {
                                 onChange={(e) =>
                                   handleRescheduleDateChange(e.target.value)
                                 }
-                                className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm font-semibold text-gray-700 outline-none focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-200"
+                                className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm font-semibold text-gray-700 outline-none transition-all focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-200 dark:focus:ring-[#46daea]"
                               />
                             </div>
 
                             <div>
-                              <label className="mb-2 block text-xs font-black uppercase tracking-wide text-gray-500">
+                              <label className="mb-2 block text-xs font-black uppercase tracking-wide text-gray-500 dark:text-slate-400">
                                 Choose available time
                               </label>
 
@@ -600,11 +634,11 @@ function DoctorAppointments() {
                                 <div className="flex items-center justify-center rounded-2xl bg-white p-5 dark:bg-[#0f2428]">
                                   <Loader2
                                     size={24}
-                                    className="animate-spin text-[#008e9b]"
+                                    className="animate-spin text-[#008e9b] dark:text-[#46daea]"
                                   />
                                 </div>
                               ) : rescheduleSlots.length === 0 ? (
-                                <div className="rounded-2xl bg-white p-4 text-center text-sm font-medium text-gray-500 dark:text-slate-400">
+                                <div className="rounded-2xl bg-white p-4 text-center text-sm font-medium text-gray-500 dark:bg-[#0f2428] dark:text-slate-400">
                                   No slots found for this date.
                                 </div>
                               ) : (
@@ -627,9 +661,9 @@ function DoctorAppointments() {
                                         className={`rounded-xl border px-3 py-2 text-xs font-black transition ${
                                           slot.available
                                             ? isSelected
-                                              ? "!bg-[#008e9b] text-white ring-2 ring-[#46daea]"
-                                              : "!bg-white text-[#008e9b] hover:!bg-[#e8fbfd]"
-                                            : "cursor-not-allowed !bg-gray-200 text-gray-400 opacity-70"
+                                              ? "!bg-[#008e9b] text-white ring-2 ring-[#46daea] dark:!bg-[#46daea] dark:text-[#071416]"
+                                              : "!bg-white text-[#008e9b] hover:!bg-[#e8fbfd] dark:border-[#46daea]/20 dark:!bg-[#0f2428] dark:text-[#46daea] dark:hover:!bg-[#46daea]/10"
+                                            : "cursor-not-allowed !bg-gray-200 text-gray-400 opacity-70 dark:!bg-[#1f3a40] dark:text-slate-500"
                                         }`}
                                       >
                                         {slot.time}
@@ -654,7 +688,7 @@ function DoctorAppointments() {
                                   !rescheduleForm.date ||
                                   !rescheduleForm.time
                                     ? "cursor-not-allowed !bg-gray-400 opacity-70"
-                                    : "!bg-[#008e9b] hover:!bg-[#007a85]"
+                                    : "!bg-[#008e9b] hover:!bg-[#007a85] dark:!bg-[#46daea] dark:text-[#071416] dark:hover:!bg-[#7ee9f2]"
                                 }`}
                               >
                                 {isUpdating ? "Saving..." : "Send Request"}
@@ -667,7 +701,7 @@ function DoctorAppointments() {
                                   setRescheduleForm({ date: "", time: "" });
                                   setRescheduleSlots([]);
                                 }}
-                                className="rounded-xl border border-gray-200 !bg-white px-4 py-2 text-xs font-black text-gray-600 transition hover:!bg-gray-50"
+                                className="rounded-xl border border-gray-200 !bg-white px-4 py-2 text-xs font-black text-gray-600 transition hover:!bg-gray-50 dark:border-[#1f3a40] dark:!bg-[#0f2428] dark:text-slate-300 dark:hover:!bg-[#071416]"
                               >
                                 Cancel
                               </button>
@@ -677,7 +711,7 @@ function DoctorAppointments() {
                           <button
                             type="button"
                             onClick={() => startReschedule(app)}
-                            className="mt-4 rounded-xl border border-[#008e9b]/25 !bg-white px-4 py-2 text-xs font-black text-[#008e9b] shadow-sm transition hover:!bg-[#e8fbfd]"
+                            className="mt-4 rounded-xl border border-[#008e9b]/25 !bg-white px-4 py-2 text-xs font-black text-[#008e9b] shadow-sm transition hover:!bg-[#e8fbfd] dark:border-[#46daea]/25 dark:!bg-[#0f2428] dark:text-[#46daea] dark:hover:!bg-[#46daea]/10"
                           >
                             Reschedule
                           </button>
