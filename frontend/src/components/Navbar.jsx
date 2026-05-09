@@ -144,7 +144,7 @@ function Navbar() {
         className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-500 ${
           theme === "dark"
             ? "translate-x-[34px] bg-[#0f2428] text-[#46daea] shadow-[0_0_18px_rgba(70,218,234,0.45)]"
-            : "translate-x-0 bg-[#008e9b] text-white shadow-[0_8px_18px_rgba(0,142,155,0.32)]"
+            : "translate-x-0 bg-white text-yellow-500 shadow-[0_8px_18px_rgba(245,158,11,0.35)] ring-1 ring-yellow-200"
         }`}
       >
         {theme === "dark" ? <Moon size={17} /> : <Sun size={17} />}
