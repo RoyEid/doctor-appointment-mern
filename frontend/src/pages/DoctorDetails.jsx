@@ -25,7 +25,7 @@ function DoctorDetails() {
           ? data.filter(
               (doc) =>
                 doc?._id !== currentId &&
-                doc?.specialty?.toLowerCase() === specialty
+                doc?.specialty?.toLowerCase() === specialty,
             )
           : [];
 
@@ -65,7 +65,7 @@ function DoctorDetails() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading doctor details..." fullScreen />
       </main>
     );
@@ -73,8 +73,8 @@ function DoctorDetails() {
 
   if (error || !doctor) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8">
-        <div className="w-full max-w-md rounded-[2rem] border border-red-100 bg-white p-8 dark:border-red-900/30 dark:bg-[#0f2428] text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
+        <div className="w-full max-w-md rounded-[2rem] border border-red-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:border-red-900/30 dark:bg-[#0f2428]">
           <h2 className="text-2xl font-black text-gray-900 dark:text-white">
             Doctor Not Found
           </h2>
@@ -95,13 +95,13 @@ function DoctorDetails() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6 lg:px-8">
       <div className="mx-auto mb-8 max-w-5xl text-center">
         <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Doctor Profile
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
+        <h2 className="text-3xl font-black text-gray-900 dark:text-white sm:text-4xl">
           {doctor?.name}
         </h2>
 
@@ -112,9 +112,9 @@ function DoctorDetails() {
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-3">
         <section className="lg:col-span-2">
-          <div className="overflow-hidden rounded-[2rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-8 md:p-10">
+          <div className="overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition-colors dark:border-[#1f3a40] dark:bg-[#0f2428] dark:shadow-[0_20px_60px_rgba(0,0,0,0.28)] sm:p-8 md:p-10">
             <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
-              <div className="h-48 w-48 flex-shrink-0 overflow-hidden rounded-full border-4 border-[#e8fbfd] bg-gray-50 shadow-lg md:h-64 md:w-64 md:rounded-[2rem]">
+              <div className="h-48 w-48 flex-shrink-0 overflow-hidden rounded-full border-4 border-[#e8fbfd] bg-gray-50 shadow-lg dark:border-[#46daea]/20 dark:bg-[#071416] md:h-64 md:w-64 md:rounded-[2rem]">
                 <img
                   src={apiConfig.getDoctorImage(doctor?.image)}
                   alt={doctor?.name || "doctor"}
@@ -126,30 +126,30 @@ function DoctorDetails() {
               </div>
 
               <div className="flex-1 space-y-4 text-center md:text-left">
-                <h3 className="text-3xl font-black text-gray-900 md:text-4xl">
+                <h3 className="text-3xl font-black text-gray-900 dark:text-white md:text-4xl">
                   {doctor?.name}
                 </h3>
 
-                <div className="inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-sm font-black text-[#008e9b]">
+                <div className="inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-sm font-black text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
                   {doctor?.specialty}
                 </div>
 
-                <p className="text-base font-bold text-gray-600">
-                  <span className="mr-1 text-[#008e9b]">
+                <p className="text-base font-bold text-gray-600 dark:text-slate-300">
+                  <span className="mr-1 text-[#008e9b] dark:text-[#46daea]">
                     {doctor?.experienceYears}
                   </span>
                   Years of Experience
                 </p>
 
-                <div className="hidden h-px w-full bg-gray-100 md:block" />
+                <div className="hidden h-px w-full bg-gray-100 dark:bg-[#1f3a40] md:block" />
 
-                <p className="text-sm font-medium leading-relaxed text-gray-500 sm:text-base">
+                <p className="text-sm font-medium leading-relaxed text-gray-500 dark:text-slate-400 sm:text-base">
                   {doctor?.description || "No description available."}
                 </p>
 
                 <Link
                   to="/add-appointment"
-                  className="inline-flex items-center justify-center rounded-2xl bg-[#008e9b] px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#007a85] hover:shadow-xl"
+                  className="inline-flex items-center justify-center rounded-2xl bg-[#008e9b] px-6 py-3 text-sm font-black text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#007a85] hover:shadow-xl dark:bg-[#46daea] dark:text-[#071416] dark:hover:bg-[#7ee9f2]"
                 >
                   Book Appointment
                 </Link>
@@ -158,17 +158,20 @@ function DoctorDetails() {
           </div>
         </section>
 
-        <aside className="rounded-[2rem] border border-gray-100 bg-white/90 p-6 shadow dark:bg-[#0f2428]/90-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-8">
+        <aside className="rounded-[2rem] border border-gray-100 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-colors dark:border-[#1f3a40] dark:bg-[#0f2428]/95 dark:shadow-[0_20px_60px_rgba(0,0,0,0.3)] md:p-8">
           <h3 className="mb-6 text-2xl font-black text-gray-900 dark:text-white">
             Other{" "}
-            <span className="text-[#008e9b]">{doctor?.specialty}</span> Doctors
+            <span className="text-[#008e9b] dark:text-[#46daea]">
+              {doctor?.specialty}
+            </span>{" "}
+            Doctors
           </h3>
 
           <div className="space-y-4">
             {relatedDoctors.length > 0 ? (
               relatedDoctors.map((doc) => (
                 <Link
-                  className="group flex items-center rounded-2xl border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                  className="group flex items-center rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#46daea]/40 hover:shadow-md dark:border-[#1f3a40] dark:bg-[#071416] dark:hover:border-[#46daea]/40"
                   key={doc?._id}
                   to={`/doctor/${doc?._id}`}
                 >
@@ -182,7 +185,7 @@ function DoctorDetails() {
                   />
 
                   <div className="min-w-0">
-                    <h4 className="truncate font-black text-gray-900 transition-colors group-hover:text-[#008e9b]">
+                    <h4 className="truncate font-black text-gray-900 transition-colors group-hover:text-[#008e9b] dark:text-white dark:group-hover:text-[#46daea]">
                       {doc?.name}
                     </h4>
 
@@ -193,7 +196,7 @@ function DoctorDetails() {
                 </Link>
               ))
             ) : (
-              <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 dark:border-[#1f3a40] dark:bg-[#071416] p-6 text-center">
+              <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center transition-colors dark:border-[#1f3a40] dark:bg-[#071416]">
                 <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
                   No related doctors found.
                 </p>
