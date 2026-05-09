@@ -153,20 +153,25 @@ function Register() {
   const RuleItem = ({ valid, text }) => (
     <div
       className={`flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black transition-all duration-300 ${
-        valid ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-500"
+        valid
+          ? "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-300"
+          : "bg-gray-50 text-gray-500 dark:bg-[#071416] dark:text-slate-400"
       }`}
     >
       {valid ? (
         <Check size={14} className="stroke-[3px]" />
       ) : (
-        <Circle size={14} className="fill-gray-300 stroke-none" />
+        <Circle
+          size={14}
+          className="fill-gray-300 stroke-none dark:fill-slate-600"
+        />
       )}
       <span>{text}</span>
     </div>
   );
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute right-[-160px] top-[-120px] h-96 w-96 rounded-full bg-[#46daea]/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-140px] left-[-140px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
@@ -197,13 +202,13 @@ function Register() {
           </div>
 
           {error && (
-            <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">
+            <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mb-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-center text-sm font-semibold text-green-700">
+            <div className="mb-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-center text-sm font-semibold text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-300">
               {success}
             </div>
           )}
@@ -217,7 +222,7 @@ function Register() {
               <div className="relative">
                 <User
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] dark:text-[#46daea]"
                 />
 
                 <input
@@ -226,7 +231,7 @@ function Register() {
                   placeholder="John Doe"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416]"
                   required
                 />
               </div>
@@ -240,7 +245,7 @@ function Register() {
               <div className="relative">
                 <Mail
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] dark:text-[#46daea]"
                 />
 
                 <input
@@ -249,7 +254,7 @@ function Register() {
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416]"
                   required
                 />
               </div>
@@ -263,7 +268,7 @@ function Register() {
               <div className="relative">
                 <Lock
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] dark:text-[#46daea]"
                 />
 
                 <input
@@ -279,22 +284,22 @@ function Register() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b] dark:hover:!text-[#46daea]"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                 </button>
               </div>
 
-              <p className="mt-2 text-xs font-medium leading-relaxed text-gray-500">
+              <p className="mt-2 text-xs font-medium leading-relaxed text-gray-500 dark:text-slate-400">
                 Use at least 8 characters with uppercase, lowercase, and a
                 number.
               </p>
 
               {form.password && (
-                <div className="mt-4 rounded-3xl border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-4 shadow-sm">
+                <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm dark:border-[#1f3a40] dark:bg-[#0f2428]">
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 dark:text-slate-500">
                       Security Check
                     </span>
 
@@ -305,7 +310,7 @@ function Register() {
                           : strengthCount === 2
                             ? "text-yellow-600"
                             : strengthCount === 3
-                              ? "text-[#008e9b]"
+                              ? "text-[#008e9b] dark:text-[#46daea]"
                               : "text-green-600"
                       }`}
                     >
@@ -320,7 +325,7 @@ function Register() {
                         className={`h-2 rounded-full transition-all duration-500 ${
                           index <= strengthCount
                             ? getStrengthColor()
-                            : "bg-gray-200"
+                            : "bg-gray-200 dark:bg-[#1f3a40]"
                         }`}
                       />
                     ))}
@@ -353,7 +358,7 @@ function Register() {
               <div className="relative">
                 <Lock
                   size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] dark:text-[#46daea]"
                 />
 
                 <input
@@ -364,10 +369,10 @@ function Register() {
                   onChange={handleChange}
                   className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416] ${
                     form.confirmPassword === ""
-                      ? "border-gray-200 focus:ring-[#008e9b]"
+                      ? "border-gray-200 focus:ring-[#008e9b] dark:border-[#1f3a40]"
                       : passwordsMatch
-                        ? "border-green-200 focus:ring-green-500"
-                        : "border-red-200 focus:ring-red-500"
+                        ? "border-green-200 focus:ring-green-500 dark:border-green-500/40"
+                        : "border-red-200 focus:ring-red-500 dark:border-red-500/40"
                   }`}
                   required
                 />
@@ -375,7 +380,7 @@ function Register() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b] dark:hover:!text-[#46daea]"
                   aria-label={
                     showConfirmPassword ? "Hide password" : "Show password"
                   }
@@ -389,14 +394,14 @@ function Register() {
               </div>
 
               {form.confirmPassword !== "" && (
-                <div className="mt-2 ml-1 flex items-center gap-1.5">
+                <div className="ml-1 mt-2 flex items-center gap-1.5">
                   {passwordsMatch ? (
-                    <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-green-600">
+                    <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-green-600 dark:text-green-300">
                       <Check size={14} strokeWidth={3} />
                       Passwords match
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-red-500">
+                    <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-red-500 dark:text-red-300">
                       <X size={14} strokeWidth={3} />
                       Passwords do not match
                     </div>
@@ -410,7 +415,7 @@ function Register() {
             disabled={!isFormValid || loading}
             className={`mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
               isFormValid && !loading
-                ? "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+                ? "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl dark:!bg-[#46daea] dark:text-[#071416] dark:hover:!bg-[#7ee9f2]"
                 : "cursor-not-allowed !bg-gray-400 opacity-70"
             }`}
           >
@@ -439,13 +444,15 @@ function Register() {
             </div>
           </div>
 
-          <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-[#1f3a40] dark:bg-[#071416]/70">
+          <div className="mx-auto flex w-full max-w-[320px] justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => setError("Google Registration Failed")}
-              theme="filled_blue"
+              theme="outline"
               shape="pill"
-              width="100%"
+              size="large"
+              text="signup_with"
+              width="320"
             />
           </div>
 
@@ -453,7 +460,7 @@ function Register() {
             Already have an account?{" "}
             <Link
               to="/login"
-              className="font-black text-[#008e9b] hover:text-[#007a85] hover:underline"
+              className="font-black text-[#008e9b] hover:text-[#007a85] hover:underline dark:text-[#46daea] dark:hover:text-[#7ee9f2]"
             >
               Log in here
             </Link>

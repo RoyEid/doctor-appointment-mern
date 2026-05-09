@@ -604,13 +604,15 @@ function Login() {
             </div>
           </div>
 
-          <div className="flex justify-center rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-[#1f3a40] dark:bg-[#071416]/70">
+          <div className="mx-auto flex w-full max-w-[320px] justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => setError("Google Login Failed")}
-              theme="filled_blue"
+              theme="outline"
               shape="pill"
-              width="100%"
+              size="large"
+              text="continue_with"
+              width="320"
             />
           </div>
 
