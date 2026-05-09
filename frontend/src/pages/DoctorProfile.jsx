@@ -32,9 +32,17 @@ function DoctorProfile() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState("/img/doctors/avatar.png");
   const [pageLoading, setPageLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const getImagePreviewUrl = (imageValue) => {
+    if (!imageValue) return "/img/doctors/avatar.png";
+
+    const imageUrl = apiConfig.getDoctorImage(imageValue);
+
+    return `${imageUrl}${imageUrl.includes("?") ? "&" : "?"}v=${Date.now()}`;
+  };
 
   useEffect(() => {
     if (user && user.role !== "doctor") {
@@ -52,15 +60,22 @@ function DoctorProfile() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
+        const doctorData = data?.doctor || data?.user || data || {};
+
         setForm((prev) => ({
           ...prev,
-          name: data.name || user.name || "",
-          email: data.email || user.email || "",
+          name: doctorData.name || data?.name || user?.name || "",
+          email: doctorData.email || data?.email || user?.email || "",
         }));
 
-        if (data.image) {
-          setPreview(apiConfig.getDoctorImage(data.image));
-        }
+        const currentImage =
+          doctorData.image ||
+          data?.image ||
+          data?.doctor?.image ||
+          data?.user?.image ||
+          user?.image;
+
+        setPreview(getImagePreviewUrl(currentImage));
       } catch (error) {
         console.error("Error fetching profile:", error);
         toast.error("Failed to load doctor profile");
@@ -100,7 +115,7 @@ function DoctorProfile() {
     if (strengthCount === 2) return "bg-yellow-500";
     if (strengthCount === 3) return "bg-[#008e9b]";
     if (strengthCount === 4) return "bg-green-500";
-    return "bg-gray-200";
+    return "bg-gray-200 dark:bg-[#1f3a40]";
   };
 
   const passwordsMatch =
@@ -114,6 +129,15 @@ function DoctorProfile() {
     form.email.trim() !== "" &&
     isPasswordValid &&
     isConfirmValid;
+
+  const labelClass =
+    "mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-300";
+
+  const iconClass =
+    "absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] dark:text-[#46daea]";
+
+  const inputClass =
+    "w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416] dark:focus:ring-[#46daea]";
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -164,8 +188,20 @@ function DoctorProfile() {
         },
       });
 
-      if (data.user) {
-        localStorage.setItem("userData", JSON.stringify(data.user));
+      const updatedUser = data?.user || data?.doctor || null;
+
+      if (updatedUser) {
+        localStorage.setItem("userData", JSON.stringify(updatedUser));
+      }
+
+      const updatedImage =
+        data?.doctor?.image ||
+        data?.user?.image ||
+        data?.image ||
+        updatedUser?.image;
+
+      if (updatedImage) {
+        setPreview(getImagePreviewUrl(updatedImage));
       }
 
       toast.success(data.message || "Profile updated successfully");
@@ -177,9 +213,8 @@ function DoctorProfile() {
         image: null,
       }));
 
-      if (data.doctor && data.doctor.image) {
-        setPreview(apiConfig.getDoctorImage(data.doctor.image));
-      }
+      setShowPassword(false);
+      setShowConfirmPassword(false);
     } catch (error) {
       const message =
         error?.response?.data?.message || "Failed to update profile";
@@ -192,13 +227,18 @@ function DoctorProfile() {
   const RuleItem = ({ valid, text }) => (
     <div
       className={`flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-black transition-all duration-300 ${
-        valid ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-500"
+        valid
+          ? "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-300"
+          : "bg-gray-50 text-gray-500 dark:bg-[#071416] dark:text-slate-400"
       }`}
     >
       {valid ? (
         <Check size={14} className="stroke-[3px]" />
       ) : (
-        <Circle size={14} className="fill-gray-300 stroke-none" />
+        <Circle
+          size={14}
+          className="fill-gray-300 stroke-none dark:fill-slate-600"
+        />
       )}
 
       <span>{text}</span>
@@ -209,20 +249,20 @@ function DoctorProfile() {
 
   if (pageLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
+      <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]">
         <LoadingSpinner text="Loading your doctor profile..." fullScreen />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] px-4 py-8 sm:px-6">
+    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6">
       <div className="mx-auto mb-8 max-w-2xl text-center">
         <div className="mb-3 inline-flex rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
           Doctor Area
         </div>
 
-        <h2 className="text-3xl font-black text-gray-900 sm:text-4xl dark:text-white">
+        <h2 className="text-3xl font-black text-gray-900 dark:text-white sm:text-4xl">
           Doctor Profile
         </h2>
 
@@ -239,79 +279,73 @@ function DoctorProfile() {
         >
           <div className="rounded-[1.5rem] border border-gray-100 bg-gray-50 p-5 dark:border-[#1f3a40] dark:bg-[#071416]/70">
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
-              <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
+              <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg dark:border-[#46daea]/20 dark:bg-[#071416]">
                 <img
                   src={preview || "/img/doctors/avatar.png"}
                   alt="Doctor profile"
                   className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/img/doctors/avatar.png";
+                  }}
                 />
               </div>
 
               <div className="w-full flex-1 text-center sm:text-left">
-                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b] shadow-sm">
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-[#008e9b] shadow-sm dark:bg-[#0f2428] dark:text-[#46daea]">
                   <ImagePlus size={15} />
                   Profile Image
                 </div>
 
                 <p className="mb-3 text-sm font-medium text-gray-500 dark:text-slate-400">
-                  Upload a clear professional image for your doctor profile.
+                  Your current profile image appears here. Choose a new image
+                  only if you want to replace it.
                 </p>
 
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleChange}
-                  className="w-full cursor-pointer text-xs text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-cyan-50 file:px-4 file:py-2 file:text-xs file:font-bold file:text-cyan-700 hover:file:bg-cyan-100"
+                  className="w-full cursor-pointer text-xs text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-cyan-50 file:px-4 file:py-2 file:text-xs file:font-bold file:text-cyan-700 hover:file:bg-cyan-100 dark:text-slate-400 dark:file:bg-[#46daea]/15 dark:file:text-[#46daea] dark:hover:file:bg-[#46daea]/25"
                 />
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
-              Name
-            </label>
+            <label className={labelClass}>Name</label>
 
             <div className="relative">
-              <UserRound
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-              />
+              <UserRound size={18} className={iconClass} />
 
               <input
                 name="name"
                 value={form.name}
                 onChange={handleChange}
                 type="text"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className={inputClass}
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
-              Email
-            </label>
+            <label className={labelClass}>Email</label>
 
             <div className="relative">
-              <Mail
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-              />
+              <Mail size={18} className={iconClass} />
 
               <input
                 name="email"
                 value={form.email}
                 onChange={handleChange}
                 type="email"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                className={inputClass}
                 required
               />
             </div>
           </div>
 
-          <div className="mt-7 border-t border-gray-100 dark:border-[#1f3a40] pt-7">
+          <div className="mt-7 border-t border-gray-100 pt-7 dark:border-[#1f3a40]">
             <div className="mb-5">
               <h3 className="text-xl font-black text-gray-900 dark:text-white">
                 Account Security
@@ -325,15 +359,10 @@ function DoctorProfile() {
 
             <div className="space-y-5">
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
-                  New Password
-                </label>
+                <label className={labelClass}>New Password</label>
 
                 <div className="relative">
-                  <Lock
-                    size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-                  />
+                  <Lock size={18} className={iconClass} />
 
                   <input
                     name="password"
@@ -341,13 +370,13 @@ function DoctorProfile() {
                     onChange={handleChange}
                     type={showPassword ? "text" : "password"}
                     placeholder="Leave empty to keep current"
-                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
+                    className={`${inputClass} pr-12`}
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b] dark:hover:!text-[#46daea]"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -357,21 +386,21 @@ function DoctorProfile() {
                 </div>
 
                 {form.password && (
-                  <div className="mt-4 rounded-3xl border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-4 shadow-sm">
+                  <div className="mt-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm dark:border-[#1f3a40] dark:bg-[#071416]">
                     <div className="mb-3 flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400">
+                      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 dark:text-slate-500">
                         Security Check
                       </span>
 
                       <span
                         className={`text-xs font-black uppercase ${
                           strengthCount <= 1
-                            ? "text-red-500"
+                            ? "text-red-500 dark:text-red-300"
                             : strengthCount === 2
-                              ? "text-yellow-600"
+                              ? "text-yellow-600 dark:text-yellow-300"
                               : strengthCount === 3
-                                ? "text-[#008e9b]"
-                                : "text-green-600"
+                                ? "text-[#008e9b] dark:text-[#46daea]"
+                                : "text-green-600 dark:text-green-300"
                         }`}
                       >
                         Strength: {getStrengthLabel()}
@@ -385,7 +414,7 @@ function DoctorProfile() {
                           className={`h-2 rounded-full transition-all duration-500 ${
                             index <= strengthCount
                               ? getStrengthColor()
-                              : "bg-gray-200"
+                              : "bg-gray-200 dark:bg-[#1f3a40]"
                           }`}
                         />
                       ))}
@@ -411,15 +440,10 @@ function DoctorProfile() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
-                  Confirm New Password
-                </label>
+                <label className={labelClass}>Confirm New Password</label>
 
                 <div className="relative">
-                  <Lock
-                    size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
-                  />
+                  <Lock size={18} className={iconClass} />
 
                   <input
                     name="confirmPassword"
@@ -427,12 +451,12 @@ function DoctorProfile() {
                     onChange={handleChange}
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Re-enter new password"
-                    className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 ${
+                    className={`w-full rounded-2xl border bg-gray-50 py-4 pl-12 pr-12 text-sm font-semibold text-gray-800 outline-none transition-all focus:border-transparent focus:bg-white focus:ring-2 dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 dark:focus:bg-[#071416] ${
                       form.confirmPassword === ""
-                        ? "border-gray-200 focus:ring-[#008e9b]"
+                        ? "border-gray-200 focus:ring-[#008e9b] dark:border-[#1f3a40] dark:focus:ring-[#46daea]"
                         : passwordsMatch
-                          ? "border-green-200 focus:ring-green-500"
-                          : "border-red-200 focus:ring-red-500"
+                          ? "border-green-200 focus:ring-green-500 dark:border-green-500/40"
+                          : "border-red-200 focus:ring-red-500 dark:border-red-500/40"
                     }`}
                     required={!!form.password}
                   />
@@ -440,7 +464,7 @@ function DoctorProfile() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b]"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 !border-none !bg-transparent !p-0 !text-gray-400 !shadow-none transition-colors hover:!bg-transparent hover:!text-[#008e9b] dark:hover:!text-[#46daea]"
                     aria-label={
                       showConfirmPassword ? "Hide password" : "Show password"
                     }
@@ -454,14 +478,14 @@ function DoctorProfile() {
                 </div>
 
                 {form.confirmPassword !== "" && form.password !== "" && (
-                  <div className="mt-2 ml-1 flex items-center gap-1.5">
+                  <div className="ml-1 mt-2 flex items-center gap-1.5">
                     {passwordsMatch ? (
-                      <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-green-600">
+                      <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-green-600 dark:text-green-300">
                         <Check size={14} strokeWidth={3} />
                         Passwords match
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-red-500">
+                      <div className="flex items-center gap-1 text-xs font-black uppercase tracking-tight text-red-500 dark:text-red-300">
                         <X size={14} strokeWidth={3} />
                         Passwords do not match
                       </div>
@@ -477,7 +501,7 @@ function DoctorProfile() {
             disabled={saving || !isFormValid}
             className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black text-white shadow-lg transition-all duration-300 ${
               isFormValid && !saving
-                ? "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl"
+                ? "!bg-[#008e9b] hover:-translate-y-0.5 hover:!bg-[#007a85] hover:shadow-xl dark:!bg-[#46daea] dark:text-[#071416] dark:hover:!bg-[#7ee9f2]"
                 : "cursor-not-allowed !bg-gray-400 opacity-70"
             }`}
           >

@@ -44,7 +44,35 @@ router.get("/me", auth("doctor"), async (req, res) => {
             return res.status(404).json({ message: "Doctor profile not found" });
         }
 
-        return res.json(doctor);
+        const user = await User.findById(req.user.id).select(
+            "_id name email role"
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: "User account not found" });
+        }
+
+        return res.json({
+            _id: doctor._id,
+            id: doctor._id,
+            name: doctor.name || user.name,
+            email: user.email,
+            role: user.role,
+            specialty: doctor.specialty,
+            description: doctor.description,
+            experienceYears: doctor.experienceYears,
+            image: doctor.image,
+            availableSlots: doctor.availableSlots,
+            userId: doctor.userId,
+            doctor,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                image: doctor.image,
+            },
+        });
     } catch (error) {
         console.error("Error fetching doctor profile:", error);
         return res.status(500).json({ message: "Server error" });
@@ -52,95 +80,118 @@ router.get("/me", auth("doctor"), async (req, res) => {
 });
 
 // Doctor self profile update
-router.put("/update-profile", auth("doctor"), upload.single("image"), async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
+router.put(
+    "/update-profile",
+    auth("doctor"),
+    upload.single("image"),
+    async (req, res) => {
+        try {
+            const { name, email, password } = req.body;
 
-        const doctor = await getDoctorProfileForUser(req.user.id);
+            const doctor = await getDoctorProfileForUser(req.user.id);
 
-        if (!doctor) {
-            return res.status(404).json({ message: "Doctor profile not found" });
-        }
-
-        const user = await User.findById(req.user.id);
-
-        if (!user) {
-            return res.status(404).json({ message: "User account not found" });
-        }
-
-        if (name) {
-            user.name = name;
-            doctor.name = name;
-        }
-
-        if (email) {
-            const normalizedEmail = email.trim().toLowerCase();
-
-            const existingUser = await User.findOne({
-                email: normalizedEmail,
-                _id: { $ne: user._id },
-            });
-
-            if (existingUser) {
-                return res.status(400).json({
-                    message: "A user with this email already exists",
-                });
+            if (!doctor) {
+                return res.status(404).json({ message: "Doctor profile not found" });
             }
 
-            user.email = normalizedEmail;
-        }
+            const user = await User.findById(req.user.id);
 
-        if (password) {
-            if (!passwordRegex.test(password)) {
-                return res.status(400).json({
-                    message: passwordMessage,
-                });
+            if (!user) {
+                return res.status(404).json({ message: "User account not found" });
             }
 
-            user.password = await bcrypt.hash(password, 10);
-        }
+            if (name) {
+                user.name = name;
+                doctor.name = name;
+            }
 
-        if (req.file) {
-            const uploadResponse = await imagekit.upload({
-                file: req.file.buffer,
-                fileName: `${Date.now()}-${req.file.originalname}`,
-                folder: "/doctors",
+            if (email) {
+                const normalizedEmail = email.trim().toLowerCase();
+
+                const existingUser = await User.findOne({
+                    email: normalizedEmail,
+                    _id: { $ne: user._id },
+                });
+
+                if (existingUser) {
+                    return res.status(400).json({
+                        message: "A user with this email already exists",
+                    });
+                }
+
+                user.email = normalizedEmail;
+            }
+
+            if (password) {
+                if (!passwordRegex.test(password)) {
+                    return res.status(400).json({
+                        message: passwordMessage,
+                    });
+                }
+
+                user.password = await bcrypt.hash(password, 10);
+            }
+
+            if (req.file) {
+                const uploadResponse = await imagekit.upload({
+                    file: req.file.buffer,
+                    fileName: `${Date.now()}-${req.file.originalname}`,
+                    folder: "/doctors",
+                });
+
+                doctor.image = uploadResponse.url;
+            }
+
+            await user.save();
+            await doctor.save();
+
+            return res.json({
+                message: "Doctor profile updated successfully",
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    image: doctor.image,
+                },
+                doctor: {
+                    id: doctor._id,
+                    name: doctor.name,
+                    email: user.email,
+                    specialty: doctor.specialty,
+                    description: doctor.description,
+                    experienceYears: doctor.experienceYears,
+                    image: doctor.image,
+                    availableSlots: doctor.availableSlots,
+                    userId: doctor.userId,
+                },
             });
-
-            doctor.image = uploadResponse.url;
+        } catch (error) {
+            console.error("Error updating doctor profile:", error);
+            return res.status(500).json({ message: "Server error" });
         }
-
-        await user.save();
-        await doctor.save();
-
-        return res.json({
-            message: "Doctor profile updated successfully",
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            },
-            doctor: {
-                id: doctor._id,
-                image: doctor.image,
-            },
-        });
-    } catch (error) {
-        console.error("Error updating doctor profile:", error);
-        return res.status(500).json({ message: "Server error" });
     }
-});
+);
 
 // Admin: create doctor alias -> /doctors/admin/create-doctor
-router.post("/admin/create-doctor", auth("admin"), upload.single("image"), async (req, res) => {
-    return createDoctorHandler(req, res);
-});
+router.post(
+    "/admin/create-doctor",
+    auth("admin"),
+    upload.single("image"),
+    async (req, res) => {
+        return createDoctorHandler(req, res);
+    }
+);
 
 // Legacy admin: /doctors/addDoctors
-router.post("/addDoctors", auth("admin"), upload.single("image"), async (req, res) => {
-    return createDoctorHandler(req, res);
-});
+router.post(
+    "/addDoctors",
+    auth("admin"),
+    upload.single("image"),
+    async (req, res) => {
+        return createDoctorHandler(req, res);
+    }
+);
 
 async function createDoctorHandler(req, res) {
     try {
@@ -214,12 +265,17 @@ async function createDoctorHandler(req, res) {
                     id: savedDoctor._id,
                     name: savedDoctor.name,
                     specialty: savedDoctor.specialty,
+                    description: savedDoctor.description,
+                    experienceYears: savedDoctor.experienceYears,
                     image: savedDoctor.image,
+                    userId: savedDoctor.userId,
                 },
                 user: {
                     id: newUser._id,
+                    name: newUser.name,
                     email: newUser.email,
                     role: newUser.role,
+                    image: savedDoctor.image,
                 },
                 credentials: {
                     email: newUser.email,
