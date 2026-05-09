@@ -116,33 +116,35 @@ function Navbar() {
       onClick={toggleTheme}
       className={`relative inline-flex h-11 w-[78px] items-center rounded-full !border !p-1 !shadow-none transition-all duration-500 ${
         theme === "dark"
-          ? "!border-[#46daea]/25 !bg-[#071416] shadow-[0_0_20px_rgba(70,218,234,0.16)]"
-          : "!border-yellow-200 !bg-gradient-to-r !from-yellow-100 !to-cyan-100"
+          ? "!border-[#46daea]/30 !bg-[#071416] shadow-[0_0_22px_rgba(70,218,234,0.22)]"
+          : "!border-[#008e9b]/25 !bg-white shadow-[0_8px_22px_rgba(15,23,42,0.12)]"
       }`}
       aria-label={
         theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
       }
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
-      <span className="absolute left-3 text-yellow-500 transition-opacity duration-300">
-        <Sun
-          size={15}
-          className={theme === "dark" ? "opacity-40" : "opacity-100"}
-        />
+      <span
+        className={`absolute left-3 transition-all duration-300 ${
+          theme === "dark" ? "text-slate-500" : "text-yellow-500"
+        }`}
+      >
+        <Sun size={15} />
       </span>
 
-      <span className="absolute right-3 text-[#46daea] transition-opacity duration-300">
-        <Moon
-          size={15}
-          className={theme === "dark" ? "opacity-100" : "opacity-40"}
-        />
+      <span
+        className={`absolute right-3 transition-all duration-300 ${
+          theme === "dark" ? "text-[#46daea]" : "text-slate-400"
+        }`}
+      >
+        <Moon size={15} />
       </span>
 
       <span
         className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-500 ${
           theme === "dark"
             ? "translate-x-[34px] bg-[#0f2428] text-[#46daea] shadow-[0_0_18px_rgba(70,218,234,0.45)]"
-            : "translate-x-0 bg-white text-yellow-500 shadow-[0_8px_20px_rgba(15,23,42,0.16)]"
+            : "translate-x-0 bg-[#008e9b] text-white shadow-[0_8px_18px_rgba(0,142,155,0.32)]"
         }`}
       >
         {theme === "dark" ? <Moon size={17} /> : <Sun size={17} />}
