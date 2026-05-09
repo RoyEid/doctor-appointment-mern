@@ -1,15 +1,12 @@
 import { Link } from "react-router-dom";
 import {
   CalendarCheck,
-  Facebook,
   HeartPulse,
-  Instagram,
   Mail,
   MapPin,
   Phone,
   ShieldCheck,
   Stethoscope,
-  Twitter,
 } from "lucide-react";
 
 function Footer() {
@@ -23,10 +20,37 @@ function Footer() {
   ];
 
   const services = [
-    "Online Appointments",
-    "Doctor Profiles",
-    "Medical Departments",
-    "Appointment Reminders",
+    {
+      label: "Online Appointments",
+      icon: <CalendarCheck size={15} />,
+    },
+    {
+      label: "Doctor Profiles",
+      icon: <Stethoscope size={15} />,
+    },
+    {
+      label: "Medical Departments",
+      icon: <HeartPulse size={15} />,
+    },
+    {
+      label: "Appointment Reminders",
+      icon: <ShieldCheck size={15} />,
+    },
+  ];
+
+  const contactItems = [
+    {
+      label: "Lebanon",
+      icon: <MapPin size={17} />,
+    },
+    {
+      label: "support@medicare.com",
+      icon: <Mail size={17} />,
+    },
+    {
+      label: "+961 00 000 000",
+      icon: <Phone size={17} />,
+    },
   ];
 
   return (
@@ -46,35 +70,13 @@ function Footer() {
             </Link>
 
             <p className="mt-5 max-w-sm text-sm font-medium leading-relaxed text-gray-500 dark:text-slate-400">
-              MediCare helps patients book appointments with trusted doctors,
-              manage visits, and receive healthcare updates in one modern
-              platform.
+              MediCare is a modern MERN appointment system built to help
+              patients book visits, doctors manage appointments, and admins
+              monitor healthcare activity from one dashboard.
             </p>
 
-            <div className="mt-6 flex items-center gap-3">
-              <a
-                href="#top"
-                aria-label="Facebook"
-                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#e8fbfd] text-[#008e9b] transition-all hover:-translate-y-0.5 hover:bg-[#008e9b] hover:text-white dark:bg-[#46daea]/15 dark:text-[#46daea] dark:hover:bg-[#46daea] dark:hover:text-[#071416]"
-              >
-                <Facebook size={18} />
-              </a>
-
-              <a
-                href="#top"
-                aria-label="Instagram"
-                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#e8fbfd] text-[#008e9b] transition-all hover:-translate-y-0.5 hover:bg-[#008e9b] hover:text-white dark:bg-[#46daea]/15 dark:text-[#46daea] dark:hover:bg-[#46daea] dark:hover:text-[#071416]"
-              >
-                <Instagram size={18} />
-              </a>
-
-              <a
-                href="#top"
-                aria-label="Twitter"
-                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#e8fbfd] text-[#008e9b] transition-all hover:-translate-y-0.5 hover:bg-[#008e9b] hover:text-white dark:bg-[#46daea]/15 dark:text-[#46daea] dark:hover:bg-[#46daea] dark:hover:text-[#071416]"
-              >
-                <Twitter size={18} />
-              </a>
+            <div className="mt-6 inline-flex rounded-full border border-[#008e9b]/10 bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#008e9b] dark:border-[#46daea]/15 dark:bg-[#46daea]/10 dark:text-[#46daea]">
+              Portfolio Project
             </div>
           </div>
 
@@ -106,21 +108,14 @@ function Footer() {
             <ul className="space-y-3">
               {services.map((service) => (
                 <li
-                  key={service}
+                  key={service.label}
                   className="flex items-center gap-3 text-sm font-bold text-gray-500 dark:text-slate-400"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#e8fbfd] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
-                    {service === "Online Appointments" ? (
-                      <CalendarCheck size={15} />
-                    ) : service === "Doctor Profiles" ? (
-                      <Stethoscope size={15} />
-                    ) : service === "Medical Departments" ? (
-                      <HeartPulse size={15} />
-                    ) : (
-                      <ShieldCheck size={15} />
-                    )}
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#e8fbfd] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
+                    {service.icon}
                   </span>
-                  {service}
+
+                  <span className="leading-none">{service.label}</span>
                 </li>
               ))}
             </ul>
@@ -131,27 +126,19 @@ function Footer() {
               Contact
             </h3>
 
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-sm font-bold text-gray-500 dark:text-slate-400">
-                <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#e8fbfd] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
-                  <MapPin size={17} />
-                </span>
-                Lebanon
-              </li>
+            <ul className="space-y-3">
+              {contactItems.map((item) => (
+                <li
+                  key={item.label}
+                  className="flex items-center gap-3 text-sm font-bold text-gray-500 dark:text-slate-400"
+                >
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#e8fbfd] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
+                    {item.icon}
+                  </span>
 
-              <li className="flex items-start gap-3 text-sm font-bold text-gray-500 dark:text-slate-400">
-                <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#e8fbfd] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
-                  <Mail size={17} />
-                </span>
-                support@medicare.com
-              </li>
-
-              <li className="flex items-start gap-3 text-sm font-bold text-gray-500 dark:text-slate-400">
-                <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#e8fbfd] text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
-                  <Phone size={17} />
-                </span>
-                +961 00 000 000
-              </li>
+                  <span className="leading-none">{item.label}</span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -163,9 +150,9 @@ function Footer() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-black uppercase tracking-[0.14em] text-gray-400 dark:text-slate-500">
-              <span>Secure</span>
+              <span>MERN Stack</span>
               <span className="h-1 w-1 rounded-full bg-gray-300 dark:bg-slate-600" />
-              <span>Modern</span>
+              <span>Secure Auth</span>
               <span className="h-1 w-1 rounded-full bg-gray-300 dark:bg-slate-600" />
               <span>Patient-first</span>
             </div>
