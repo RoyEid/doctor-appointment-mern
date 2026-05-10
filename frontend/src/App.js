@@ -45,11 +45,23 @@ function App() {
   const { theme } = useTheme();
   const location = useLocation();
 
-  const hideFooterRoutes = ["/login", "/register", "/forgot-password"];
+  const hideFooterRoutes = [
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/admin/dashboard",
+    "/admin/appointments",
+    "/add-doctor",
+    "/add-department",
+    "/doctor/dashboard",
+    "/doctor/appointments",
+    "/doctor/profile",
+  ];
 
   const shouldHideFooter =
     hideFooterRoutes.includes(location.pathname) ||
-    location.pathname.startsWith("/reset-password");
+    location.pathname.startsWith("/reset-password") ||
+    location.pathname.startsWith("/edit-doctor");
 
   return (
     <div className="flex min-h-screen w-full max-w-full flex-col bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
