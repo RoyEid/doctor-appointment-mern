@@ -86,7 +86,7 @@ router.put(
     upload.single("image"),
     async (req, res) => {
         try {
-            const { name, email, password } = req.body;
+            const { name, email, password, specialty, description, experienceYears } = req.body;
 
             const doctor = await getDoctorProfileForUser(req.user.id);
 
@@ -100,6 +100,7 @@ router.put(
                 return res.status(404).json({ message: "User account not found" });
             }
 
+            // Update basic info
             if (name) {
                 user.name = name;
                 doctor.name = name;
@@ -132,6 +133,12 @@ router.put(
                 user.password = await bcrypt.hash(password, 10);
             }
 
+            // Update doctor specific fields if provided
+            if (specialty) doctor.specialty = specialty;
+            if (description) doctor.description = description;
+            if (experienceYears !== undefined) doctor.experienceYears = Number(experienceYears);
+
+            // Handle image upload
             if (req.file) {
                 const uploadResponse = await imagekit.upload({
                     file: req.file.buffer,
@@ -145,6 +152,7 @@ router.put(
             await user.save();
             await doctor.save();
 
+            // Return complete merged profile
             return res.json({
                 message: "Doctor profile updated successfully",
                 user: {
@@ -155,6 +163,7 @@ router.put(
                     image: doctor.image,
                 },
                 doctor: {
+                    _id: doctor._id,
                     id: doctor._id,
                     name: doctor.name,
                     email: user.email,

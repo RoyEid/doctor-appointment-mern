@@ -56,26 +56,27 @@ function DoctorProfile() {
 
         const token = localStorage.getItem("token");
 
+        // Use the correct endpoint from apiConfig
         const { data } = await axios.get(apiConfig.getMyProfile, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const doctorData = data?.doctor || data?.user || data || {};
+        // The backend returns a combined object. 
+        // Preference: data.doctor > data.user > data
+        const doctorData = data?.doctor || data;
+        const userData = data?.user || data;
 
         setForm((prev) => ({
           ...prev,
-          name: doctorData.name || data?.name || user?.name || "",
-          email: doctorData.email || data?.email || user?.email || "",
+          name: doctorData?.name || userData?.name || "",
+          email: userData?.email || data?.email || "",
         }));
 
-        const currentImage =
-          doctorData.image ||
-          data?.image ||
-          data?.doctor?.image ||
-          data?.user?.image ||
-          user?.image;
-
-        setPreview(getImagePreviewUrl(currentImage));
+        const currentImage = doctorData?.image || userData?.image || data?.image;
+        
+        if (currentImage) {
+          setPreview(getImagePreviewUrl(currentImage));
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
         toast.error("Failed to load doctor profile");
@@ -179,7 +180,11 @@ function DoctorProfile() {
       if (form.name) payload.append("name", form.name);
       if (form.email) payload.append("email", form.email);
       if (form.password) payload.append("password", form.password);
-      if (form.image) payload.append("image", form.image);
+      
+      // ONLY send image if a new file was selected
+      if (form.image instanceof File) {
+        payload.append("image", form.image);
+      }
 
       const { data } = await axios.put(apiConfig.updateDoctorProfile, payload, {
         headers: {
@@ -188,24 +193,25 @@ function DoctorProfile() {
         },
       });
 
-      const updatedUser = data?.user || data?.doctor || null;
+      // The backend returns { message, user, doctor }
+      const updatedUser = data?.user || null;
+      const updatedDoctor = data?.doctor || null;
 
+      // Update local storage for immediate header/UI refresh elsewhere
       if (updatedUser) {
         localStorage.setItem("userData", JSON.stringify(updatedUser));
       }
 
-      const updatedImage =
-        data?.doctor?.image ||
-        data?.user?.image ||
-        data?.image ||
-        updatedUser?.image;
+      // Update preview with the new URL returned from the server (ImageKit URL)
+      const newImageUrl = updatedDoctor?.image || updatedUser?.image || data?.image;
 
-      if (updatedImage) {
-        setPreview(getImagePreviewUrl(updatedImage));
+      if (newImageUrl) {
+        setPreview(getImagePreviewUrl(newImageUrl));
       }
 
       toast.success(data.message || "Profile updated successfully");
 
+      // Reset sensitive fields but keep basic info
       setForm((prev) => ({
         ...prev,
         password: "",
@@ -216,6 +222,7 @@ function DoctorProfile() {
       setShowPassword(false);
       setShowConfirmPassword(false);
     } catch (error) {
+      console.error("Update error:", error);
       const message =
         error?.response?.data?.message || "Failed to update profile";
       toast.error(message);

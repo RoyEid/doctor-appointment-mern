@@ -151,6 +151,9 @@ export const apiConfig = {
   getDoctorsBySpecialty: (specialty) =>
     fullUrl(`/doctors/doctors/byspecialty/${encodeURIComponent(specialty)}`),
 
+  getMyProfile: fullUrl("/doctors/me"),
+  updateDoctorProfile: fullUrl("/doctors/update-profile"),
+
   // Departments
   getAllDepartments: fullUrl("/departments/allDepartments"),
   allDepartments: fullUrl("/departments/allDepartments"),
