@@ -6,6 +6,8 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   CalendarDays,
   Clock,
@@ -59,6 +61,19 @@ function AddAppointment() {
 
   const getTodayInLebanon = () => {
     return getLebanonDateParts().date;
+  };
+
+  const formatDateForApi = (date) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const parseApiDate = (value) => {
+    if (!value) return null;
+    return new Date(`${value}T00:00:00`);
   };
 
   const isTodayInLebanon = (dateValue) => {
@@ -427,7 +442,7 @@ function AddAppointment() {
             <div className="relative">
               <Stethoscope
                 size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] z-10"
               />
 
               <select
@@ -468,18 +483,24 @@ function AddAppointment() {
               Date
             </label>
 
-            <div className="relative">
+            <div className="relative custom-datepicker-container">
               <CalendarDays
                 size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b]"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] z-10 pointer-events-none"
               />
 
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                min={getTodayInLebanon()}
+              <DatePicker
+                selected={parseApiDate(form.date)}
+                onChange={(date) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    date: formatDateForApi(date),
+                    time: "",
+                  }));
+                }}
+                minDate={new Date(getTodayInLebanon() + "T00:00:00")}
+                placeholderText="Select appointment date"
+                dateFormat="yyyy-MM-dd"
                 required
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
               />
