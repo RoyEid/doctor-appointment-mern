@@ -15,6 +15,7 @@ import {
   Loader2,
   Stethoscope,
 } from "lucide-react";
+import CustomSelect from "../components/CustomSelect";
 
 const CLINIC_TIME_ZONE = "Asia/Beirut";
 
@@ -435,31 +436,24 @@ function AddAppointment() {
       >
         <section className="space-y-5">
           <div>
-            <label className="mb-1.5 block text-sm font-bold text-gray-700 dark:text-slate-200">
-              Doctor
-            </label>
-
-            <div className="relative">
-              <Stethoscope
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#008e9b] z-10"
-              />
-
-              <select
-                name="doctor"
+              <CustomSelect
+                label="Doctor"
+                placeholder="Select doctor"
                 value={form.doctor}
-                onChange={handleChange}
+                onChange={(value) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    doctor: value,
+                    time: "",
+                  }));
+                }}
+                options={doctors.map((doc) => ({
+                  value: doc._id,
+                  label: `${doc?.name} - ${doc?.specialty}`,
+                }))}
+                icon={Stethoscope}
                 required
-                className="w-full appearance-none rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-12 pr-4 text-sm font-semibold text-gray-800 outline-none dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:placeholder:text-slate-500 transition-all focus:border-transparent focus:bg-white focus:ring-2 focus:ring-[#008e9b]"
-              >
-                <option value="">Select doctor</option>
-                {doctors.map((doc) => (
-                  <option key={doc._id} value={doc._id}>
-                    {doc?.name} - {doc?.specialty}
-                  </option>
-                ))}
-              </select>
-            </div>
+              />
           </div>
 
           {selectedDoctor && (

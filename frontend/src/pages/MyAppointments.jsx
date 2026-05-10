@@ -10,6 +10,7 @@ import {
   Stethoscope,
   X,
 } from "lucide-react";
+import CustomSelect from "../components/CustomSelect";
 import api, { API_ENDPOINTS } from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import AuthRequired from "../components/AuthRequired";
@@ -631,30 +632,24 @@ function MyAppointments() {
                               </div>
 
                               <div>
-                                <label className="mb-1 block text-xs font-black uppercase tracking-[0.12em] text-gray-500">
-                                  Available Time
-                                </label>
-
-                                <select
-                                  value={rescheduleTime}
-                                  onChange={(e) =>
-                                    setRescheduleTime(e.target.value)
-                                  }
-                                  disabled={!rescheduleDate || loadingSlots}
-                                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 outline-none transition focus:border-[#008e9b] focus:ring-2 focus:ring-[#008e9b]/10 disabled:cursor-not-allowed disabled:bg-gray-100"
-                                >
-                                  <option value="">
-                                    {loadingSlots
+                                <CustomSelect
+                                  label="Available Time"
+                                  placeholder={
+                                    loadingSlots
                                       ? "Loading slots..."
-                                      : "Select time"}
-                                  </option>
-
-                                  {availableSlots.map((slot) => (
-                                    <option key={slot} value={slot}>
-                                      {slot}
-                                    </option>
-                                  ))}
-                                </select>
+                                      : "Select time"
+                                  }
+                                  value={rescheduleTime}
+                                  onChange={(value) =>
+                                    setRescheduleTime(value)
+                                  }
+                                  options={availableSlots.map((slot) => ({
+                                    value: slot,
+                                    label: slot,
+                                  }))}
+                                  icon={Clock}
+                                  required
+                                />
                               </div>
                             </div>
 
