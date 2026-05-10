@@ -25,28 +25,21 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "./context/ThemeContext";
 
-import ScrollProgress from "./components/ScrollProgress.jsx";
-
 function App() {
   const { theme } = useTheme();
   const location = useLocation();
 
-  const hideFooterRoutes = [
-    "/login",
-    "/register",
-    "/forgot-password",
-  ];
+  const hideFooterRoutes = ["/login", "/register", "/forgot-password"];
 
   const shouldHideFooter =
     hideFooterRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/reset-password");
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
-      <ScrollProgress />
+    <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
       <Navbar />
 
-      <div className="flex-1">
+      <div className="min-w-0 flex-1 overflow-x-hidden">
         <Routes>
           <Route path="/" element={<Home />} />
 
