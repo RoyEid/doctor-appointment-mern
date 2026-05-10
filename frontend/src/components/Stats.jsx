@@ -152,7 +152,7 @@ function Stats() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden border-y border-gray-100 bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16 dark:border-[#1f3a40] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
+      className="relative w-full max-w-full overflow-hidden border-y border-gray-100 bg-gradient-to-br from-white via-[#f8fdfe] to-[#eefcff] py-16 dark:border-[#1f3a40] dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
     >
       <div className="pointer-events-none absolute left-[-160px] top-[-160px] h-80 w-80 rounded-full bg-[#46daea]/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-180px] right-[-160px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />

@@ -198,7 +198,7 @@ function Departments() {
   return (
     <section
       id="services"
-      className="bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
+      className="relative w-full max-w-full overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
     >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-16 text-center">

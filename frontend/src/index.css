@@ -47,20 +47,23 @@ body {
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
-
-  /* Vertical scroll only */
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent any child element from creating page-level horizontal scrolling */
 #root {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
-/* Do NOT style all buttons globally.
-   Each button should use its own Tailwind classes. */
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+/* Do NOT style all buttons globally. */
 button {
   font-family: inherit;
 }
@@ -82,7 +85,7 @@ input[type="password"]::-ms-clear {
   color: #f1f5f9;
 }
 
-/* Vertical scrollbar only - desktop/laptop */
+/* Better scrollbar - Desktop Only */
 @media (min-width: 769px) {
   ::-webkit-scrollbar {
     width: 10px;
@@ -108,6 +111,7 @@ input[type="password"]::-ms-clear {
     background: linear-gradient(180deg, #00b9c7, #006b77);
   }
 
+  /* Better scrollbar - Dark mode desktop */
   .dark ::-webkit-scrollbar-track {
     background: #0b1d20;
   }
@@ -119,22 +123,6 @@ input[type="password"]::-ms-clear {
 
   .dark ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, #7ee9f2, #46daea);
-  }
-}
-
-/* Mobile: native vertical scrolling only, no horizontal scrolling */
-@media (max-width: 768px) {
-  html,
-  body,
-  #root {
-    overflow-x: hidden;
-    overflow-y: auto;
-    max-width: 100%;
-  }
-
-  ::-webkit-scrollbar:horizontal {
-    display: none;
-    height: 0;
   }
 }
 

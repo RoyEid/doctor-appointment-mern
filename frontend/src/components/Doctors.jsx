@@ -102,7 +102,7 @@ function Doctors() {
   return (
     <section
       id="doctors"
-      className="relative overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
+      className="relative w-full max-w-full overflow-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] py-20 dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30]"
     >
       <div className="pointer-events-none absolute left-[-180px] top-20 h-96 w-96 rounded-full bg-[#46daea]/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-220px] right-[-180px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
@@ -126,7 +126,7 @@ function Doctors() {
           </p>
         </div>
 
-        <div className="relative mx-auto mb-14 max-w-6xl overflow-hidden rounded-[2rem] border border-[#008e9b]/10 bg-white/70 py-4 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-[#46daea]/15 dark:bg-[#0f2428]/70 dark:shadow-[0_18px_55px_rgba(0,0,0,0.25)]">
+        <div className="relative mx-auto mb-14 w-full max-w-full overflow-hidden rounded-[2rem] border border-[#008e9b]/10 bg-white/70 py-4 shadow-[0_18px_55px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-[#46daea]/15 dark:bg-[#0f2428]/70 dark:shadow-[0_18px_55px_rgba(0,0,0,0.25)]">
           <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-[#0f2428] dark:via-[#0f2428]/90" />
           <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-white via-white/90 to-transparent dark:from-[#0f2428] dark:via-[#0f2428]/90" />
 
