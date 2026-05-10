@@ -48,18 +48,20 @@ function Footer() {
       icon: <Mail size={17} />,
     },
     {
-      label: "+961 00 000 000",
+      label: "+961 81 123 456",
       icon: <Phone size={17} />,
     },
   ];
 
   return (
     <footer className="relative overflow-hidden border-t border-gray-100 bg-white text-gray-700 transition-colors dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-300">
+      {/* Decorative Blur Elements */}
       <div className="pointer-events-none absolute left-[-180px] top-[-160px] h-96 w-96 rounded-full bg-[#46daea]/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-180px] right-[-160px] h-96 w-96 rounded-full bg-[#008e9b]/10 blur-3xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+          {/* Logo & Description */}
           <div>
             <Link to="/" className="inline-flex items-center gap-3">
               <img
@@ -70,16 +72,13 @@ function Footer() {
             </Link>
 
             <p className="mt-5 max-w-sm text-sm font-medium leading-relaxed text-gray-500 dark:text-slate-400">
-              MediCare is a modern MERN appointment system built to help
-              patients book visits, doctors manage appointments, and admins
-              monitor healthcare activity from one dashboard.
+              MediCare helps patients book appointments with trusted doctors,
+              manage visits, and receive healthcare updates in one modern
+              platform.
             </p>
-
-            <div className="mt-6 inline-flex rounded-full border border-[#008e9b]/10 bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#008e9b] dark:border-[#46daea]/15 dark:bg-[#46daea]/10 dark:text-[#46daea]">
-              Portfolio Project
-            </div>
           </div>
 
+          {/* Quick Links */}
           <div>
             <h3 className="mb-5 text-lg font-black text-gray-900 dark:text-white">
               Quick Links
@@ -100,6 +99,7 @@ function Footer() {
             </ul>
           </div>
 
+          {/* Services */}
           <div>
             <h3 className="mb-5 text-lg font-black text-gray-900 dark:text-white">
               Services
@@ -121,6 +121,7 @@ function Footer() {
             </ul>
           </div>
 
+          {/* Contact Information */}
           <div>
             <h3 className="mb-5 text-lg font-black text-gray-900 dark:text-white">
               Contact
@@ -143,6 +144,7 @@ function Footer() {
           </div>
         </div>
 
+        {/* Footer Bottom */}
         <div className="mt-12 border-t border-gray-100 pt-6 dark:border-[#1f3a40]">
           <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
             <p className="text-sm font-semibold text-gray-500 dark:text-slate-400">
@@ -150,11 +152,11 @@ function Footer() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-black uppercase tracking-[0.14em] text-gray-400 dark:text-slate-500">
-              <span>MERN Stack</span>
+              <span>Online Care</span>
               <span className="h-1 w-1 rounded-full bg-gray-300 dark:bg-slate-600" />
-              <span>Secure Auth</span>
+              <span>Trusted Doctors</span>
               <span className="h-1 w-1 rounded-full bg-gray-300 dark:bg-slate-600" />
-              <span>Patient-first</span>
+              <span>Easy Booking</span>
             </div>
           </div>
         </div>
