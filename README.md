@@ -23,9 +23,9 @@ Experience the platform from different perspectives using these demo credentials
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **Admin** | `admin@test.com` | `admin123` |
-| **Doctor** | `doctor-demo@email.com` | `doctor123` |
-| **Patient** | `patient-demo@email.com` | `patient123` |
+| **Admin** | `royeid984+admin@gmail.com` | `Admin123` |
+| **Doctor** | `royeid984+michael.brown@gmail.com` | `MichaelBrown123` |
+| **Patient** | `royeid984+patient.karim@gmail.com` | `PatientDemo123` |
 
 ---
 
@@ -181,7 +181,7 @@ Building this project provided deep insights into:
 **Roy Eid**  
 Full Stack Developer  
 - **GitHub:** [RoyEid](https://github.com/RoyEid)  
-- **LinkedIn:** [Roy Eid](https://www.linkedin.com/in/royeid/)  
+- **LinkedIn:** [Roy Eid](https://www.linkedin.com/in/royeid02/)  
 - **Email:** roy.eid02@gmail.com
 
 ---
