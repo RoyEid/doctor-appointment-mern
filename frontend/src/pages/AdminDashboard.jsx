@@ -291,8 +291,8 @@ function AdminDashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-[#f4fbfc] via-white to-[#eefcff] px-4 py-8 transition-colors dark:from-[#071416] dark:via-[#0b1d20] dark:to-[#102b30] sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl">
         <div className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e8fbfd] px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-[#008e9b] dark:bg-[#102b30] dark:text-[#46daea]">
             <Activity size={14} />
@@ -309,7 +309,8 @@ function AdminDashboard() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          {" "}
           {cards.map((card) => (
             <div
               key={card.fullLabel}
@@ -336,7 +337,8 @@ function AdminDashboard() {
           ))}
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="mt-6 grid w-full grid-cols-1 gap-6 xl:grid-cols-3">
+          {" "}
           <div className={`${chartCardClass} xl:col-span-2`}>
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
@@ -383,7 +385,6 @@ function AdminDashboard() {
               </ResponsiveContainer>
             </div>
           </div>
-
           <div className={chartCardClass}>
             <div className="mb-5">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">
@@ -463,7 +464,8 @@ function AdminDashboard() {
               </div>
             </div>
 
-            <div className="max-h-[440px] space-y-3 overflow-y-auto pr-1">
+            <div className="space-y-3">
+              {" "}
               {analytics.topDoctors.length > 0 ? (
                 analytics.topDoctors.map((doctor, index) => (
                   <div
@@ -572,8 +574,8 @@ function AdminDashboard() {
               )}
             </div>
 
-            <div className="hidden overflow-hidden rounded-2xl border border-gray-100 dark:border-[#1f3a40] md:block">
-              <div className="overflow-x-auto">
+            <div className="hidden max-w-full overflow-hidden rounded-2xl border border-gray-100 dark:border-[#1f3a40] md:block">
+              <div className="max-w-full overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100 dark:divide-[#1f3a40]">
                   <thead className="bg-gray-50 dark:bg-[#071416]">
                     <tr>
