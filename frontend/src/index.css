@@ -27,24 +27,36 @@ html,
 body,
 #root {
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
 }
 
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body {
   margin: 0;
+  width: 100%;
+  max-width: 100%;
   font-family: "Roboto", "Outfit", Arial, sans-serif;
   background: var(--app-bg);
   color: var(--app-text);
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+
+  /* Important: vertical only */
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent any child element from creating horizontal page scroll */
+#root {
+  overflow-x: hidden;
 }
 
 /* Do NOT style all buttons globally.
@@ -70,10 +82,16 @@ input[type="password"]::-ms-clear {
   color: #f1f5f9;
 }
 
-/* Better scrollbar - Desktop only */
+/* Desktop scrollbar: vertical scrollbar only on the right */
 @media (min-width: 769px) {
   ::-webkit-scrollbar {
     width: 10px;
+    height: 0;
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    display: none;
+    height: 0;
   }
 
   ::-webkit-scrollbar-track {
@@ -101,6 +119,22 @@ input[type="password"]::-ms-clear {
 
   .dark ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, #7ee9f2, #46daea);
+  }
+}
+
+/* Mobile: use native vertical scrolling only */
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-width: 100%;
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    display: none;
+    height: 0;
   }
 }
 
