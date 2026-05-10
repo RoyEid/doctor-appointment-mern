@@ -81,7 +81,7 @@ function AdminAppointments() {
           All Appointments
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-300">
           Review appointment activity across the platform. Approval actions are
           handled by the assigned doctors.
         </p>
@@ -90,7 +90,7 @@ function AdminAppointments() {
       <div className="mx-auto max-w-3xl space-y-4">
         {appointments.length === 0 ? (
           <div className="rounded-[2rem] border border-gray-100 bg-white dark:border-[#1f3a40] dark:bg-[#0f2428] p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-10">
-            <p className="text-base font-medium text-gray-500 sm:text-lg dark:text-slate-400">
+            <p className="text-base font-medium text-gray-500 sm:text-lg dark:text-slate-300">
               No appointments found across the platform.
             </p>
           </div>
@@ -116,18 +116,18 @@ function AdminAppointments() {
 
                     <div className="min-w-0 flex-1">
                       <div className="mb-1 flex flex-col gap-0.5">
-                        <h3 className="text-base font-black leading-tight text-gray-900 sm:text-lg">
+                        <h3 className="text-base font-black leading-tight text-gray-900 sm:text-lg dark:text-white">
                           {app.doctor?.name || "Unknown Doctor"}
                         </h3>
 
                         {app.user && (
-                          <p className="text-sm font-bold text-[#008e9b]">
+                          <p className="text-sm font-bold text-[#008e9b] dark:text-[#46daea]">
                             Patient: {app.user.name}
                           </p>
                         )}
                       </div>
 
-                      <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-400">
+                      <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-300">
                         {app.reason || "No reason provided"}
                       </p>
 
@@ -160,7 +160,7 @@ function AdminAppointments() {
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-xs font-medium text-gray-500 dark:text-slate-400">
+                  <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-xs font-medium text-gray-500 dark:border-[#1f3a40] dark:bg-[#071416] dark:text-slate-300">
                     Review only. Approval actions are handled by assigned
                     doctors.
                   </div>

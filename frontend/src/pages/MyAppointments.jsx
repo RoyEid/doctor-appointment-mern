@@ -334,7 +334,7 @@ function MyAppointments() {
           My Appointments
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-300">
           Review your appointments, request a reschedule, cancel if needed, or
           respond to doctor reschedule requests.
         </p>
@@ -345,7 +345,7 @@ function MyAppointments() {
           <p className="text-2xl font-black text-[#008e9b]">
             {appointments.length}
           </p>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-300">
             Total
           </p>
         </div>
@@ -354,14 +354,14 @@ function MyAppointments() {
           <p className="text-2xl font-black text-green-600">
             {activeAppointments.length}
           </p>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-300">
             Active
           </p>
         </div>
 
         <div className="col-span-2 rounded-3xl bg-white p-4 text-center shadow-sm dark:bg-[#0f2428] sm:col-span-1">
           <p className="text-2xl font-black text-gray-900 dark:text-white">30 min</p>
-          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-300">
             Duration
           </p>
         </div>
@@ -380,7 +380,7 @@ function MyAppointments() {
               <Stethoscope size={34} />
             </div>
 
-            <p className="mb-4 text-base font-medium text-gray-500 sm:text-lg dark:text-slate-400">
+            <p className="mb-4 text-base font-medium text-gray-500 sm:text-lg dark:text-slate-300">
               You have no appointments booked.
             </p>
 
@@ -430,7 +430,7 @@ function MyAppointments() {
                       />
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-base font-black text-gray-900 sm:text-lg">
+                        <h3 className="truncate text-base font-black text-gray-900 sm:text-lg dark:text-white">
                           {app.doctor?.name || "Unknown Doctor"}
                         </h3>
 
@@ -438,7 +438,7 @@ function MyAppointments() {
                           {app.doctor?.specialty || "Doctor"}
                         </p>
 
-                        <p className="mt-1 line-clamp-2 break-words text-sm font-medium text-gray-500 dark:text-slate-400">
+                        <p className="mt-1 line-clamp-2 break-words text-sm font-medium text-gray-500 dark:text-slate-300">
                           {app.reason || "No reason provided"}
                         </p>
                       </div>
@@ -503,21 +503,21 @@ function MyAppointments() {
                           {app.time || "N/A"}
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-gray-500">
+                        <p className="mt-1 text-xs font-semibold text-gray-500 dark:text-slate-400">
                           30-minute appointment
                         </p>
                       </div>
                     </div>
 
                     {isReschedulePending && (
-                      <div className="mt-4 rounded-3xl border border-blue-100 bg-blue-50 p-4">
-                        <p className="text-sm font-black text-blue-700">
+                      <div className="mt-4 rounded-3xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/30 dark:bg-blue-900/10">
+                        <p className="text-sm font-black text-blue-700 dark:text-blue-300">
                           Doctor proposed a new appointment time
                         </p>
 
                         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          <div className="rounded-2xl bg-white p-3">
-                            <p className="text-xs font-black uppercase tracking-wide text-gray-400">
+                          <div className="rounded-2xl bg-white p-3 dark:bg-[#071416]">
+                            <p className="text-xs font-black uppercase tracking-wide text-gray-400 dark:text-slate-500">
                               Previous
                             </p>
                             <p className="mt-1 text-sm font-bold text-gray-700 dark:text-slate-200">
@@ -526,11 +526,11 @@ function MyAppointments() {
                             </p>
                           </div>
 
-                          <div className="rounded-2xl bg-white p-3">
-                            <p className="text-xs font-black uppercase tracking-wide text-gray-400">
+                          <div className="rounded-2xl bg-white p-3 dark:bg-[#071416]">
+                            <p className="text-xs font-black uppercase tracking-wide text-gray-400 dark:text-slate-500">
                               New
                             </p>
-                            <p className="mt-1 text-sm font-bold text-[#008e9b]">
+                            <p className="mt-1 text-sm font-bold text-[#008e9b] dark:text-[#46daea]">
                               {formatDate(app.date)} at {app.time || "N/A"}
                             </p>
                           </div>
@@ -568,8 +568,8 @@ function MyAppointments() {
                             disabled={isResponding}
                             className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold shadow-sm transition ${
                               isResponding
-                                ? "cursor-not-allowed border-gray-300 !bg-gray-300 text-gray-600 opacity-70"
-                                : "border-red-200 !bg-white text-red-600 hover:!bg-red-50"
+                                ? "cursor-not-allowed border-gray-300 !bg-gray-300 text-gray-600 opacity-70 dark:!bg-[#1f3a40] dark:text-slate-500"
+                                : "border-red-200 !bg-white text-red-600 hover:!bg-red-50 dark:border-red-500/30 dark:!bg-[#071416] dark:text-red-400 dark:hover:!bg-red-500/10"
                             }`}
                           >
                             {isResponding ? (
@@ -627,7 +627,7 @@ function MyAppointments() {
                                       e.target.value,
                                     )
                                   }
-                                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 outline-none transition focus:border-[#008e9b] focus:ring-2 focus:ring-[#008e9b]/10"
+                                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-bold text-gray-700 outline-none transition focus:border-[#008e9b] focus:ring-2 focus:ring-[#008e9b]/10 dark:border-[#1f3a40] dark:bg-[#071416] dark:text-white dark:focus:bg-[#071416]"
                                 />
                               </div>
 

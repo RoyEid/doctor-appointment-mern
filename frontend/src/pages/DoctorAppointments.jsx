@@ -335,7 +335,7 @@ function DoctorAppointments() {
           Doctor Schedule
         </h2>
 
-        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-400">
+        <p className="mx-auto mt-2 max-w-xl text-sm font-medium text-gray-500 dark:text-slate-300">
           View your daily schedule, patient bookings, and available 30-minute
           slots.
         </p>
@@ -358,7 +358,7 @@ function DoctorAppointments() {
               })}
             </h3>
 
-            <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-400">
+            <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-300">
               Cyan card = available slot. Dark card = booked patient
               appointment.
             </p>
@@ -389,7 +389,7 @@ function DoctorAppointments() {
             <p className="text-2xl font-black text-[#008e9b] dark:text-[#46daea]">
               {availableScheduleCount}
             </p>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-300">
               Available
             </p>
           </div>
@@ -398,7 +398,7 @@ function DoctorAppointments() {
             <p className="text-2xl font-black text-gray-800 dark:text-white">
               {activeScheduleCount}
             </p>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-300">
               Booked
             </p>
           </div>
@@ -407,7 +407,7 @@ function DoctorAppointments() {
             <p className="text-2xl font-black text-gray-900 dark:text-white">
               30 min
             </p>
-            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-400">
+            <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500 dark:text-slate-300">
               Slot duration
             </p>
           </div>
@@ -429,7 +429,7 @@ function DoctorAppointments() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {scheduleSlots.length === 0 ? (
               <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center dark:border-[#1f3a40] dark:bg-[#071416]">
-                <p className="text-sm font-medium text-gray-500 dark:text-slate-400">
+                <p className="text-sm font-medium text-gray-500 dark:text-slate-300">
                   No schedule slots found for this date.
                 </p>
               </div>
@@ -491,13 +491,13 @@ function DoctorAppointments() {
                         </div>
 
                         {appointment?.user?.email && (
-                          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
+                          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-300">
                             <Mail size={14} />
                             {appointment.user.email}
                           </div>
                         )}
 
-                        <p className="line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-400">
+                        <p className="line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-300">
                           <span className="font-black text-gray-700 dark:text-slate-200">
                             Reason:
                           </span>{" "}
@@ -519,7 +519,7 @@ function DoctorAppointments() {
             Appointment Requests
           </h3>
 
-          <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-400">
+          <p className="mt-1 text-sm font-medium text-gray-500 dark:text-slate-300">
             Approve, reject, or propose a new available time.
           </p>
         </div>
@@ -527,7 +527,7 @@ function DoctorAppointments() {
         <div className="space-y-4">
           {appointments.length === 0 ? (
             <div className="rounded-[2rem] border border-gray-100 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:border-[#1f3a40] dark:bg-[#0f2428] sm:p-10">
-              <p className="text-base font-medium text-gray-500 dark:text-slate-400 sm:text-lg">
+              <p className="text-base font-medium text-gray-500 dark:text-slate-300 sm:text-lg">
                 No appointments assigned to you.
               </p>
             </div>
@@ -554,7 +554,7 @@ function DoctorAppointments() {
                               {app.user?.name || "Unknown Patient"}
                             </h3>
 
-                            <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-400">
+                            <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-500 dark:text-slate-300">
                               <span className="font-black text-gray-700 dark:text-slate-200">
                                 Reason:
                               </span>{" "}
