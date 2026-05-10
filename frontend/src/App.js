@@ -25,6 +25,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "./context/ThemeContext";
 
+import ScrollProgress from "./components/ScrollProgress.jsx";
+
 function App() {
   const { theme } = useTheme();
   const location = useLocation();
@@ -41,6 +43,7 @@ function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
+      <ScrollProgress />
       <Navbar />
 
       <div className="flex-1">
