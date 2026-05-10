@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import Login from "./components/Login.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Register from "./components/Register.jsx";
@@ -25,6 +27,20 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "./context/ThemeContext";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   const { theme } = useTheme();
   const location = useLocation();
@@ -37,6 +53,7 @@ function App() {
 
   return (
     <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
+      <ScrollToTop />
       <Navbar />
 
       <div className="min-w-0 flex-1 overflow-x-hidden">
