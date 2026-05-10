@@ -132,7 +132,8 @@ function AllDoctors() {
               )}
 
               <Link to={`/doctor/${doc._id}`} className="block">
-                <div className="mx-auto mb-5 h-36 w-36 overflow-hidden rounded-full border-4 border-[#e8fbfd] bg-gray-50 shadow-md transition group-hover:border-[#46daea]">
+                <div className="mx-auto mb-5 h-36 w-36 overflow-hidden rounded-full border-4 border-[#e8fbfd] bg-gray-50 shadow-md transition group-hover:border-[#46daea] dark:border-[#1f3a40] dark:bg-[#071416] dark:group-hover:border-[#46daea]">
+                  {" "}
                   <img
                     src={apiConfig.getDoctorImage(doc?.image)}
                     alt={doc?.name || "doctor"}
@@ -143,11 +144,13 @@ function AllDoctors() {
                   />
                 </div>
 
-                <h3 className="text-xl font-black text-gray-900 transition group-hover:text-[#008e9b]">
+                <h3 className="text-xl font-black text-gray-900 transition group-hover:text-[#008e9b] dark:text-white dark:group-hover:text-[#46daea]">
+                  {" "}
                   {doc?.name}
                 </h3>
 
-                <p className="mt-2 inline-flex rounded-full bg-[#e8fbfd] px-4 py-1.5 text-sm font-bold text-[#008e9b]">
+                <p className="mt-2 inline-flex rounded-full bg-[#e8fbfd] px-4 py-1.5 text-sm font-bold text-[#008e9b] dark:bg-[#46daea]/15 dark:text-[#46daea]">
+                  {" "}
                   {doc.specialty}
                 </p>
 
