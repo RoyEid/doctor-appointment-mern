@@ -42,7 +42,7 @@ function ScrollReveal({
     <div
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out ${
+      className={`w-full overflow-hidden transition-all duration-700 ease-out ${
         isVisible
           ? "translate-x-0 translate-y-0 opacity-100"
           : `${getHiddenTransform()} opacity-0`

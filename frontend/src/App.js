@@ -52,11 +52,11 @@ function App() {
     location.pathname.startsWith("/reset-password");
 
   return (
-    <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
+    <div className="flex min-h-screen w-full max-w-full flex-col bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
       <ScrollToTop />
       <Navbar />
 
-      <div className="min-w-0 flex-1 overflow-x-hidden">
+      <div className="min-w-0 flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
 
